@@ -6,11 +6,9 @@
     <p><%= format_text(cat.description, allow_color: false) %></p>
   <% end %>
   <% t.column("Level Requirements") do |cat| %>
-    <% vname = User::Levels.id_to_name(cat.can_view) %>
-    <% cname = User::Levels.id_to_name(cat.can_create) %>
     <ul>
-      <li>View: <b class="with-style user-<%= vname.downcase %>"><%= vname %></b></li>
-      <li>Create: <b class="with-style user-<%= cname.downcase %>"><%= cname %></b></li>
+      <li>View: <%= user_level(cat.can_view) %></li>
+      <li>Create: <%= user_level(cat.can_create) %></li>
     </ul>
   <% end %>
   <% t.column do |cat| %>
@@ -28,6 +26,12 @@
 <% end %>
 
 <%= render(partial: "secondary_links") %>
+
+<% if policy(ForumCategory).reorder? %>
+  <%= javascript_tag(nonce: true) do -%>
+    Danbooru.SortableTable.init({ table: "#forum-categories-table", url: "<%= reorder_forum_categories_path(format: :json) %>" });
+  <% end %>
+<% end %>
 
 <% content_for(:page_title) do %>
   Post Report Reasons

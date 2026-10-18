@@ -32,7 +32,7 @@ class TagNameValidator < ActiveModel::EachValidator
       record.errors.add(attribute, "'#{value}' cannot contain non-printable characters")
     when %r{\A[+_`(){}\[\]/]}
       record.errors.add(attribute, "'#{value}' cannot begin with a '#{value[0]}'")
-    when /\A(#{TagQuery::METATAGS.join('|')}|#{TagCategory.regexp}):(.+)\z/i
+    when /\A(#{TagQuery.metatags.join('|')}|#{TagCategory.regexp}):(.+)\z/i
       record.errors.add(attribute, "'#{value}' cannot begin with '#{$1}:'")
     when /\p{Zs}|\p{Cf}/
       record.errors.add(attribute, "'#{value}' cannot contain invisible characters")

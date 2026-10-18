@@ -57,7 +57,7 @@ module PostSets
 
     def is_simple_tags?
       return false if %w[~ *].any? { |c| public_tag_string.include?(c) }
-      return false if public_tag_string.split.any? { |tag| TagQuery::METATAGS.include?(tag.split(":")[0]) }
+      return false if public_tag_string.split.any? { |tag| TagQuery.metatags.include?(tag.split(":")[0]) }
       true
     end
 

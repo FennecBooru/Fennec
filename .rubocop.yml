@@ -163,6 +163,10 @@ Style/Lambda:
 Style/MapIntoArray:
   Enabled: false
 
+Style/NumericLiterals:
+  Exclude:
+    - db/fixes/**/*
+
 Style/NumericPredicate:
   EnforcedStyle: comparison
 

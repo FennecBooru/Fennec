@@ -453,6 +453,32 @@ class ModAction < ApplicationRecord
       json: %i[alias_desc change_desc],
     },
 
+    ### Tag Category ###
+    tag_category_create:                        {
+      text: ->(mod, _user) { "Created tag category \"#{mod.name}\"" },
+      json: %i[name],
+    },
+    tag_category_delete:                        {
+      text: ->(mod, _user) { "Deleted tag category \"#{mod.name}\"" },
+      json: %i[name],
+    },
+    tag_category_tags_transfer:                 {
+      text: ->(mod, _user) { "Moved #{mod.total} tags from tag category \"#{mod.old_category_name}\" to \"#{mod.category_name}\"" },
+      json: %i[total old_category_name category_name],
+    },
+    tag_categories_reorder:                     {
+      text: ->(mod, _user) { "Changed the order of #{mod.total} tag categories" },
+      json: %i[total],
+    },
+    tag_category_update:                        {
+      text: ->(mod, _user) do
+        text = "Updated tag category \"#{mod.name}\""
+        text += "\nChanged name from \"#{mod.old_name}\" to \"#{mod.name}\"" if mod.old_name != mod.name
+        text
+      end,
+      json: %i[name old_name],
+    },
+
     ### Implication ###
     tag_implication_create:                     {
       text: ->(mod, _user) { "Created #{mod.implication_desc}" },

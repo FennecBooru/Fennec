@@ -3,6 +3,8 @@
 #include <ruby.h>
 #include <ruby/encoding.h>
 
+#include <algorithm>
+
 static VALUE cDText = Qnil;
 static VALUE cDTextError = Qnil;
 
@@ -36,7 +38,7 @@ static auto parse_dtext(VALUE input, DTextOptions options = {}) {
   }
 }
 
-static VALUE c_parse(VALUE self, VALUE input, VALUE base_url, VALUE domain, VALUE internal_domains, VALUE github_url, VALUE f_inline, VALUE f_disable_mentions, VALUE f_allow_color, VALUE f_qtags, VALUE max_thumbs) {
+static VALUE c_parse(VALUE self, VALUE input, VALUE base_url, VALUE domain, VALUE internal_domains, VALUE color_names, VALUE github_url, VALUE f_inline, VALUE f_disable_mentions, VALUE f_allow_color, VALUE f_qtags, VALUE max_thumbs) {
   if (NIL_P(input)) {
     return Qnil;
   }
@@ -66,6 +68,15 @@ static VALUE c_parse(VALUE self, VALUE input, VALUE base_url, VALUE domain, VALU
     VALUE rb_domain = rb_ary_entry(internal_domains, i);
     std::string domain = StringValueCStr(rb_domain); // raise ArgumentError if the domain contains null bytes.
     options.internal_domains.insert(domain);
+  }
+
+  Check_Type(color_names, T_ARRAY);
+
+  for (int i = 0; i < RARRAY_LEN(color_names); i++) {
+    VALUE rb_name = rb_ary_entry(color_names, i);
+    std::string name = StringValueCStr(rb_name);
+    std::transform(name.begin(), name.end(), name.begin(), [](unsigned char c) { return std::tolower(c); });
+    options.color_names.insert(name);
   }
 
   auto [dtext, wiki_pages, posts, mentions, qtags] = parse_dtext(input, options);
@@ -104,5 +115,5 @@ static VALUE c_parse(VALUE self, VALUE input, VALUE base_url, VALUE domain, VALU
 extern "C" void Init_dtext() {
   cDText = rb_define_class("DText", rb_cObject);
   cDTextError = rb_define_class_under(cDText, "Error", rb_eStandardError);
-  rb_define_singleton_method(cDText, "c_parse", c_parse, 10);
+  rb_define_singleton_method(cDText, "c_parse", c_parse, 11);
 }

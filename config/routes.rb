@@ -469,6 +469,11 @@ Rails.application.routes.draw do
       resources(:implications, controller: "tags/implications", as: "tag_implications") do
         put(:approve, on: :member)
       end
+      resources(:categories, controller: "tags/categories", as: "tag_categories", only: %i[index new create edit update destroy]) do
+        get(:styles, on: :collection, constraints: { format: "css" }) # the tags constraint only allows json and html
+        post(:reorder, on: :collection)
+        match(:transfer_tags, on: :member, via: %i[get post])
+      end
     end
     member do
       get(:followers)

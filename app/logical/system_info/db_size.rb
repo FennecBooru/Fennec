@@ -49,9 +49,10 @@ class SystemInfo
           else
             @results[name] = [Row.new(nil, "total", rows.sum(&:size)), *rows]
           end
-        rescue PG::Error => e
-          @skipped << [name, "#{e.name}: #{e.message}"]
         end
+      # outside the block so failing to connect is caught too, like when a database is dropped after being listed
+      rescue PG::Error => e
+        @skipped << [name, "#{e.class.name}: #{e.message}"]
       end
       self
     end

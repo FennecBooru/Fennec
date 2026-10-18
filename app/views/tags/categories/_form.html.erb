@@ -1,0 +1,34 @@
+<%= custom_form_for(@tag_category) do |f| %>
+  <%= error_messages_for("tag_category") %>
+  <% if @tag_category.persisted? && @tag_category.code_references.any? %>
+    <div class="notice">
+      <p>The site's code uses this category through the <%= "name".pluralize(@tag_category.code_references.size) %> <%= tag.strong(@tag_category.code_references.keys.to_sentence) %>. Renaming is fine since the old name is kept as an alias, but if <%= @tag_category.code_references.size == 1 ? "it's" : "they're" %> removed from the name and aliases these stop working:</p>
+      <ul>
+        <% @tag_category.code_references.each do |name, uses| %>
+          <li><strong><%= name %></strong>: <%= uses %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <% if @tag_category.new_record? %>
+    <%= f.input(:id, as: :integer, label: "ID", required: false, hint: "Leave empty to use the next one. It can't be changed later, and can't be one that has had tags before.") %>
+  <% end %>
+  <%= f.input(:name, hint: "Lowercase letters only. Used for prefixes like name:tag, and in code as TagCategory.name.#{' Renaming keeps the old name as an alias.' if @tag_category.persisted?}") %>
+  <%= f.input(:aliases_string, label: "Aliases", hint: "Other names for prefixes, separated by spaces. The first is used for the count metatag, like chartags.") %>
+  <%= f.input(:display, hint: "Shown in category dropdowns. Defaults to the name.") %>
+  <%= f.input(:header, hint: "Shown above the category's tags on posts. Defaults to the name.") %>
+  <%= f.input(:color, hint: "Hex color, like #b4c7d9") %>
+  <%= f.input(:color_alt, label: "Hover color", hint: "Hex color, used when hovering") %>
+  <%= f.input(:is_default, as: :boolean, label: "Default", hint: "New tags without a prefix get this category. Set another category as the default to change it.") %>
+  <%= f.input(:min_level, label: "Minimum level", collection: user_levels_for_select(User::Levels::ANONYMOUS), include_blank: false, hint: "Users below this level can't put tags in this category") %>
+  <%= f.input(:suffixes_string, label: "Required suffixes", hint: "Separated by spaces. If set, tags in this category must end with one of these in parentheses, like _(lore).") %>
+
+  <h2>Post descriptions</h2>
+  <p>Used for post titles, like "character (copyright) created by artist". Categories without a description position aren't included.</p>
+  <%= f.input(:format_position, label: "Description position", hint: "Lower numbers come first. Leave empty to leave the category out.") %>
+  <%= f.input(:format_string, label: "Format", hint: "%s is replaced with the tags, like \"created by %s\"") %>
+  <%= f.input(:format_limit, label: "Limit", hint: "The most tags to include before adding \"etc\"") %>
+  <%= f.input(:format_regex, label: "Regex", hint: "Applied to each tag, the first capture group is used. Like ^(.+?)(?:_\\(.+\\))?$ to remove a suffix in parentheses.") %>
+  <%= f.input(:format_exclusion_string, label: "Excluded tags", hint: "Tags left out, separated by spaces") %>
+  <%= f.button(:submit, "Save") %>
+<% end %>

@@ -1,0 +1,84 @@
+<h1>Tag Categories</h1>
+<% showing_deleted = policy(TagCategory).show_deleted? && %w[included only].include?(params.dig(:search, :deleted).to_s.downcase) %>
+<% if policy(TagCategory).show_deleted? %>
+  <p>
+    <% if showing_deleted %>
+      <%= link_to("Hide deleted", tag_categories_path) %>
+    <% else %>
+      <%= link_to("Show deleted", tag_categories_path(search: { deleted: "included" })) %>
+    <% end %>
+  </p>
+<% end %>
+
+<% missing = TagCategory.missing_code_references %>
+<% if missing.any? %>
+  <div class="notice">
+    <p>No category is named or aliased <%= tag.strong(missing.keys.to_sentence) %>, which the site's code looks for, so these don't work:</p>
+    <ul>
+      <% missing.each do |name, uses| %>
+        <li><strong><%= name %></strong>: <%= uses %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<%= table_for(@tag_categories) do |t| %>
+  <% t.column(:name) do |category| %>
+    <% if category.is_deleted? %>
+      <%= category.name %> <span class="color-muted">(deleted)</span>
+    <% else %>
+      <%= link_to(category.name, tags_path(search: { category: category.id }), class: "tag-type-#{category.id}") %>
+    <% end %>
+    <% if !category.is_deleted? && category.code_references.any? %>
+      <i class="fa-solid fa-triangle-exclamation tag-category-code-warning" title="<%= category.code_references.map { |name, uses| "The code uses #{name} for #{uses}" }.join("\n") %>"></i>
+    <% end %>
+    <% if category.is_default? %>
+      <span class="color-muted">(default)</span>
+    <% end %>
+  <% end %>
+  <% t.column("Aliases") do |category| %>
+    <%= category.aliases.join(", ") %>
+  <% end %>
+  <% t.column(:display) %>
+  <% t.column(:header) %>
+  <% t.column("Colors") do |category| %>
+    <%= category.color %>, <%= category.color_alt %>
+  <% end %>
+  <% t.column(name: "Tags") do |category| %>
+    <%= link_to(category.tag_count, tags_path(search: { category_id: category.id })) %>
+  <% end %>
+  <% t.column("Minimum Level") do |category| %>
+    <%= user_level(category.min_level) %>
+  <% end %>
+  <% t.column("Updated") do |category| %>
+    <%= link_to_user(category.updater) %>
+    <p><%= compact_time(category.updated_at) %></p>
+  <% end %>
+  <% t.column do |category| %>
+    <% unless category.is_deleted? %>
+      <% if policy(TagCategory).update?
+      %>
+        <%= link_to("Edit", edit_tag_category_path(category)) %>
+        <% if policy(category).transfer_tags? && category.tag_count > 0 %>
+          | <%= link_to("Transfer Tags", transfer_tags_tag_category_path(category)) %>
+        <% end %>
+      <% end %>
+      <% if policy(TagCategory).destroy? && category.deletable? %>
+        | <%= link_to("Delete", tag_category_path(category), method: :delete, data: { confirm: ["Are you sure you want to delete the #{category.name} category?", *("The site's code uses it as #{category.code_references.keys.to_sentence}, which will stop working." if category.code_references.any?)].join(" ") }) %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<%= render("secondary_links", reorderable: !showing_deleted) %>
+
+<% content_for(:page_title) do %>
+  Tag Categories
+<% end %>
+
+<%# reordering only works on categories that aren't deleted %>
+<% if policy(TagCategory).reorder? && !showing_deleted %>
+  <%= javascript_tag(nonce: true) do -%>
+    Danbooru.SortableTable.init({ table: "#tag-categories-table", url: "<%= reorder_tag_categories_path(format: :json) %>", key: "position", start: 0 });
+  <% end %>
+<% end %>

@@ -20,7 +20,7 @@
     <h3>Category Changes</h3>
     <ul>
       <% changes.each do |tag, category| %>
-        <li><strong class="text-yellow">The category of <%= link_to_wiki_or_new(tag.name) %> will be changed from <span class="tag-type-<%= tag.category %>"><%= TagCategory.get(tag.category).name %></span> to <span class="tag-type-<%= category %>"><%= TagCategory.get(category).name %></span></strong></li>
+        <li><strong class="text-yellow">The category of <%= link_to_wiki_or_new(tag.name) %> will be changed from <span class="tag-type-<%= tag.category %>"><%= TagCategory.get(tag.category)&.name || TagCategory.deleted_name(tag.category) %></span> to <span class="tag-type-<%= category %>"><%= TagCategory.get(category)&.name || TagCategory.deleted_name(category) %></span></strong></li>
       <% end %>
     </ul>
   <% end %>

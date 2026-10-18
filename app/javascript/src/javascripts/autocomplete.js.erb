@@ -2,11 +2,14 @@ import Utility from './utility'
 
 let Autocomplete = {};
 
-Autocomplete.METATAGS = <%= TagQuery::METATAGS.to_json %>;
-Autocomplete.TAG_CATEGORIES = <%= TagCategory.mapping.to_json %>;
-Autocomplete.ORDER_METATAGS = <%= TagQuery::ORDER_METATAGS.to_json %>;
+// Tag categories can change at any time, so they come from the page instead of the build
+Autocomplete.TAG_CATEGORY_DATA = JSON.parse(Utility.meta("tag-categories") || "{}");
+Autocomplete.TAG_CATEGORIES = Autocomplete.TAG_CATEGORY_DATA.mapping || {};
+Autocomplete.CATEGORY_METATAGS = (Autocomplete.TAG_CATEGORY_DATA.short_names || []).map(name => name + "tags");
+Autocomplete.METATAGS = <%= TagQuery::METATAGS.to_json %>.concat(Autocomplete.CATEGORY_METATAGS);
+Autocomplete.ORDER_METATAGS = <%= TagQuery::ORDER_METATAGS.to_json %>.concat(Autocomplete.CATEGORY_METATAGS.flatMap(metatag => [metatag, metatag + "_asc"]));
 
-Autocomplete.TAG_PREFIXES = "-|~|" + Object.keys(Autocomplete.TAG_CATEGORIES).map(category => category + ":").join("|");
+Autocomplete.TAG_PREFIXES = ["-", "~", ...Object.keys(Autocomplete.TAG_CATEGORIES).map(category => category + ":")].join("|");
 Autocomplete.TAG_PREFIXES_REGEX = new RegExp("^(" + Autocomplete.TAG_PREFIXES + ")(.*)$", "i");
 Autocomplete.METATAGS_REGEX = new RegExp("^(" + Autocomplete.METATAGS.join("|") + "):(.*)$", "i");
 
@@ -66,6 +69,11 @@ Autocomplete.initialize_tag_autocomplete = function() {
         return;
       }
 
+      if (Autocomplete.CATEGORY_METATAGS.includes(metatag)) {
+        resp([]);
+        return;
+      }
+
       switch (metatag) {
       case "md5":
       case "width":
@@ -84,9 +92,6 @@ Autocomplete.initialize_tag_autocomplete = function() {
       case "age":
       case "limit":
       case "tagcount":
-      <% TagCategory.short_name_list.each do |category| %>
-        case "<%= category %>tags": // eslint-disable-line
-      <% end %>
         resp([]);
         return;
       case "order":

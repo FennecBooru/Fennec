@@ -31,6 +31,7 @@ The parser accepts options that change behavior:
 | `inline` | bool | false | Strip all block-level elements; newlines become spaces |
 | `disable_mentions` (f_mentions=false) | bool | false | Ignore `@username` and `<@username>` |
 | `allow_color` (f_allow_color) | bool | false | Enable `[color=...]` tags |
+| `color_names` | array | `DEFAULT_COLOR_NAMES` | Names `[color=...]` turns into a `dtext-color-NAME` class |
 | `qtags` (f_qtags) | bool | false | Enable `#tag` qtag links |
 | `base_url` | string | "" | Prefix prepended to relative URLs in output |
 | `domain` | string | "" | Domain treated as "internal" (no `rel="external nofollow noreferrer"`) |
@@ -333,8 +334,11 @@ Typed/semantic color categories:
 [color=general]text[/color]     → <span class="dtext-color-general">text</span>
 ```
 
-Accepted typed color keywords (case-insensitive):
-`gen`, `general`, `art`, `artist`, `cont`, `contributor`, `oc`, `ch`, `char`, `character`, `co`, `copy`, `copyright`, `spec`, `species`, `inv`, `invalid`, `meta`, `lor`, `lore`, `gender`, `imp`, `important`, `s`, `safe`, `q`, `questionable`, `e`, `explicit`
+Names in the `color_names` option (case-insensitive, used for tag categories) get a `dtext-color-NAME` class
+instead of a CSS color. It defaults to `DText::DEFAULT_COLOR_NAMES`:
+`gen`, `general`, `art`, `artist`, `cont`, `contributor`, `oc`, `ch`, `char`, `character`, `co`, `copy`, `copyright`, `spec`, `species`, `inv`, `invalid`, `meta`, `lor`, `lore`, `gender`, `imp`, `important`
+
+The rating keywords are always typed (case-insensitive): `s`, `safe`, `q`, `questionable`, `e`, `explicit`
 
 If `allow_color` is false, `[color=...]` tags are silently ignored (content is still rendered).
 

@@ -3082,6 +3082,8 @@ class PostTest < ActiveSupport::TestCase
       create(:tag, name: "some_invalid")
       Tag.where(name: "some_meta").update_all(category: TagCategory.meta)
       Tag.where(name: "some_invalid").update_all(category: TagCategory.invalid)
+      # update_all skips the callback that keeps the category cache current
+      Tag.where(name: %w[some_meta some_invalid]).find_each(&:update_category_cache)
       post = create(:post, tag_string: "solo")
       save_with_groups(post, [{ characters: ["fluffy_(oc)"], tags: %w[blue_eyes some_artist some_meta some_invalid] }], "solo")
 

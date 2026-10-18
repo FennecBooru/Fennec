@@ -605,7 +605,9 @@ class Post < ApplicationRecord
   module TagMethods
     # These categories don't identify or describe a character, so they're never allowed into a
     # character group - finalize_character_groups strips them back out to the ungrouped tags.
-    UNGROUPABLE_CATEGORIES = [TagCategory.artist, TagCategory.meta, TagCategory.invalid].freeze
+    def self.ungroupable_categories
+      [TagCategory.artist, TagCategory.meta, TagCategory.invalid].compact
+    end
 
     attr_reader(:ungrouped_tag_string_input, :character_groups_attributes_input)
 
@@ -729,7 +731,7 @@ class Post < ApplicationRecord
       # Artist/meta/invalid tags can't describe a character, so they always fall back to the
       # ungrouped tags instead - even if the UI (or an implication) put one in a group.
       categories = Tag.categories_for(groups.flatten.uniq)
-      groups = groups.map { |tags| tags.reject { |t| UNGROUPABLE_CATEGORIES.include?(categories[t]) } }
+      groups = groups.map { |tags| tags.reject { |t| TagMethods.ungroupable_categories.include?(categories[t]) } }
 
       self.character_groups = groups.compact_blank.map { |tags| { "tags" => tags.uniq } }
     ensure
@@ -758,8 +760,9 @@ class Post < ApplicationRecord
       return [] if character_groups.blank?
       all_group_tags = character_groups.flat_map { |g| Array(g["tags"]) }
       categories = Tag.categories_for(all_group_tags)
+      character = TagCategory.character
       character_groups.map do |g|
-        characters, attributes = Array(g["tags"]).partition { |t| categories[t] == TagCategory::CHARACTER.id }
+        characters, attributes = Array(g["tags"]).partition { |t| character && categories[t] == character }
         { characters: characters, tags: attributes }
       end
     end
@@ -788,30 +791,34 @@ class Post < ApplicationRecord
       Tag.where(name: tag_array_was)
     end
 
-    TagCategory.categories.each do |category|
-      define_method("#{category.name}_tags") do
-        Tag.where(name: send("#{category.name}_tag_array"))
+    CATEGORY_TAG_METHOD = /\A(?<category>[a-z]+)_(?<type>tags|tag_array)(?<suffix>_was|_before_last_save)?\z/
+    CATEGORY_COUNT_METHOD = /\Atag_count_(?<category>[a-z]+)\z/
+
+    # post.artist_tags, post.artist_tag_array, and their _was and _before_last_save versions, and
+    # post.tag_count_artist, for the category with that name or alias. Empty or 0 if there isn't one
+    def method_missing(name, *args, &)
+      return super unless args.empty? && !block_given? && self.class.attribute_names.exclude?(name.to_s)
+
+      if (match = CATEGORY_COUNT_METHOD.match(name.to_s))
+        category_id = TagCategory.get(match[:category])&.id
+        return category_id.nil? ? 0 : tag_category_data[category_id.to_s].to_i
       end
 
-      define_method("#{category.name}_tags_was") do
-        Tag.where(name: send("#{category.name}_tag_array_was"))
-      end
+      match = CATEGORY_TAG_METHOD.match(name.to_s)
+      return super unless match
 
-      define_method("#{category.name}_tags_before_last_save") do
-        Tag.where(name: send("#{category.name}_tag_array_before_last_save"))
-      end
+      category_id = TagCategory.get(match[:category])&.id
+      names = case match[:suffix]
+              when "_was" then typed_tags_was(category_id)
+              when "_before_last_save" then typed_tags_before_last_save(category_id)
+              else typed_tags(category_id)
+              end
+      match[:type] == "tags" ? Tag.where(name: names) : names
+    end
 
-      define_method("#{category.name}_tag_array") do
-        typed_tags(category.id)
-      end
-
-      define_method("#{category.name}_tag_array_was") do
-        typed_tags_was(category.id)
-      end
-
-      define_method("#{category.name}_tag_array_before_last_save") do
-        typed_tags_before_last_save(category.id)
-      end
+    def respond_to_missing?(name, include_private = false)
+      match = CATEGORY_TAG_METHOD.match(name.to_s) || CATEGORY_COUNT_METHOD.match(name.to_s)
+      (match.present? && TagCategory.get(match[:category]).present?) || super
     end
 
     def added_tags
@@ -861,14 +868,6 @@ class Post < ApplicationRecord
         success = follower.set_latest_post(exclude: id)
         follower.update(last_post_id: nil) unless success
       end
-    end
-
-    def set_tag_count(category, tagcount)
-      send("tag_count_#{category}=", tagcount)
-    end
-
-    def inc_tag_count(category)
-      set_tag_count(category, send("tag_count_#{category}") + 1)
     end
 
     def merge_old_changes
@@ -1293,22 +1292,22 @@ class Post < ApplicationRecord
       @tag_categories ||= Tag.categories_for(tag_array)
     end
 
-    def typed_tags(category_id = nil)
+    # With no arguments, { tag name => category id }. Given a category id, the names of the tags
+    # in it - a nil id is a category that doesn't exist, so there are none
+    def typed_tags(*category_id)
       @typed_tags ||= typed_tag_string.split.map { |t| t.split("|").reverse }.uniq(&:first).to_h.transform_values(&:to_i)
-      return @typed_tags.select { |_k, v| category_id == v }.keys if category_id
-      @typed_tags
+      return @typed_tags if category_id.empty?
+      @typed_tags.select { |_k, v| category_id.first == v }.keys
     end
 
     def typed_tags_was(category_id)
       @typed_tags_was ||= typed_tag_string_was.split.map { |t| t.split("|").reverse }.uniq(&:first).to_h.transform_values(&:to_i)
-      return @typed_tags_was.select { |_k, v| category_id == v }.keys if category_id
-      @typed_tags_was
+      @typed_tags_was.select { |_k, v| category_id == v }.keys
     end
 
     def typed_tags_before_last_save(category_id)
       @typed_tag_string_before_last_save ||= (typed_tag_string_before_last_save || "").split.map { |t| t.split("|").reverse }.uniq(&:first).to_h.transform_values(&:to_i)
-      return @typed_tag_string_before_last_save.select { |_k, v| category_id == v }.keys if category_id
-      @typed_tag_string_before_last_save
+      @typed_tag_string_before_last_save.select { |_k, v| category_id == v }.keys
     end
 
     def copy_tags_to_parent
@@ -1351,10 +1350,8 @@ class Post < ApplicationRecord
     def clean_typed_tag_string!
       array = typed_tag_string.split.uniq { |t| t.split("|").last }
       self.typed_tag_string = array.join(" ")
-      TagCategory.categories.each do |category|
-        count = array.count { |t| t.start_with?("#{category.id}|") }
-        send("tag_count_#{category.name}=", count)
-      end
+      # { category id => count }, only categories the post has tags in
+      self.tag_category_data = array.map { |t| t.split("|").first }.tally
       self.tag_count = array.count
     end
   end
@@ -2093,7 +2090,7 @@ class Post < ApplicationRecord
           daily: daily_views,
           total: total_views,
         },
-        tags:             TagCategory.category_names.index_with { |category| typed_tags(TagCategory.get(category).id) },
+        tags:             TagCategory.categories.to_h { |category| [category.name, typed_tags(category.id)] },
         character_groups: character_groups_for_api,
         ungrouped_tags:   ungrouped_tags,
         locked_tags:      locked_tags.split,
@@ -2358,7 +2355,7 @@ class Post < ApplicationRecord
 
     def has_artist_tag
       return unless new_record?
-      return if tags.artist.any?
+      return if TagCategory.artist.nil? || tags.in_category(:artist).any?
 
       warnings.add(:base, 'Artist tag is required. "Click here":/help/tags#categorychange if you need help changing the category of a tag. Ask on the forum if you need naming help')
     end
@@ -2366,7 +2363,7 @@ class Post < ApplicationRecord
     def has_enough_tags
       return unless new_record?
 
-      if tags.general.count < 10
+      if TagCategory.general && tags.in_category(:general).count < 10
         warnings.add(:base, "Uploads must have at least 10 general tags. Read the \"Tagging Checklist\":/help/tagging_checklist for information on tagging your uploads")
       end
     end
@@ -2376,7 +2373,7 @@ class Post < ApplicationRecord
     # is still required though, so it's still a real (blocking) validation here.
     def in_progress_requires_artist_tag
       return unless new_record?
-      return if tags.artist.any?
+      return if TagCategory.artist.nil? || tags.in_category(:artist).any?
 
       errors.add(:base, 'Artist tag is required for in-progress uploads. "Click here":/help/tags#categorychange if you need help changing the category of a tag. Ask on the forum if you need naming help')
     end

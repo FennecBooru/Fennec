@@ -1,0 +1,48 @@
+<%# Mirrors the rules tags.scss used to generate for each category. Names, aliases, and colors are validated, so they're safe to output as-is %>
+body {
+<% @tag_categories.each do |category| -%>
+  --color-tag-<%= category.id %>: <%= category.color %>;
+  --color-tag-<%= category.id %>-alt: <%= category.color_alt %>;
+<% category.values.each do |value| -%>
+  --color-tag-<%= value %>: var(--color-tag-<%= category.id %>);
+  --color-tag-<%= value %>-alt: var(--color-tag-<%= category.id %>-alt);
+<% end -%>
+<% end -%>
+}
+<% @tag_categories.each do |category| -%>
+<%
+  id = category.id
+  links = [".tag-type-#{id}", ".category-#{id} a", ".ui-widget-content .category-#{id} a", ".ui-widget-content a.tag-type-#{id}"]
+  active = ".ui-widget-content .ui-state-active a.tag-type-#{id}"
+-%>
+
+<%= links.flat_map { |s| [s, "#{s}:link", "#{s}:visited"] }.join(", ") %> {
+  color: var(--color-tag-<%= id %>);
+}
+
+<%= links.map { |s| "#{s}:hover" }.join(", ") %> {
+  color: var(--color-tag-<%= id %>-alt);
+}
+
+<%= active %> {
+  color: var(--color-tag-<%= id %>-alt);
+}
+
+<%= active %>:link, <%= active %>:visited {
+  color: var(--color-tag-<%= id %>);
+}
+
+<%= active %>:hover {
+  color: var(--color-tag-<%= id %>-alt);
+}
+
+<%= [*links, active].map { |s| "#{s}.selected" }.join(", ") %> {
+  color: white;
+}
+<% category.values.each do |value| -%>
+
+.styled-dtext .dtext-color-<%= value %> {
+  color: var(--color-tag-<%= id %>);
+}
+<% end -%>
+<% end -%>

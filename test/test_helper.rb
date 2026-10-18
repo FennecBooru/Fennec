@@ -163,6 +163,10 @@ class ActiveSupport::TestCase # rubocop:disable Style/ClassAndModuleChildren
     AdminConfig.any_instance.stubs(:flag_ai_posts).returns(false)
     AdminConfig.any_instance.stubs(:tag_ai_posts).returns(false)
     AdminConfig.any_instance.stubs(:enable_email_verification).returns(false)
+
+    # categories are data, so every test starts from the defaults
+    TagCategory.delete_all
+    TagCategory.create_defaults!(creator_id: User.system.id)
   end
 
   teardown do

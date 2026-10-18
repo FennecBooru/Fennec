@@ -497,10 +497,18 @@ class DTextTest < Minitest::Test
     assert_parse("<p><span class=\"dtext-color\" style=\"color: #FFA500\">test</span></p>", "[color=#FFA500]test[/color]", allow_color: true)
     assert_parse("<p><span class=\"dtext-color\" style=\"color: orangered\">test</span></p>", "[color=orangered]test[/color]", allow_color: true)
     assert_parse("<p>test</p>", "[color=orangered]test[/color]", allow_color: false)
-    typed = %w[general gen artist art contributor cont copyright copy co character char ch oc species spec invalid inv meta lore lor gender safe questionable explicit]
+    typed = %w[general gen artist art contributor cont copyright copy co character char ch oc species spec invalid inv meta lore lor gender important imp safe questionable explicit]
     typed.each do |category|
       assert_parse("<p><span class=\"dtext-color-#{category}\">test</span></p>", "[color=#{category}]test[/color]", allow_color: true)
     end
+  end
+
+  def test_color_names
+    assert_parse("<p><span class=\"dtext-color-custom\">test</span></p>", "[color=custom]test[/color]", allow_color: true, color_names: %w[custom])
+    assert_parse("<p><span class=\"dtext-color-custom\">test</span></p>", "[color=CUSTOM]test[/color]", allow_color: true, color_names: %w[Custom])
+    assert_parse("<p><span class=\"dtext-color\" style=\"color: artist\">test</span></p>", "[color=artist]test[/color]", allow_color: true, color_names: %w[custom])
+    assert_parse("<p><span class=\"dtext-color-s\">test</span></p>", "[color=s]test[/color]", allow_color: true, color_names: [])
+    assert_parse("<p><span class=\"dtext-color\" style=\"color: #123\">test</span></p>", "[color=#123]test[/color]", allow_color: true, color_names: %w[custom])
   end
 
   def test_inline_elements

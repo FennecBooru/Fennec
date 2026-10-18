@@ -12,7 +12,7 @@ class Tag < ApplicationRecord
 
   validates(:name, uniqueness: true, tag_name: true, on: :create)
   validates(:name, length: { minimum: 1, maximum: 100 })
-  validates(:category, inclusion: { in: TagCategory.ids })
+  validates(:category, inclusion: { in: ->(_) { TagCategory.ids }, message: "is not a tag category" })
   validate(:user_can_create_tag?, on: :create)
   validate(:user_can_change_category?, if: :category_changed?)
   validate(:validate_deprecation_requires_wiki_page, if: -> { is_deprecated? && is_deprecated_changed? })
@@ -21,20 +21,26 @@ class Tag < ApplicationRecord
   before_save(:lock_when_deprecated, if: :is_deprecated?)
   after_create(:create_version)
   after_update(:create_version, if: :saved_change_to_watched_attributes?)
+  after_destroy(-> { TagCategory.where(id: category).update_all("tag_count = tag_count - 1") })
+  after_save(:update_category_tag_counts, if: :saved_change_to_category?)
   belongs_to_user(:creator, ip: true, clones: :updater)
   resolvable(:updater)
 
+  attribute(:category, :integer, default: -> { TagCategory.default_id })
   attr_accessor(:reason)
 
-  TagCategory.categories.each do |category|
-    scope(category.name, -> { where(category: category.id) })
-    next unless category != TagCategory::INVALID # We can't this because we would override the internal "invalid?" method
-    define_singleton_method("#{category.name}?") do |record|
-      record.category == category.id
-    end
+  scope(:in_category, ->(category) { where(category: TagCategory.get(category)&.id) })
+
+  # Tag.artist etc, scoped to the category with that name or alias. Only defined for categories
+  # that exist, use in_category when the category might not
+  def self.method_missing(name, *args, &)
+    return super unless args.empty? && !block_given? && name.match?(TagCategory::NAME_REGEX) && TagCategory.get(name.to_s)
+    in_category(name.to_s)
   end
 
-  scope(:invalid, -> { where(category: TagCategory::INVALID) })
+  def self.respond_to_missing?(name, include_private = false)
+    (name.match?(TagCategory::NAME_REGEX) && TagCategory.get(name.to_s).present?) || super
+  end
   scope(:empty, -> { where.lteq(post_count: 0) })
   scope(:nonempty, -> { where.gt(post_count: 0) })
 
@@ -82,7 +88,7 @@ class Tag < ApplicationRecord
     module ClassMethods
       def category_for(tag_name)
         Cache.fetch("tc:#{tag_name}") do
-          Tag.where(name: tag_name).pick(:category).to_i
+          Tag.where(name: tag_name).pick(:category) || TagCategory.default_id
         end
       end
 
@@ -108,7 +114,7 @@ class Tag < ApplicationRecord
       end
 
       def category_for_value(value)
-        TagCategory.reverse_mapping.fetch(value, "unknown category").capitalize
+        TagCategory.reverse_mapping[value]&.capitalize || TagCategory.deleted_name(value)
       end
     end
 
@@ -117,7 +123,12 @@ class Tag < ApplicationRecord
     end
 
     def category_name
-      TagCategory.get(category).title
+      TagCategory.get(category)&.title || TagCategory.deleted_name(category)
+    end
+
+    def update_category_tag_counts
+      TagCategory.where(id: category_before_last_save).update_all("tag_count = tag_count - 1") unless category_before_last_save.nil?
+      TagCategory.where(id: category).update_all("tag_count = tag_count + 1")
     end
 
     def update_category_post_counts!
@@ -143,10 +154,10 @@ class Tag < ApplicationRecord
       cat = TagCategory.get(category)
       return false unless cat
       unless cat.can_use?(updater)
-        errors.add(:category, "can only used by admins")
+        errors.add(:category, "can only be used by #{User::Levels.id_to_name(cat.min_level).pluralize} and above")
         return false
       end
-      if cat.suffixes&.none? { |s| name&.ends_with?("_(#{s})") }
+      if cat.suffixes.present? && cat.suffixes.none? { |s| name&.ends_with?("_(#{s})") }
         errors.add(:category, "can only be applied to tags that end with #{cat.suffixes.map { |s| "'_(#{s})'" }.join(', ')}")
         false
       end
@@ -167,10 +178,18 @@ class Tag < ApplicationRecord
                         reason:          reason || "")
     end
 
-    TagCategory.categories.map(&:name).each do |category|
-      define_method("#{category}?") do
-        self.category == TagCategory.value_for(category)
-      end
+    # tag.artist? etc, true if the tag is in the category with that name or alias. Methods that
+    # already exist, like ActiveRecord's invalid?, aren't affected
+    def method_missing(name, *args, &)
+      category_name = name.to_s.delete_suffix("?")
+      return super unless args.empty? && !block_given? && name.end_with?("?") && category_name.match?(TagCategory::NAME_REGEX)
+      return super if self.class.attribute_names.include?(category_name)
+      category.present? && category == TagCategory.get(category_name)&.id
+    end
+
+    def respond_to_missing?(name, include_private = false)
+      category_name = name.to_s.delete_suffix("?")
+      (name.end_with?("?") && category_name.match?(TagCategory::NAME_REGEX) && TagCategory.get(category_name).present?) || super
     end
   end
 
@@ -367,7 +386,7 @@ class Tag < ApplicationRecord
 
   def category_editable_by?(user)
     return false if is_locked? && !user.is_admin?
-    return false unless TagCategory.get(category).can_use?(user)
+    return false if TagCategory.get(category)&.can_use?(user) == false
     return true if post_count < AdminConfig.get_user(:tag_type_edit_limit, user)
     false
   end

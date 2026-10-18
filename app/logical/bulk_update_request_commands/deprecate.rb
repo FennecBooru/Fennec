@@ -38,14 +38,14 @@ module BulkUpdateRequestCommands
 
     def category_changes
       t = tag || Tag.new(name: tag_name)
-      return [] unless t.general?
+      return [] unless t.general? && TagCategory.invalid
       [[t, TagCategory.invalid]]
     end
 
     def process(_processor, approver)
       ensure_valid!
       t = tag
-      t.category = TagCategory.invalid if t.general?
+      t.category = TagCategory.invalid if t.general? && TagCategory.invalid
       t.is_deprecated = true
       t.updater = approver
       t.save!

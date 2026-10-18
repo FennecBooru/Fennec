@@ -50,6 +50,7 @@
     <%= li_link_to("Listing", tags_path) %>
     <%= li_link_to_if(policy(Tag).followed?, "Followed", followed_tags_path) %>
     <%= li_link_to("Aliases", tag_aliases_path) %>
+    <%= li_link_to("Categories", tag_categories_path) %>
     <%= li_link_to("Alias History", mod_actions_path(search: { action: "tag_alias_create,tag_alias_update" })) %>
     <%= li_link_to("Implications", tag_implications_path) %>
     <%= li_link_to("Implication History", mod_actions_path(search: { action: "tag_implication_create,tag_implication_update" })) %>

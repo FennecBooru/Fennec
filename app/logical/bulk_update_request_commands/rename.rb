@@ -36,7 +36,7 @@ module BulkUpdateRequestCommands
     end
 
     def category_changes
-      return [] if consequent_tag&.artist?
+      return [] if TagCategory.artist.nil? || consequent_tag&.artist?
       [[consequent_tag || Tag.new(name: consequent_name), TagCategory.artist]]
     end
 

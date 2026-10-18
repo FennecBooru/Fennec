@@ -109,7 +109,8 @@ class PostsDecorator < ApplicationDecorator
 
     size = options[:size] ? post.file_size : nil
 
-    img_contents = link_to(r.polymorphic_path(link_target, link_params)) do
+    # inside the post-preview frame, so it would otherwise load the post into the frame
+    img_contents = link_to(r.polymorphic_path(link_target, link_params), data: { turbo: false }) do
       tag.picture do
         safe_join([
           tag.source(media: "(max-width: 800px)", srcset: cropped_url),

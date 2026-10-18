@@ -153,8 +153,9 @@ module Tags
           asserts do
             search(:antecedent_name, "foo").records { [@tag_alias] }
             search(:consequent_name, "bar").records { [@tag_alias] }
-            search(:antecedent_tag_category, TagCategory.copyright).records { [@tag_alias] }
-            search(:consequent_tag_category, TagCategory.artist).records { [@tag_alias] }
+            # categories only exist once a test starts, so these are looked up lazily
+            search(:antecedent_tag_category, -> { TagCategory.copyright }).name("copyright").records { [@tag_alias] }
+            search(:consequent_tag_category, -> { TagCategory.artist }).name("artist").records { [@tag_alias] }
             search(:name_matches, "foo").records { [@tag_alias] }
             search(:name_matches, "bar").records { [@tag_alias] }
             search(:status, "active").records { [@tag_alias] }

@@ -279,8 +279,8 @@ open_tr = '[tr'i tag_attributes :>> ']' | '<tr'i tag_attributes :>> '>';
 open_th = '[th'i tag_attributes :>> ']' | '<th'i tag_attributes :>> '>';
 open_td = '[td'i tag_attributes :>> ']' | '<td'i tag_attributes :>> '>';
 open_br = '[br]'i | '<br>'i;
-open_color = '[color='i ([a-z]+|'#'i[0-9a-fA-F]{3,6}) >mark_a1 %mark_a2 ']';
-open_color_typed = '[color='i ('gen'i('eral'i)?|'art'i('ist'i)?|'cont'|'contributor'i|'oc'i|'ch'i('ar'i('acter'i)?)?|'co'i('py'i('right'i)?)?|'spec'i('ies'i)?|'inv'i('alid'i)?|'meta'i|'lor'i('e'i)?|'gender'i|'imp'i('ortant'i)?|'s'i('afe'i)?|'q'i('uestionable'i)?|'e'i('xplicit'i)?) >mark_a1 %mark_a2 ']';
+open_color = '[color='i ([a-zA-Z]+|'#'i[0-9a-fA-F]{3,6}) >mark_a1 %mark_a2 ']';
+open_color_typed = '[color='i ('s'i('afe'i)?|'q'i('uestionable'i)?|'e'i('xplicit'i)?) >mark_a1 %mark_a2 ']';
 
 open_note = '[note]'i | '<note>'i;
 open_b = '[b]'i | '<b>'i | '<strong>'i;
@@ -501,14 +501,23 @@ inline := |*
 
   open_color => {
     if(options.f_allow_color) {
-        dstack_open_element(INLINE_COLOR, "<span class=\"dtext-color\" style=\"color: ");
-      if(a1[0] == '#') {
-        append("#");
-        append_uri_escaped({ a1 + 1, a2 });
+      // names in color_names (tag categories) get a class, anything else is a css color
+      std::string name(a1, a2);
+      std::transform(name.begin(), name.end(), name.begin(), [](unsigned char c) { return std::tolower(c); });
+      if(a1[0] != '#' && options.color_names.find(name) != options.color_names.end()) {
+        dstack_open_element(INLINE_COLOR, "<span class=\"dtext-color-");
+        append_uri_escaped(name);
+        append("\">");
       } else {
-        append_uri_escaped({ a1, a2 });
+        dstack_open_element(INLINE_COLOR, "<span class=\"dtext-color\" style=\"color: ");
+        if(a1[0] == '#') {
+          append("#");
+          append_uri_escaped({ a1 + 1, a2 });
+        } else {
+          append_uri_escaped({ a1, a2 });
+        }
+        append("\">");
       }
-      append("\">");
     }
   };
 

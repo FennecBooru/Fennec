@@ -127,17 +127,7 @@
     border-left-color: themed("color-dtext-section");
   }
 
-  @each $tag-category, $tag-category-name in $tag-categories-short {
-    .dtext-color-#{$tag-category} {
-      color: themed("color-tag-#{$tag-category-name}");
-    }
-  }
-
-  @each $tag-category-id, $tag-category-name in $tag-categories {
-    .dtext-color-#{$tag-category-name} {
-      color: themed("color-tag-#{$tag-category-name}");
-    }
-  }
+  // tag category colors come from Tags::CategoriesController#styles
 
   @each $rating, $rating-name in $ratings {
     .dtext-color-#{$rating} {

@@ -24,6 +24,10 @@ class MigrationsTest < ActiveSupport::TestCase
     # those checks see the same state a real database (which never lost this history) would.
     applied_fixes = ActiveRecord::Base.connection.table_exists?(:fixes) ? YiffSpace::FixTracker.applied.to_a : []
 
+    # with_config_override! (lib/migrations/config_override.rb) replaces these constants with bare
+    # classes when a migration is loaded, so they're put back afterwards for the tests that run next
+    original_constants = %i[AdminConfig Config].filter_map { |name| [name, Object.const_get(name)] if Object.const_defined?(name) }
+
     begin
       versions.reverse_each { |version| migration_context.run(:down, version) }
       versions.each do |version|
@@ -43,6 +47,13 @@ class MigrationsTest < ActiveSupport::TestCase
       end
     ensure
       migration_context.migrate
+      original_constants.each do |name, klass|
+        Object.send(:remove_const, name) if Object.const_defined?(name, false)
+        Object.const_set(name, klass)
+      end
+      # every table was recreated, so prepared statements and column info from before are stale
+      ActiveRecord::Base.connection.clear_cache!
+      ActiveRecord::Base.descendants.each(&:reset_column_information)
     end
   end
 

@@ -1,0 +1,10 @@
+<%# locals: (reorderable: true) -%>
+<% content_for(:secondary_links) do %>
+  <%= subnav_link_to("Listing", tag_categories_path) %>
+  <%= subnav_link_to_if(policy(TagCategory).create?, "New", new_tag_category_path) %>
+  <% if params[:action] == "index" && reorderable && policy(TagCategory).reorder? %>
+    |
+    <%= subnav_link_to("Edit Order", "#", class: "edit-order-link") %>
+    <%= subnav_link_to("Save", "#", class: "save-order-link", li_options: { style: "display: none;" }) %>
+  <% end %>
+<% end %>

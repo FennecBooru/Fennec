@@ -65,22 +65,12 @@ BEGIN
     OR NEW.last_commented_at IS DISTINCT FROM OLD.last_commented_at
     OR NEW.comment_count IS DISTINCT FROM OLD.comment_count
     OR NEW.qtags IS DISTINCT FROM OLD.qtags
-    OR NEW.tag_count_general IS DISTINCT FROM OLD.tag_count_general
-    OR NEW.tag_count_artist IS DISTINCT FROM OLD.tag_count_artist
-    OR NEW.tag_count_contributor IS DISTINCT FROM OLD.tag_count_contributor
-    OR NEW.tag_count_character IS DISTINCT FROM OLD.tag_count_character
-    OR NEW.tag_count_copyright IS DISTINCT FROM OLD.tag_count_copyright
-    OR NEW.tag_count_meta IS DISTINCT FROM OLD.tag_count_meta
-    OR NEW.tag_count_species IS DISTINCT FROM OLD.tag_count_species
-    OR NEW.tag_count_invalid IS DISTINCT FROM OLD.tag_count_invalid
-    OR NEW.tag_count_lore IS DISTINCT FROM OLD.tag_count_lore
-    OR NEW.tag_count_gender IS DISTINCT FROM OLD.tag_count_gender
-    OR NEW.tag_count_important IS DISTINCT FROM OLD.tag_count_important
     OR NEW.is_unlisted IS DISTINCT FROM OLD.is_unlisted
     OR NEW.is_in_progress IS DISTINCT FROM OLD.is_in_progress
     OR NEW.character_groups IS DISTINCT FROM OLD.character_groups
     OR NEW.pool_ids IS DISTINCT FROM OLD.pool_ids
     OR NEW.public_set_ids IS DISTINCT FROM OLD.public_set_ids
+    OR NEW.tag_category_data IS DISTINCT FROM OLD.tag_category_data
     OR old_md5 IS DISTINCT FROM new_md5
   THEN
     NEW.change_seq = nextval('public.posts_change_seq_seq');
@@ -100,7 +90,6 @@ SET default_table_access_method = heap;
 
 CREATE TABLE public.admin_config (
     id text DEFAULT 'config'::text NOT NULL,
-    contributor_suffixes text DEFAULT 'va, modeler'::text NOT NULL,
     comment_bump_threshold integer DEFAULT 40 NOT NULL,
     pending_uploads_limit integer DEFAULT 3 NOT NULL,
     comment_limit integer DEFAULT 15 NOT NULL,
@@ -209,8 +198,6 @@ CREATE TABLE public.admin_config (
     upload_whitelists_forum_topic integer DEFAULT 0 NOT NULL,
     post_sample_size integer DEFAULT 300 NOT NULL,
     updated_at timestamp(6) without time zone,
-    lore_suffixes text DEFAULT 'lore'::text NOT NULL,
-    artist_exclusion_tags text DEFAULT 'avoid_posting, conditional_dnp, epilepsy_warning, sound_warning'::text NOT NULL,
     flag_ai_posts boolean DEFAULT true NOT NULL,
     tag_ai_posts boolean DEFAULT true NOT NULL,
     ai_confidence_threshold integer DEFAULT 50 NOT NULL,
@@ -2832,23 +2819,15 @@ CREATE TABLE public.posts (
     fav_count integer DEFAULT 0 NOT NULL,
     tag_string text DEFAULT ''::text NOT NULL,
     tag_count integer DEFAULT 0 NOT NULL,
-    tag_count_general integer DEFAULT 0 NOT NULL,
-    tag_count_artist integer DEFAULT 0 NOT NULL,
-    tag_count_character integer DEFAULT 0 NOT NULL,
-    tag_count_copyright integer DEFAULT 0 NOT NULL,
     parent_id bigint,
     has_children boolean DEFAULT false NOT NULL,
     last_commented_at timestamp without time zone,
     has_active_children boolean DEFAULT false NOT NULL,
     bit_flags bigint DEFAULT 0 NOT NULL,
-    tag_count_meta integer DEFAULT 0 NOT NULL,
     locked_tags text DEFAULT ''::text NOT NULL,
-    tag_count_species integer DEFAULT 0 NOT NULL,
-    tag_count_invalid integer DEFAULT 0 NOT NULL,
     description text DEFAULT ''::text NOT NULL,
     comment_count integer DEFAULT 0 NOT NULL,
     change_seq bigint NOT NULL,
-    tag_count_lore integer DEFAULT 0 NOT NULL,
     bg_color character varying,
     is_comment_disabled boolean DEFAULT false NOT NULL,
     original_tag_string text DEFAULT ''::text NOT NULL,
@@ -2856,22 +2835,20 @@ CREATE TABLE public.posts (
     qtags character varying[] DEFAULT '{}'::character varying[] NOT NULL,
     upload_url character varying,
     vote_string character varying DEFAULT ''::character varying NOT NULL,
-    tag_count_gender integer DEFAULT 0 NOT NULL,
     thumbnail_frame integer,
-    tag_count_contributor integer DEFAULT 0 NOT NULL,
     min_edit_level integer DEFAULT 10 NOT NULL,
     typed_tag_string character varying DEFAULT ''::character varying NOT NULL,
     upload_media_asset_id bigint,
     updater_id bigint NOT NULL,
     updater_ip_addr inet NOT NULL,
-    tag_count_important integer DEFAULT 0 NOT NULL,
     is_appealed boolean DEFAULT false NOT NULL,
     is_unlisted boolean DEFAULT false NOT NULL,
     is_in_progress boolean DEFAULT false NOT NULL,
     character_groups jsonb DEFAULT '[]'::jsonb NOT NULL,
     pool_ids bigint[] DEFAULT '{}'::bigint[] NOT NULL,
     public_set_ids bigint[] DEFAULT '{}'::bigint[] NOT NULL,
-    private_set_ids bigint[] DEFAULT '{}'::bigint[] NOT NULL
+    private_set_ids bigint[] DEFAULT '{}'::bigint[] NOT NULL,
+    tag_category_data jsonb DEFAULT '{}'::jsonb NOT NULL
 );
 
 
@@ -3238,6 +3215,38 @@ ALTER SEQUENCE public.tag_aliases_id_seq OWNED BY public.tag_aliases.id;
 
 
 --
+-- Name: tag_categories; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.tag_categories (
+    id integer NOT NULL,
+    creator_id bigint NOT NULL,
+    creator_ip_addr inet NOT NULL,
+    updater_id bigint NOT NULL,
+    updater_ip_addr inet NOT NULL,
+    name character varying NOT NULL,
+    aliases character varying[] DEFAULT '{}'::character varying[] NOT NULL,
+    header character varying NOT NULL,
+    display character varying NOT NULL,
+    color character varying NOT NULL,
+    color_alt character varying NOT NULL,
+    format_limit integer,
+    format_string character varying,
+    format_exclusion character varying[] DEFAULT '{}'::character varying[] NOT NULL,
+    format_regex character varying,
+    suffixes character varying[] DEFAULT '{}'::character varying[] NOT NULL,
+    format_position integer,
+    "position" integer,
+    min_level integer DEFAULT 0 NOT NULL,
+    is_default boolean DEFAULT false NOT NULL,
+    is_deleted boolean DEFAULT false NOT NULL,
+    tag_count integer DEFAULT 0 NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
 -- Name: tag_followers; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -3392,7 +3401,7 @@ CREATE TABLE public.tags (
     id bigint NOT NULL,
     name character varying NOT NULL,
     post_count integer DEFAULT 0 NOT NULL,
-    category smallint DEFAULT 0 NOT NULL,
+    category smallint NOT NULL,
     related_tags text,
     related_tags_updated_at timestamp without time zone,
     created_at timestamp without time zone NOT NULL,
@@ -5414,6 +5423,22 @@ ALTER TABLE ONLY public.staff_notes
 
 ALTER TABLE ONLY public.tag_aliases
     ADD CONSTRAINT tag_aliases_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: tag_categories tag_categories_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tag_categories
+    ADD CONSTRAINT tag_categories_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: tag_categories tag_categories_position_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tag_categories
+    ADD CONSTRAINT tag_categories_position_unique UNIQUE ("position") DEFERRABLE INITIALLY DEFERRED;
 
 
 --
@@ -7617,6 +7642,34 @@ CREATE INDEX index_tag_aliases_on_updater_id ON public.tag_aliases USING btree (
 
 
 --
+-- Name: index_tag_categories_on_creator_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_tag_categories_on_creator_id ON public.tag_categories USING btree (creator_id);
+
+
+--
+-- Name: index_tag_categories_on_is_default; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_tag_categories_on_is_default ON public.tag_categories USING btree (is_default) WHERE is_default;
+
+
+--
+-- Name: index_tag_categories_on_lower_name; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_tag_categories_on_lower_name ON public.tag_categories USING btree (lower((name)::text)) WHERE (NOT is_deleted);
+
+
+--
+-- Name: index_tag_categories_on_updater_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_tag_categories_on_updater_id ON public.tag_categories USING btree (updater_id);
+
+
+--
 -- Name: index_tag_followers_on_last_post_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -8429,6 +8482,14 @@ ALTER TABLE ONLY public.domain_icons
 
 ALTER TABLE ONLY public.tags
     ADD CONSTRAINT fk_rails_187412be99 FOREIGN KEY (creator_id) REFERENCES public.users(id);
+
+
+--
+-- Name: tag_categories fk_rails_18a74d38d3; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tag_categories
+    ADD CONSTRAINT fk_rails_18a74d38d3 FOREIGN KEY (updater_id) REFERENCES public.users(id);
 
 
 --
@@ -9640,6 +9701,14 @@ ALTER TABLE ONLY public.quick_rules
 
 
 --
+-- Name: tag_categories fk_rails_df9b52d54c; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tag_categories
+    ADD CONSTRAINT fk_rails_df9b52d54c FOREIGN KEY (creator_id) REFERENCES public.users(id);
+
+
+--
 -- Name: post_replacements fk_rails_e2177a7d4b; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -9782,6 +9851,7 @@ ALTER TABLE ONLY public.help_pages
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261014031322'),
 ('20261010090000'),
 ('20261009120000'),
 ('20260915135048'),
@@ -9987,6 +10057,11 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220106081415');
 
 INSERT INTO "fixes" (id, "index") VALUES
+(249, NULL),
+(248, 2),
+(248, 1),
+(247, NULL),
+(246, NULL),
 (245, NULL),
 (244, NULL),
 (243, NULL),

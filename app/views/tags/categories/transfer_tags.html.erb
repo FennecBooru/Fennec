@@ -1,0 +1,15 @@
+<h1>Transfer Tags: <%= @tag_category.name %></h1>
+
+<p>This moves all <%= @tag_category.tag_count %> tags in <%= link_to(@tag_category.name, tags_path(search: { category: @tag_category.id }), class: "tag-type-#{@tag_category.id}") %> into the chosen category, so this one can be deleted. Each tag gets a version, and its posts are updated afterwards.</p>
+<p>Nobody but the system can put tags in the category while they're moving. Tags the new category won't take, like ones missing its required suffix, are left behind.</p>
+
+<%= custom_form_for(:tag_category, url: transfer_tags_tag_category_path(@tag_category), method: :post) do |f| %>
+  <%= f.input(:new_category_id, label: "New Category", collection: TagCategory.for_select.reject { |(_name, id)| id == @tag_category.id }, include_blank: false) %>
+  <%= f.submit("Transfer Tags") %>
+<% end %>
+
+<%= render("secondary_links") %>
+
+<% content_for(:page_title) do %>
+  Transfer Tags
+<% end %>

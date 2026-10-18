@@ -27,6 +27,26 @@ class PostQueryBuilder
     relation
   end
 
+  # posts only have a key for categories they have tags in, a missing key is 0
+  def add_tag_category_count_relation(relation, values, category_id)
+    return relation unless values
+    field = "COALESCE((posts.tag_category_data->>'#{category_id.to_i}')::integer, 0)"
+    values.each do |(type, value, max)|
+      next if value.nil?
+      relation = case type
+                 when :eq then relation.where("#{field} = ?", value)
+                 when :gt then relation.where("#{field} > ?", value)
+                 when :gte then relation.where("#{field} >= ?", value)
+                 when :lt then relation.where("#{field} < ?", value)
+                 when :lte then relation.where("#{field} <= ?", value)
+                 when :in then relation.where("#{field} IN (?)", value)
+                 when :between then relation.where("#{field} BETWEEN ? AND ?", value, max)
+                 else relation
+                 end
+    end
+    relation
+  end
+
   def add_array_range_relation(relation, values, field, &block)
     return relation unless values
     if block_given?
@@ -58,8 +78,8 @@ class PostQueryBuilder
     relation = add_array_range_relation(relation, q[:change_seq], "posts.change_seq")
     relation = add_array_range_relation(relation, q[:date], "posts.created_at")
     relation = add_array_range_relation(relation, q[:age], "posts.created_at")
-    TagCategory.category_names.each do |category|
-      relation = add_array_range_relation(relation, q[:"#{category}_tag_count"], "posts.tag_count_#{category}")
+    TagCategory.categories.each do |category|
+      relation = add_tag_category_count_relation(relation, q[:"#{category.name}_tag_count"], category.id)
     end
     relation = add_array_range_relation(relation, q[:post_tag_count], "posts.tag_count")
 

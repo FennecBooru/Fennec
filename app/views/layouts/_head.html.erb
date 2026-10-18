@@ -25,6 +25,7 @@
 <meta name="enable-js-navigation" content="<%= CurrentUser.user.enable_keyboard_navigation %>">
 <meta name="enable-autocomplete" content="<%= CurrentUser.user.enable_autocomplete %>">
 <meta name="style-usernames" content="<%= CurrentUser.user.style_usernames? %>">
+<meta name="tag-categories" content="<%= TagCategory.as_frontend_json.to_json %>">
 <% if page?("static", "home") %>
   <meta name="active-mascots" content="<%= Mascot.active_for_user(CurrentUser.user).to_json %>">
 <% end %>
@@ -38,6 +39,7 @@
 <%= auto_discovery_link_tag(:atom, posts_path(format: "atom", tags: params[:tags])) %>
 
 <%= stylesheet_pack_tag("application", nonce: true) %>
+<%= stylesheet_link_tag(styles_tag_categories_path(format: :css, v: TagCategory.version), nonce: true) %>
 <%= javascript_pack_tag("application", nonce: true, defer: false) %>
 
 <script type="application/ld+json">

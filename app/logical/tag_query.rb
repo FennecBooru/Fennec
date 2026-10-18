@@ -69,7 +69,7 @@ class TagQuery
     source status pool set fav favoritedby note locked upvote votedup downvote voteddown voted
     width height mpixels ratio filesize duration score favcount framecount views date age change tagcount
     commenter comm noter noteupdater disapprovals qtags
-  ] + TagCategory.short_name_list.map { |tag_name| "#{tag_name}tags" }
+  ].freeze
 
   METATAGS = %w[
     md5 order limit child randseed ratinglocked notelocked statuslocked
@@ -94,7 +94,25 @@ class TagQuery
     views views_desc views_asc
     rank
     random
-  ] + COUNT_METATAGS + TagCategory.short_name_list.flat_map { |str| %W[#{str}tags #{str}tags_asc] }
+  ] + COUNT_METATAGS
+
+  # The metatags for tag categories, like chartags, depend on which categories exist so they
+  # aren't in the constants above
+  def self.category_metatags
+    TagCategory.short_name_list.map { |short_name| "#{short_name}tags" }
+  end
+
+  def self.negatable_metatags
+    NEGATABLE_METATAGS + category_metatags
+  end
+
+  def self.metatags
+    METATAGS + category_metatags
+  end
+
+  def self.order_metatags
+    ORDER_METATAGS + category_metatags.flat_map { |metatag| [metatag, "#{metatag}_asc"] }
+  end
 
   delegate(:[], :include?, to: :@q)
   attr_reader(:q, :user, :resolve_aliases, :tag_count)
@@ -165,7 +183,7 @@ class TagQuery
     quote_delimited + tagstr.split.uniq
   end
 
-  def self.has_any_metatag?(tags, list: METATAGS)
+  def self.has_any_metatag?(tags, list: metatags)
     return false if tags.blank?
 
     tags = scan(tags) if tags.is_a?(String)

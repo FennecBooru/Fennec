@@ -109,8 +109,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
     add_array_range_relation(:date, :created_at)
     add_array_range_relation(:age, :created_at)
 
-    TagCategory.category_names.each do |category|
-      add_array_range_relation(:"#{category}_tag_count", "tag_count_#{category}")
+    TagCategory.categories.each do |category|
+      add_tag_category_count_relation(:"#{category.name}_tag_count", category.id)
     end
 
     add_array_range_relation(:post_tag_count, :tag_count)
@@ -357,10 +357,10 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       order.push({ tag_count: :asc })
 
     when /(#{TagCategory.short_name_regex})tags(?:\Z|_desc)/
-      order.push({ "tag_count_#{TagCategory.short_name_mapping[$1]}" => :desc })
+      order.push(tag_category_count_order(TagCategory.short_name_mapping[$1], :desc))
 
     when /(#{TagCategory.short_name_regex})tags_asc/
-      order.push({ "tag_count_#{TagCategory.short_name_mapping[$1]}" => :asc })
+      order.push(tag_category_count_order(TagCategory.short_name_mapping[$1], :asc))
 
     when "disapprovals", "disapprovals_desc"
       if user.can_approve_posts?
@@ -435,5 +435,37 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
         },
       })
     end
+  end
+
+  # posts only have a key for categories they have tags in, so a missing key counts as 0
+  def add_tag_category_count_relation(key, category_id)
+    field = "tag_category_counts.#{category_id}"
+    relation = ->(range) do
+      query = range_relation(range, field)
+      next query unless query && range_includes_zero?(range)
+      match_any(query, match_none({ exists: { field: field } }))
+    end
+
+    must.concat(q[key].map(&relation)) if q[key]
+    must_not.concat(q[:"#{key}_must_not"].map(&relation)) if q[:"#{key}_must_not"]
+    should.concat(q[:"#{key}_should"].map(&relation)) if q[:"#{key}_should"]
+  end
+
+  def range_includes_zero?(range)
+    case range[0]
+    when :eq then range[1] == 0
+    when :gt then range[1] < 0
+    when :gte then range[1] <= 0
+    when :lt then range[1] > 0
+    when :lte then range[1] >= 0
+    when :in then range[1].include?(0)
+    when :between then 0.between?(range[1], range[2])
+    else false
+    end
+  end
+
+  # unmapped_type covers categories no post has been indexed with yet
+  def tag_category_count_order(category_name, direction)
+    { "tag_category_counts.#{TagCategory.get(category_name).id}" => { order: direction, missing: 0, unmapped_type: "integer" } }
   end
 end

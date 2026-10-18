@@ -77,9 +77,8 @@ class TagSetPresenter < ApplicationPresenter
 
   # compact (horizontal) list, as seen in the /comments index.
   def inline_tag_list_html(link_type = :tag)
-    tags = safe_join(TagCategory::CATEGORIZED_LIST.map do |category|
+    tags = safe_join(TagCategory.categories.map do |category|
       tags_for_category(category).map do |tag|
-        category = tag.antecedent_alias&.consequent_tag&.category || category
         h.tag.li(tag_link(tag, tag.name, link_type), class: "category-#{tag.category}")
       end
     end)
@@ -88,32 +87,31 @@ class TagSetPresenter < ApplicationPresenter
 
   # the list of tags inside the tag box in the post edit form.
   def split_tag_list_text
-    TagCategory::CATEGORIZED_LIST.map do |category|
+    TagCategory.categories.map do |category|
       tags_for_category(category).map(&:name).join(" ")
     end.compact_blank.join(" \n")
   end
 
-  def humanized_essential_tag_string(category_list: TagCategory::HUMANIZED_LIST, default: "")
+  def humanized_essential_tag_string(category_list: TagCategory.formatted, default: "")
     @humanized_essential_tag_string ||= begin
       strings = category_list.map do |category|
-        mapping = TagCategory.get(category)
-        max_tags = mapping.limit || 0
-        regexmap = mapping.regex || //
-        formatstr = mapping.formatstr || "%s"
-        excluded_tags = mapping.exclusion || []
+        category = TagCategory.get(category)
+        next if category.nil?
+        max_tags = category.format_limit || 0
+        formatstr = category.format_string.presence || "%s"
 
-        type_tags = tags_for_category(category).map(&:name) - excluded_tags
+        type_tags = tags_for_category(category).map(&:name) - category.format_exclusion
         next if type_tags.empty?
 
         if max_tags > 0 && type_tags.length > max_tags
           type_tags = type_tags.sort_by { |x| -x.size }.take(max_tags) + ["etc"]
         end
 
-        if regexmap != //
-          type_tags = type_tags.map { |tag| tag.match(regexmap)[1] }
+        if category.format_regexp
+          type_tags = type_tags.map { |tag| tag.match(category.format_regexp)&.[](1) || tag }
         end
 
-        if category == "copyright" && tags_for_category("character").blank?
+        if category.id == TagCategory.copyright && tags_for_category(TagCategory.character).blank?
           type_tags.to_sentence
         else
           formatstr % type_tags.to_sentence
@@ -154,13 +152,13 @@ class TagSetPresenter < ApplicationPresenter
     html = []
     by_category = tags.group_by(&:category)
 
-    TagCategory::SPLIT_HEADER_LIST.each do |category|
-      typetags = by_category[TagCategory.mapping[category.downcase]] || []
+    TagCategory.categories.each do |category|
+      typetags = by_category[category.id] || []
       next unless typetags.any?
 
-      html << h.tag.h2(TagCategory.get(category).header, class: "#{category}-tag-list-header tag-list-header", data: { category: category })
+      html << h.tag.h2(category.header, class: "#{category.name}-tag-list-header tag-list-header", data: { category: category.name })
       list_items = typetags.map { |tag| build_list_item(tag, current_query: current_query, highlight: highlighted_tags.include?(tag.name), followed: followed_tags.include?(tag.name)) }
-      html << h.tag.ul(safe_join(list_items), class: "#{category}-tag-list")
+      html << h.tag.ul(safe_join(list_items), class: "#{category.name}-tag-list")
     end
 
     safe_join(html)
@@ -174,9 +172,11 @@ class TagSetPresenter < ApplicationPresenter
     @tags_by_category ||= ordered_tags.group_by(&:category)
   end
 
-  def tags_for_category(category_name)
-    category = TagCategory.mapping[category_name.downcase]
-    tags_by_category[category] || []
+  # accepts anything TagCategory.get does
+  def tags_for_category(category)
+    category = TagCategory.get(category)
+    return [] if category.nil?
+    tags_by_category[category.id] || []
   end
 
   def ordered_tags

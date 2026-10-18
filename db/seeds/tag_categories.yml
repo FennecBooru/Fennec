@@ -1,0 +1,87 @@
+# The categories a new site starts with, see TagCategory.create_defaults!
+# Colors are the ones from before categories were dynamic.
+- id: 0
+  name: general
+  aliases: [gen]
+  color: "#b4c7d9"
+  color_alt: "#2e76b4"
+  position: 8
+  is_default: true
+- id: 1
+  name: artist
+  aliases: [art]
+  header: Artists
+  color: "#f2ac08"
+  color_alt: "#fbd67f"
+  position: 2
+  format_position: 2
+  format_string: created by %s
+  format_exclusion: [avoid_posting, conditional_dnp, epilepsy_warning, sound_warning]
+- id: 2
+  name: contributor
+  aliases: [cont]
+  header: Contributors
+  color: "#c0c0c0"
+  color_alt: "#71706e"
+  position: 3
+  suffixes: [va, modeler]
+- id: 3
+  name: copyright
+  aliases: [copy, co]
+  header: Copyrights
+  color: "#d0d"
+  color_alt: "#ff5eff"
+  position: 4
+  format_position: 1
+  format_string: (%s)
+  format_limit: 1
+- id: 4
+  name: character
+  aliases: [char, ch, oc]
+  header: Characters
+  color: "#0a0"
+  color_alt: "#2bff2b"
+  position: 5
+  format_position: 0
+  format_regex: ^(.+?)(?:_\(.+\))?$
+  format_limit: 5
+- id: 5
+  name: species
+  aliases: [spec]
+  color: "#ed5d1f"
+  color_alt: "#f6b295"
+  position: 6
+- id: 6
+  name: invalid
+  aliases: [inv]
+  color: "#ff3d3d"
+  color_alt: "#ffbdbd"
+  position: 1
+  min_level: 40 # admin
+- id: 7
+  name: meta
+  color: "#fff"
+  color_alt: "#666"
+  position: 9
+  min_level: 40 # admin
+- id: 8
+  name: lore
+  aliases: [lor]
+  color: "#282"
+  color_alt: "#5fdb5f"
+  position: 10
+  min_level: 40 # admin
+  suffixes: [lore]
+- id: 9
+  name: gender
+  color: "#dad88b"
+  color_alt: "#ede660"
+  position: 7
+  min_level: 40 # admin
+- id: 10
+  name: important
+  aliases: [imp]
+  color: "#58f0f7"
+  color_alt: "#89f4f9"
+  position: 0
+  min_level: 40 # admin

@@ -6,7 +6,7 @@
 # PostSearch::FormParser does the reverse, for pre-filling the form from an existing search.
 module PostSearch
   module Fields
-    mattr_accessor(:fields, default: [])
+    mattr_accessor(:static_fields, default: [])
     mattr_accessor(:categories, default: [])
 
     Field = Struct.new(:type, :category, :metatag, :name, :hint, :negatable, :options, :input_options, keyword_init: true) do
@@ -21,11 +21,21 @@ module PostSearch
       def dom_id
         "search_#{metatag}"
       end
+
+      # options can be a proc, for ones that depend on tag categories
+      def options
+        value = self[:options]
+        value.respond_to?(:call) ? value.call : value
+      end
+
+      def to_h
+        super.merge(options: options)
+      end
     end
 
     module Methods
       def add_field(type, metatag, category:, name: metatag.to_s.titleize, hint: nil, negatable: false, options: nil, input_options: {})
-        fields << Field.new(type: type, category: category, metatag: metatag, name: name, hint: hint, negatable: negatable, options: options, input_options: input_options)
+        static_fields << Field.new(type: type, category: category, metatag: metatag, name: name, hint: hint, negatable: negatable, options: options, input_options: input_options)
       end
 
       def add_text_field(metatag, **)
@@ -78,6 +88,14 @@ module PostSearch
         mod.module_eval(&block)
       end
 
+      # The tag category count fields depend on which categories exist, so they're added here
+      def fields
+        static_fields + TagCategory.categories.map do |category|
+          short_name = category.aliases.first || category.name
+          Field.new(type: :range, category: "Scores & Counts", metatag: :"#{short_name}tags", name: "#{category.title} Tag Count", negatable: true, input_options: {})
+        end
+      end
+
       def fields_for(category_name)
         fields.select { |f| f.category == category_name }
       end
@@ -94,7 +112,7 @@ module PostSearch
     LOCKED_OPTIONS = [%w[Rating rating], %w[Note note], %w[Status status]].freeze
     CHILD_OPTIONS = [%w[Any any], %w[None none]].freeze
     FILETYPE_OPTIONS = Post::EXTENSIONS.map { |ext| [ext.upcase, ext] }.freeze
-    ORDER_OPTIONS = TagQuery::ORDER_METATAGS.map { |o| [o.tr("_", " ").titleize, o] }.freeze
+    ORDER_OPTIONS = -> { TagQuery.order_metatags.map { |o| [o.tr("_", " ").titleize, o] } }
 
     category("Rating & Status") do
       add_select_field(:rating, RATING_OPTIONS, negatable: true, hint: "Leave blank for any rating")
@@ -129,12 +147,6 @@ module PostSearch
       add_range_field(:tagcount, negatable: true, name: "Tag Count")
       add_range_field(:comment_count, negatable: true, name: "Comment Count")
       add_range_field(:change, negatable: true, name: "Change Sequence")
-
-      TagCategory::CATEGORIZED_LIST.each do |cat|
-        category_obj = TagCategory.get(cat)
-        short_name = category_obj.aliases.first || cat
-        add_range_field(:"#{short_name}tags", negatable: true, name: "#{category_obj.title} Tag Count")
-      end
     end
 
     category("Dates") do

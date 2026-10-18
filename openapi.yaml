@@ -77,6 +77,11 @@ x-constants:
     - tag_alias_update
     - tag_implication_create
     - tag_implication_update
+    - tag_category_create
+    - tag_category_delete
+    - tag_category_tags_transfer
+    - tag_categories_reorder
+    - tag_category_update
     - takedown_process
     - takedown_delete
     - ticket_claim
@@ -142,6 +147,7 @@ x-constants:
     - SiteAsset
     - TagAlias
     - TagImplication
+    - TagCategory
     - Takedown
     - Ticket
     - UploadWhitelist
@@ -204,18 +210,6 @@ x-constants:
     - s
     - q
     - e
-  - &tag-categories
-    - 0 # general
-    - 1 # artist
-    - 2 # contributor
-    - 3 # copyright
-    - 4 # character
-    - 5 # species
-    - 6 # invalid
-    - 7 # meta
-    - 8 # lore
-    - 9 # gender
-    - 10 # important
   - &feedback-categories
     - negative
     - neutral
@@ -1567,7 +1561,7 @@ components:
         name:
           type: string
           description: |
-            Valid for: `help_create`, `help_delete`, `help_update`, `site_asset_create`, `site_asset_delete`, `site_asset_update`, `rule_create`, `rule_delete`, `rule_update`, `rule_category_create`, `rule_category_delete`, `rule_category_update`
+            Valid for: `help_create`, `help_delete`, `help_update`, `site_asset_create`, `site_asset_delete`, `site_asset_update`, `rule_create`, `rule_delete`, `rule_update`, `rule_category_create`, `rule_category_delete`, `rule_category_update`, `tag_category_create`, `tag_category_delete`, `tag_category_update`
         domain:
           type: string
           description: |
@@ -1575,7 +1569,7 @@ components:
         total:
           type: number
           description: |
-            Valid for: `post_deletion_reasons_reorder`, `post_replacement_rejection_reasons_reorder`, `rules_reorder`, `rule_categories_reorder`, `quick_rules_reorder`
+            Valid for: `post_deletion_reasons_reorder`, `post_replacement_rejection_reasons_reorder`, `rules_reorder`, `rule_categories_reorder`, `quick_rules_reorder`, `tag_categories_reorder`, `tag_category_tags_transfer`
         query:
           type: string
           description: |
@@ -1663,7 +1657,7 @@ components:
         old_name:
           type: string
           description: |
-            Valid for: `artist_rename`, `rule_update`, `rule_category_update`
+            Valid for: `artist_rename`, `rule_update`, `rule_category_update`, `tag_category_update`
         duration:
           type: string
           description: |
@@ -1771,11 +1765,11 @@ components:
         category_name:
           type: string
           description: |
-            Valid for: `rule_create`, `rule_delete`, `rule_update`
+            Valid for: `rule_create`, `rule_delete`, `rule_update`, `tag_category_tags_transfer`
         old_category_name:
           type: string
           description: |
-            Valid for: `rule_update`
+            Valid for: `rule_update`, `tag_category_tags_transfer`
         prompt:
           type: string
           description: |
@@ -2918,7 +2912,7 @@ components:
           type: string
         category_id:
           type: number
-          enum: *tag-categories
+          description: A tag category id, see /tags/categories.json
     RecordBuilder:
       type: object
       required:
@@ -3407,7 +3401,7 @@ components:
           type: number
         category:
           type: number
-          enum: *tag-categories
+          description: A tag category id, see /tags/categories.json
         related_tags:
           type: array
           items:
@@ -3541,10 +3535,10 @@ components:
             - alias
         tagTypeA:
           type: ["number", "null"]
-          enum: *tag-categories
+          description: A tag category id, see /tags/categories.json
         tagTypeB:
           type: ["number", "null"]
-          enum: *tag-categories
+          description: A tag category id, see /tags/categories.json
     TagVersion:
       type: object
       required:
@@ -3567,7 +3561,7 @@ components:
           format: date-time
         category:
           type: number
-          enum: *tag-categories
+          description: A tag category id, see /tags/categories.json
         is_locked:
           type: boolean
         tag_id:
@@ -3950,7 +3944,7 @@ components:
           type: string
         category_id:
           type: number
-          enum: *tag-categories
+          description: A tag category id, see /tags/categories.json
         protection_level:
           type: ["number", "null"]
     WikiPageVersion:
@@ -12152,7 +12146,7 @@ paths:
           name: search[category]
           schema:
             type: number
-            enum: *tag-categories
+            description: A tag category id, see /tags/categories.json
         - in: query
           name: search[hide_empty]
           schema:
@@ -12221,7 +12215,7 @@ paths:
               properties:
                 category:
                   type: number
-                  enum: *tag-categories
+                  description: A tag category id, see /tags/categories.json
                 reason:
                   type: string
                 is_locked:
@@ -12487,12 +12481,12 @@ paths:
           name: search[antecedent_tag_category]
           schema:
             type: number
-            enum: *tag-categories
+            description: A tag category id, see /tags/categories.json
         - in: query
           name: search[consequent_tag_category]
           schema:
             type: number
-            enum: *tag-categories
+            description: A tag category id, see /tags/categories.json
         - in: query
           name: search[creator_id]
           schema:
@@ -12694,12 +12688,12 @@ paths:
           name: search[antecedent_tag_category]
           schema:
             type: number
-            enum: *tag-categories
+            description: A tag category id, see /tags/categories.json
         - in: query
           name: search[consequent_tag_category]
           schema:
             type: number
-            enum: *tag-categories
+            description: A tag category id, see /tags/categories.json
         - in: query
           name: search[creator_id]
           schema:
@@ -12872,7 +12866,7 @@ paths:
           in: query
           schema:
             type: number
-            enum: *tag-categories
+            description: A tag category id, see /tags/categories.json
       responses:
         200:
           description: Success
@@ -12902,7 +12896,7 @@ paths:
                   type: string
                 category_id:
                   type: number
-                  enum: *tag-categories
+                  description: A tag category id, see /tags/categories.json
       responses:
         200:
           description: Success

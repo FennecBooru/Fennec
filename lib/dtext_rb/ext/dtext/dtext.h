@@ -122,6 +122,9 @@ struct DTextOptions {
 
   // Links to these domains are converted to shortlinks (used so links to https://danbooru.donmai.us/posts/1234 are converted to post #1234).
   std::unordered_set<std::string> internal_domains;
+
+  // Lowercase names that [color=name] turns into a dtext-color-name class instead of a css color (used for tag categories).
+  std::unordered_set<std::string> color_names;
 };
 
 class StateMachine {

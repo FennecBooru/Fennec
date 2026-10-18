@@ -342,7 +342,8 @@ class BulkUpdateRequestCommandsTest < ActiveSupport::TestCase
       should("process") do
         approve!(@bur, @admin)
 
-        assert_equal("#{@tag.name} #{@tag2.name}", @post.reload.tag_string)
+        # tag strings are sorted, and the factory's numbered names don't always sort in creation order
+        assert_equal([@tag.name, @tag2.name].sort.join(" "), @post.reload.tag_string)
       end
 
       should("fail to process if invalid") do

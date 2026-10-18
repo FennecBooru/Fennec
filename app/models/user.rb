@@ -59,7 +59,8 @@ class User < ApplicationRecord
 
     def self.level_class(level)
       level = id_to_name(level) if level.is_a?(Integer)
-      "user-#{level.downcase}"
+      # parameterize so Former Staff is user-former-staff, like the styles expect
+      "user-#{level.parameterize}"
     end
 
     def self.max_level

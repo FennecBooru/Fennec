@@ -22,6 +22,9 @@ class ApplicationJob < ActiveJob::Base
   # (low/variants/eris/followers: 1, tags: 2, default: 3, high: 5) as a fixed priority ordering.
   QUEUE_PRIORITIES = { high: -20, default: 0, tags: 10 }.freeze
 
+  # RequestStore is only cleared between requests, so cached things like tag categories would go stale in workers
+  before_perform { RequestStore.clear! }
+
   before_enqueue do |job|
     job.priority ||= QUEUE_PRIORITIES.fetch(job.queue_name.to_sym, 20)
   end

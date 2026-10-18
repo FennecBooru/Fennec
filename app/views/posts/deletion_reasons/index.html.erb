@@ -48,5 +48,5 @@
 
 <%= javascript_tag(nonce: true) do -%>
   const spacing = $(`<%= render(partial: "spacing") %>`);
-  Danbooru.PostDeletionReasons.init(spacing);
+  Danbooru.SortableTable.init({ table: "#post-deletion-reasons-table", url: "<%= reorder_post_deletion_reasons_path(format: :json) %>", spacing });
 <% end %>

@@ -27,6 +27,8 @@ class ChangeSeqTest < ActiveSupport::TestCase
       [*current.split, SecureRandom.hex(4)].sort.join(" ")
     when :typed_tag_string
       [*current.split, "0|#{SecureRandom.hex(4)}"].sort.join(" ")
+    when :tag_category_data
+      current.merge("0" => current["0"].to_i + 1)
     when :character_groups
       [*current, { "tags" => [SecureRandom.hex(4)] }]
     when :pool_ids, :public_set_ids
@@ -58,7 +60,7 @@ class ChangeSeqTest < ActiveSupport::TestCase
     context("change_seq") do
       setup do
         # columns which would be reset by callbacks
-        @force_columns = %i[comment_count tag_count_general tag_count_artist tag_count_contributor tag_count_character tag_count_copyright tag_count_meta tag_count_species tag_count_invalid tag_count_lore tag_count_gender tag_count_important typed_tag_string]
+        @force_columns = %i[comment_count tag_category_data typed_tag_string]
         @post = create(:webm_post)
       end
 

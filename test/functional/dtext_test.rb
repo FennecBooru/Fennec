@@ -515,10 +515,24 @@ class DtextTest < ActiveSupport::TestCase
         end
 
         context("named") do
-          [*TagCategory.mapping.keys.map { |k| k.tr("_", "-") }, *Post::Ratings.map.keys, *Post::Ratings.map.values].each do |name|
+          [*Post::Ratings.map.keys, *Post::Ratings.map.values].each do |name|
             should("parse #{name}") do
               assert_parse_dtext(%(<p><span class="dtext-color-#{name}">test</span></p>), "[color=#{name}]test[/color]", allow_color: true)
             end
+          end
+
+          # categories only exist once a test starts
+          should("parse every tag category name and alias") do
+            TagCategory.mapping.each_key do |name|
+              assert_equal(%(<p><span class="dtext-color-#{name}">test</span></p>), DTextHelper.format_text("[color=#{name}]test[/color]", allow_color: true))
+            end
+          end
+
+          should("parse new tag categories") do
+            create(:tag_category, name: "brandnew", aliases: %w[bn])
+
+            assert_equal(%(<p><span class="dtext-color-brandnew">test</span></p>), DTextHelper.format_text("[color=brandnew]test[/color]", allow_color: true))
+            assert_equal(%(<p><span class="dtext-color-bn">test</span></p>), DTextHelper.format_text("[color=BN]test[/color]", allow_color: true))
           end
         end
       end

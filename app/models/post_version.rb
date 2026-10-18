@@ -177,7 +177,7 @@ class PostVersion < ApplicationRecord
     categories = Tag.categories_for(character_groups.flat_map { |g| Array(g["tags"]) })
     character_groups.each_with_object({}) do |g, map|
       tags = Array(g["tags"])
-      characters = tags.select { |t| categories[t] == TagCategory::CHARACTER.id }.sort
+      characters = tags.select { |t| TagCategory.character && categories[t] == TagCategory.character }.sort
       next if characters.empty?
       label = characters.join(" ")
       tags.each { |t| map[t] = label }
@@ -191,7 +191,7 @@ class PostVersion < ApplicationRecord
     categories = Tag.categories_for(character_groups.flat_map { |g| Array(g["tags"]) })
     character_groups.filter_map do |g|
       tags = Array(g["tags"])
-      tags.any? { |t| categories[t] == TagCategory::CHARACTER.id } ? nil : tags
+      tags.any? { |t| TagCategory.character && categories[t] == TagCategory.character } ? nil : tags
     end
   end
 

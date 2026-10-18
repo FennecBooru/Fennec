@@ -71,8 +71,9 @@ class TagsControllerTest < ActionDispatch::IntegrationTest
         asserts do
           search(:is_locked, "true").records { [@deprecated_tag, @artist_tag] }
           search(:is_deprecated, "true").records { [@deprecated_tag] }
-          search(:category, TagCategory.general).records { [@deprecated_tag, @general_tag] }
-          search(:category, "#{TagCategory.general},#{TagCategory.artist}").records { [@deprecated_tag, @artist_tag, @general_tag] }
+          # categories only exist once a test starts, so these are looked up lazily
+          search(:category, -> { TagCategory.general }).name("general").records { [@deprecated_tag, @general_tag] }
+          search(:category, -> { "#{TagCategory.general},#{TagCategory.artist}" }).name("general,artist").records { [@deprecated_tag, @artist_tag, @general_tag] }
           search(:name, "foo").records { [@general_tag] }
           search(:name_matches, "bar").records { [@artist_tag] }
           search(:fuzzy_name_matches, "ba").records { [@copyright_tag, @artist_tag] }
@@ -176,8 +177,8 @@ class TagsControllerTest < ActionDispatch::IntegrationTest
 
       context("access control") do
         asserts do
-          access.gte(User::Levels::MEMBER).put { tag_path(@tag) }.params({ tag: { category: TagCategory.general } }).success(:redirect)
-          access.gte(User::Levels::MEMBER).json.put { tag_path(@tag) }.params({ tag: { category: TagCategory.general } })
+          access.gte(User::Levels::MEMBER).put { tag_path(@tag) }.params { { tag: { category: TagCategory.general } } }.success(:redirect)
+          access.gte(User::Levels::MEMBER).json.put { tag_path(@tag) }.params { { tag: { category: TagCategory.general } } }
         end
       end
     end

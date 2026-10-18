@@ -83,41 +83,10 @@ body {
   --color-user-admin-alt:         #9d6703;
   --color-user-owner:             #da70d6;
   --color-user-owner-alt:         #{darken(#da70d6, 10%)};
+  --color-user-locked:            #808080;
+  --color-user-locked-alt:        #{lighten(#808080, 10%)};
 
-  // Tag Categories
-  --color-tag-general:            #b4c7d9;
-  --color-tag-general-alt:        #2e76b4;
-
-  --color-tag-contributor:        #c0c0c0;
-  --color-tag-contributor-alt:    #71706e;
-
-  --color-tag-artist:             #f2ac08;
-  --color-tag-artist-alt:         #fbd67f;
-
-  --color-tag-copyright:          #d0d;
-  --color-tag-copyright-alt:      #ff5eff;
-
-  --color-tag-character:          #0a0;
-  --color-tag-character-alt:      #2bff2b;
-
-  --color-tag-species:            #ed5d1f;
-  --color-tag-species-alt:        #f6b295;
-
-  --color-tag-invalid:            #ff3d3d;
-  --color-tag-invalid-alt:        #{lighten(#ff3d3d, 25%)};
-
-  --color-tag-meta:               #fff;
-  --color-tag-meta-alt:           #666;
-
-  --color-tag-lore:               #282;
-  --color-tag-lore-alt:           #5fdb5f;
-
-  --color-tag-gender:             #dad88b;
-  --color-tag-gender-alt:         #ede660;
-
-  --color-tag-important:          #58f0f7;
-  --color-tag-important-alt:      #{lighten(#58f0f7, 10%)};
-
+  // Tag category colors come from Tags::CategoriesController#styles
   --color-tag-pool:               wheat;
   --color-tag-pool-alt:           #d0b27a;
 

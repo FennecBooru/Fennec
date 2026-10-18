@@ -1,39 +1,10 @@
 
 
-@each $tag-category, $tag-category-name in $tag-categories {
-  .tag-type-#{$tag-category},
-  .category-#{$tag-category} a,
-  .ui-widget-content .category-#{$tag-category} a,
-  .ui-widget-content a.tag-type-#{$tag-category} {
+// category colors come from Tags::CategoriesController#styles
 
-    &, &:link, &:visited {
-      color: themed("color-tag-#{$tag-category-name}");
-    }
-
-    &:hover {
-      color: themed("color-tag-#{$tag-category-name}-alt");
-    }
-
-    &.selected {
-      color: $tag-selected-color;
-    }
-  }
-
-  .ui-widget-content .ui-state-active a.tag-type-#{$tag-category} {
-    color: themed("color-tag-#{$tag-category-name}-alt");
-
-    &:link, &:visited {
-      color: themed("color-tag-#{$tag-category-name}");
-    }
-
-    &:hover {
-      color: themed("color-tag-#{$tag-category-name}-alt");
-    }
-
-    &.selected {
-      color: $tag-selected-color;
-    }
-  }
+.tag-category-code-warning {
+  color: palette("text-yellow");
+  margin-left: 0.25em;
 }
 
 .deprecated-tag-icon {

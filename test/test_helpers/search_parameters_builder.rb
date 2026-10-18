@@ -84,7 +84,7 @@ module TestHelpers
 
     def build
       on_build.presence&.call
-      @name = "<value>" if @value.is_a?(Proc)
+      @name ||= "<value>" if @value.is_a?(Proc)
       return build_shared if @shared
       param = @param
       value = @value

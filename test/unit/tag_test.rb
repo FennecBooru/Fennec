@@ -110,11 +110,20 @@ class TagTest < ActiveSupport::TestCase
     end
 
     context("not be settable to an invalid category") do
-      subject do
-        Tag.new(creator: create(:owner_user))
-      end
+      # categories only exist once the test has started, so this can't use validate_inclusion_of
+      should("only allow existing categories") do
+        user = create(:owner_user)
+        TagCategory.ids.each do |id|
+          tag = build(:tag, category: id, creator: user)
+          tag.valid?
 
-      should(validate_inclusion_of(:category).in_array(TagCategory.ids))
+          assert_not_includes(tag.errors[:category], "is not a tag category", "category #{id} should be allowed")
+        end
+        tag = build(:tag, category: 9999, creator: user)
+
+        assert_not(tag.valid?)
+        assert_includes(tag.errors[:category], "is not a tag category")
+      end
     end
 
     should("create a version upon creation") do
@@ -297,9 +306,10 @@ class TagTest < ActiveSupport::TestCase
       # Valid: parentheses properly ordered and balanced even across multiple segments
       should(allow_value("foo_(bar)_baz_(qux)").for(:name).on(:create))
 
-      metatags = TagQuery::METATAGS + TagCategory.mapping.keys
-      metatags.each do |metatag|
-        should_not(allow_value("#{metatag}:foo").for(:name).on(:create))
+      should("not allow names starting with a metatag or category prefix") do
+        (TagQuery.metatags + TagCategory.mapping.keys).each do |metatag|
+          assert_not(build(:tag, name: "#{metatag}:foo").valid?, "#{metatag}:foo should be invalid")
+        end
       end
     end
   end

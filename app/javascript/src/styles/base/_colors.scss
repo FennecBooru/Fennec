@@ -159,36 +159,6 @@ $tags-vote-up-color: green;
 // Users
 $user-home-greeting-color: gold;
 
-$tag-categories: (
-  "0": "general",
-  "1": "artist",
-  "2": "contributor",
-  "3": "copyright",
-  "4": "character",
-  "5": "species",
-  "6": "invalid",
-  "7": "meta",
-  "8": "lore",
-  "9": "gender",
-  "10": "important"
-);
-
-$tag-categories-short: (
-  "gen": "general",
-  "art": "artist",
-  "cont": "contributor",
-  "copy": "copyright",
-  "co": "copyright",
-  "char": "character",
-  "ch": "character",
-  "oc": "character",
-  "spec": "species",
-  "inv": "invalid",
-  "meta": "meta",
-  "lor": "lore",
-  "imp": "important"
-);
-
 $ratings: (
   "s": "safe",
   "q": "questionable",

@@ -1,4 +1,5 @@
 $levels: (
+  "anonymous"
   "banned"
   "restricted"
   "member"
@@ -9,6 +10,7 @@ $levels: (
   "system"
   "admin"
   "owner"
+  "locked"
 );
 
 @each $level in $levels {
@@ -26,7 +28,7 @@ $levels: (
     text-decoration: line-through;
   }
 
-  &.user-trusted, &.user-former-staff, &.user-janitor, &.user-moderator, &.user-system, &.user-admin, &.user-owner {
+  &.user-trusted, &.user-former-staff, &.user-janitor, &.user-moderator, &.user-system, &.user-admin, &.user-owner, &.user-locked {
     font-weight: bold;
   }
 }

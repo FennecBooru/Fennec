@@ -16,7 +16,7 @@ module BulkUpdateRequestCommands
     end
 
     def category_exists
-      errors.add(:base, "invalid category") unless TagCategory.category_names.include?(category.downcase)
+      errors.add(:base, "invalid category") unless TagCategory.mapping.key?(category.downcase)
     end
 
     def estimate_update_count

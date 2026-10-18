@@ -12,12 +12,9 @@
         <div class="related-tag-functions">
             Related:
             <a href="#" @click.prevent="findRelated()">Tags</a> |
-            <a href="#" @click.prevent="findRelated(1)">Artists</a> |
-            <a href="#" @click.prevent="findRelated(2)">Contributors</a> |
-            <a href="#" @click.prevent="findRelated(3)">Copyrights</a> |
-            <a href="#" @click.prevent="findRelated(4)">Characters</a> |
-            <a href="#" @click.prevent="findRelated(5)">Species</a> |
-            <a href="#" @click.prevent="findRelated(7)">Metatags</a> |
+            <template v-for="category in relatedCategories" :key="category.id">
+                <a href="#" @click.prevent="findRelated(category.id)">{{ category.header }}</a> |
+            </template>
             <a href="#" @click.prevent="previewFinalTags">Preview Final Tags</a>
         </div>
         <div>
@@ -51,6 +48,8 @@
     },
     data() {
       return {
+        // every category but the default, which "Tags" already covers
+        relatedCategories: (Autocomplete.TAG_CATEGORY_DATA.categories || []).filter(category => category.id !== Autocomplete.TAG_CATEGORY_DATA.default_id),
         preview: {
           loading: false,
           show: false,

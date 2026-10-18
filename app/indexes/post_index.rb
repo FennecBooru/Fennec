@@ -33,8 +33,10 @@ module PostIndex
         },
       },
       mappings: {
-        dynamic:    false,
-        properties: {
+        dynamic:           false,
+        # tag_category_counts is keyed by category id, so new categories need no mapping change
+        dynamic_templates: [{ tag_category_counts: { path_match: "tag_category_counts.*", mapping: { type: "integer" } } }],
+        properties:        {
           created_at:               { type: "date" },
           updated_at:               { type: "date" },
           commented_at:             { type: "date" },
@@ -48,17 +50,7 @@ module PostIndex
           tag_count:                { type: "integer" },
           change_seq:               { type: "long" },
 
-          tag_count_general:        { type: "integer" },
-          tag_count_artist:         { type: "integer" },
-          tag_count_character:      { type: "integer" },
-          tag_count_copyright:      { type: "integer" },
-          tag_count_meta:           { type: "integer" },
-          tag_count_species:        { type: "integer" },
-          tag_count_invalid:        { type: "integer" },
-          tag_count_lore:           { type: "integer" },
-          tag_count_contributor:    { type: "integer" },
-          tag_count_gender:         { type: "integer" },
-          tag_count_important:      { type: "integer" },
+          tag_category_counts:      { type: "object", dynamic: true },
           comment_count:            { type: "integer" },
           disapproval_count:        { type: "integer" },
 
@@ -300,17 +292,7 @@ module PostIndex
       tag_count:                tag_count,
       change_seq:               change_seq,
 
-      tag_count_general:        tag_count_general,
-      tag_count_artist:         tag_count_artist,
-      tag_count_character:      tag_count_character,
-      tag_count_copyright:      tag_count_copyright,
-      tag_count_meta:           tag_count_meta,
-      tag_count_species:        tag_count_species,
-      tag_count_lore:           tag_count_lore,
-      tag_count_invalid:        tag_count_invalid,
-      tag_count_contributor:    tag_count_contributor,
-      tag_count_gender:         tag_count_gender,
-      tag_count_important:      tag_count_important,
+      tag_category_counts:      tag_category_data,
       comment_count:            options_or_get.call(:comment_count, -> { comment_count }),
       disapproval_count:        options_or_get.call(:disapproval_count, -> { ::PostDisapproval.where(post_id: id).pluck(:user_id).size }),
 

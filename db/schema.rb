@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_10_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_031322) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -26,7 +26,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_090000) do
     t.string "appeal_notice_wiki_page", default: "internal:appeal_notice", null: false
     t.integer "artist_edit_limit", default: 25, null: false
     t.integer "artist_edit_limit_bypass", default: 15, null: false
-    t.text "artist_exclusion_tags", default: "avoid_posting, conditional_dnp, epilepsy_warning, sound_warning", null: false
     t.string "artist_tag_placeholder", default: "artist_name, unknown_artist, anonymous_artist etc.", null: false
     t.integer "audio_track_per_day_limit", default: 2, null: false
     t.integer "audio_track_per_day_limit_bypass", default: 20, null: false
@@ -52,7 +51,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_090000) do
     t.string "contact_email", default: "admin@gayfur.city", null: false
     t.string "contact_wiki_page", default: "help:contact", null: false
     t.string "content_tag_placeholder", default: "cub scatplay watersports diaper my_little_pony vore rape hyper etc.", null: false
-    t.text "contributor_suffixes", default: "va, modeler", null: false
     t.integer "custom_style_max_size", default: 500000, null: false
     t.boolean "db_exports_enabled", default: false, null: false
     t.string "default_blacklist", default: "", null: false
@@ -94,7 +92,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_090000) do
     t.integer "hourly_upload_limit", default: 30, null: false
     t.jsonb "image_height", default: {"max" => 40000, "min" => 300}, null: false
     t.jsonb "image_width", default: {"max" => 40000, "min" => 300}, null: false
-    t.text "lore_suffixes", default: "lore", null: false
     t.jsonb "mascot_height", default: {"max" => 1000, "min" => 250}, null: false
     t.jsonb "mascot_width", default: {"max" => 1000, "min" => 250}, null: false
     t.jsonb "max_domain_icon_file_sizes", default: {"gif" => 256, "jpg" => 256, "png" => 256, "webp" => 256}, null: false
@@ -1404,18 +1401,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_090000) do
     t.string "rating", limit: 1, default: "q", null: false
     t.integer "score", default: 0, null: false
     t.string "source", null: false
+    t.jsonb "tag_category_data", default: {}, null: false
     t.integer "tag_count", default: 0, null: false
-    t.integer "tag_count_artist", default: 0, null: false
-    t.integer "tag_count_character", default: 0, null: false
-    t.integer "tag_count_contributor", default: 0, null: false
-    t.integer "tag_count_copyright", default: 0, null: false
-    t.integer "tag_count_gender", default: 0, null: false
-    t.integer "tag_count_general", default: 0, null: false
-    t.integer "tag_count_important", default: 0, null: false
-    t.integer "tag_count_invalid", default: 0, null: false
-    t.integer "tag_count_lore", default: 0, null: false
-    t.integer "tag_count_meta", default: 0, null: false
-    t.integer "tag_count_species", default: 0, null: false
     t.text "tag_string", default: "", null: false
     t.integer "thumbnail_frame"
     t.string "typed_tag_string", default: "", null: false
@@ -1591,6 +1578,37 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_090000) do
     t.index ["updater_id"], name: "index_tag_aliases_on_updater_id"
   end
 
+  create_table "tag_categories", id: :integer, default: nil, force: :cascade do |t|
+    t.string "aliases", default: [], null: false, array: true
+    t.string "color", null: false
+    t.string "color_alt", null: false
+    t.datetime "created_at", null: false
+    t.bigint "creator_id", null: false
+    t.inet "creator_ip_addr", null: false
+    t.string "display", null: false
+    t.string "format_exclusion", default: [], null: false, array: true
+    t.integer "format_limit"
+    t.integer "format_position"
+    t.string "format_regex"
+    t.string "format_string"
+    t.string "header", null: false
+    t.boolean "is_default", default: false, null: false
+    t.boolean "is_deleted", default: false, null: false
+    t.integer "min_level", default: 0, null: false
+    t.string "name", null: false
+    t.integer "position"
+    t.string "suffixes", default: [], null: false, array: true
+    t.integer "tag_count", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.bigint "updater_id", null: false
+    t.inet "updater_ip_addr", null: false
+    t.index "lower((name)::text)", name: "index_tag_categories_on_lower_name", unique: true, where: "(NOT is_deleted)"
+    t.index ["creator_id"], name: "index_tag_categories_on_creator_id"
+    t.index ["is_default"], name: "index_tag_categories_on_is_default", unique: true, where: "is_default"
+    t.index ["updater_id"], name: "index_tag_categories_on_updater_id"
+    t.unique_constraint ["position"], deferrable: :deferred, name: "tag_categories_position_unique"
+  end
+
   create_table "tag_followers", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "last_post_id"
@@ -1649,7 +1667,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_090000) do
   end
 
   create_table "tags", force: :cascade do |t|
-    t.integer "category", limit: 2, default: 0, null: false
+    t.integer "category", limit: 2, null: false
     t.datetime "created_at", precision: nil, null: false
     t.bigint "creator_id", null: false
     t.inet "creator_ip_addr", null: false
@@ -2161,6 +2179,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_090000) do
   add_foreign_key "tag_aliases", "users", column: "approver_id"
   add_foreign_key "tag_aliases", "users", column: "creator_id"
   add_foreign_key "tag_aliases", "users", column: "updater_id"
+  add_foreign_key "tag_categories", "users", column: "creator_id"
+  add_foreign_key "tag_categories", "users", column: "updater_id"
   add_foreign_key "tag_followers", "posts", column: "last_post_id"
   add_foreign_key "tag_followers", "tags"
   add_foreign_key "tag_followers", "users"
