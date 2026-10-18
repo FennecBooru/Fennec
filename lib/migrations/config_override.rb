@@ -23,16 +23,40 @@ module Migrations
           end
         end
         return yield(klass) if block_given?
-        Object.send(:remove_const, model) if Object.constants.include?(model)
-        Object.const_set(model, klass)
+        # only swapped in while the migration runs, migrations are loaded well before then
+        config_overrides[model] = klass
         klass
       end
 
       def with_admin_config_override!(&)
         with_config_override!("admin_config", :AdminConfig, &)
       end
+
+      def config_overrides
+        @config_overrides ||= {}
+      end
+    end
+
+    def exec_migration(...)
+      overrides = self.class.config_overrides
+      return super if overrides.empty?
+
+      originals = overrides.keys.index_with { |model| Object.const_get(model) if Object.const_defined?(model, false) }
+      overrides.each { |model, klass| replace_const(model, klass) }
+      begin
+        super
+      ensure
+        originals.each { |model, original| replace_const(model, original) }
+      end
+    end
+
+    private
+
+    def replace_const(model, value)
+      Object.send(:remove_const, model) if Object.const_defined?(model, false)
+      Object.const_set(model, value) unless value.nil?
     end
   end
 
-  ActiveRecord::Migration.include(ConfigOverride)
+  ActiveRecord::Migration.prepend(ConfigOverride)
 end
