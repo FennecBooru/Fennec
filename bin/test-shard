@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Prints the test files for one of several CI jobs, balanced by how long each file took last time.
+#
+#   bin/test-shard INDEX TOTAL [RUNTIME_LOG]
+#
+# INDEX starts at 1. The log has "path:seconds" lines (see test/support/runtime_log_reporter.rb).
+# Files missing from it are weighed by their size, so the split still works without one.
+# Every job has to be given the same log, or files can be run twice or not at all.
+
+index, total, log = ARGV
+abort("usage: bin/test-shard INDEX TOTAL [RUNTIME_LOG]") if index.nil? || total.nil?
+index = Integer(index)
+total = Integer(total)
+abort("INDEX must be between 1 and TOTAL") unless index.between?(1, total)
+log = File.expand_path(log) if log
+
+Dir.chdir(File.expand_path("..", __dir__))
+files = Dir["test/**/*_test.rb"].reject { |file| file.start_with?("test/system/") }.sort
+
+times = {}
+if log && File.exist?(log)
+  File.foreach(log) do |line|
+    file, time = line.strip.split(/:(?=[^:]*\z)/)
+    times[file] = time.to_f if file && time
+  end
+end
+
+# turns sizes into seconds, from the files that have both
+known = files.select { |file| times[file] }
+per_byte = known.any? ? known.sum { |file| times[file] } / known.sum { |file| File.size(file) } : 1.0
+weights = files.to_h { |file| [file, times[file] || (File.size(file) * per_byte)] } # rubocop:disable Rails/IndexWith -- runs without rails
+
+# the heaviest file left goes to the lightest job
+shards = Array.new(total) { { time: 0.0, files: [] } }
+weights.sort_by { |file, weight| [-weight, file] }.each do |file, weight|
+  shard = shards.min_by.with_index { |s, i| [s[:time], i] }
+  shard[:time] += weight
+  shard[:files] << file
+end
+
+shard = shards[index - 1]
+warn("shard #{index}/#{total}: #{shard[:files].size} files, " + (known.any? ? "about #{shard[:time].round}s" : "split by size, there's no runtime log"))
+puts(shard[:files].sort)

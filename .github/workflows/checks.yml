@@ -60,6 +60,25 @@ jobs:
           name: dtext
           path: /tmp/dtext.tar
 
+      # the last run's test times, which every test shard splits the files by. Shared from here so
+      # they all get the same one, otherwise files could be run twice or not at all
+      - name: Restore Test Runtime Log
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/test_runtime.log
+          key: test-runtime-${{ github.run_id }}
+          restore-keys: test-runtime-
+
+      # the first run has none yet, the shards split by file size then
+      - name: Create Test Runtime Log
+        run: mkdir -p tmp && touch tmp/test_runtime.log
+
+      - name: Upload Test Runtime Log
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-runtime
+          path: tmp/test_runtime.log
+
   rubocop:
     runs-on: ubuntu-22.04
     needs: docker-build
@@ -92,13 +111,15 @@ jobs:
       - name: Run ESLint
         run: $DOCKER_RUN linter
 
-  tests:
+  test-shards:
+    name: tests (${{ matrix.shard }})
     runs-on: ubuntu-22.04
     needs: docker-build
     if: ${{ !contains(github.event.head_commit.message, '[skip tests]') }}
-    permissions:
-      contents: read
-      checks: write
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6]
 
     steps:
       - name: Checkout Repository
@@ -108,29 +129,77 @@ jobs:
         with:
           name: gayfurcity
 
+      - name: Download Test Runtime Log
+        uses: actions/download-artifact@v4
+        with:
+          name: test-runtime
+          path: tmp
+
       - name: Run Tests
-        run: $DOCKER_RUN -e PARALLEL_WORKERS=4 tests
+        run: |
+          files=$(ruby bin/test-shard ${{ matrix.shard }} ${{ strategy.job-total }} tmp/test_runtime.log)
+          $DOCKER_RUN -e PARALLEL_WORKERS=4 -e TEST_RUNTIME_LOG=tmp/shard_runtime.log tests $files
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: test-results
-          path: log/test.log
-
-      - name: Publish Test Report
-        uses: dorny/test-reporter@v1
-        if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
-        with:
-          name: Minitest Results
-          path: 'test/reports/*.xml'
-          reporter: java-junit
-          fail-on-error: false
+          name: test-results-${{ matrix.shard }}
+          path: |
+            log/test.log
+            test/reports/*.xml
+            tmp/shard_runtime.log
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: GayFurCity/GayFurCity
+
+  # one result for all of the shards, and the test report and runtime log made from them
+  tests:
+    runs-on: ubuntu-22.04
+    needs: test-shards
+    if: ${{ always() && needs.test-shards.result != 'skipped' }}
+    permissions:
+      contents: read
+      checks: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Download Test Results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: test-results-*
+          path: test-results
+
+      - name: Publish Test Report
+        uses: dorny/test-reporter@v1
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        with:
+          name: Minitest Results
+          path: 'test-results/*/test/reports/*.xml'
+          reporter: java-junit
+          fail-on-error: false
+
+      - name: Merge Test Runtime Logs
+        run: |
+          mkdir -p tmp
+          cat test-results/*/tmp/shard_runtime.log > tmp/test_runtime.log 2>/dev/null || true
+          [ -s tmp/test_runtime.log ] || rm tmp/test_runtime.log
+
+      - name: Save Test Runtime Log
+        uses: actions/cache/save@v4
+        if: hashFiles('tmp/test_runtime.log') != ''
+        with:
+          path: tmp/test_runtime.log
+          key: test-runtime-${{ github.run_id }}
+
+      - name: Check Test Results
+        if: needs.test-shards.result != 'success'
+        run: exit 1
 
   dtext-tests:
     runs-on: ubuntu-22.04

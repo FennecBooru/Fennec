@@ -25,6 +25,10 @@ unless ENV["RM_INFO"]
   require("minitest/reporters")
   reporters = [Minitest::Reporters::DefaultReporter.new]
   reporters << Minitest::Reporters::JUnitReporter.new if ENV["CI"]
+  if ENV["TEST_RUNTIME_LOG"].present?
+    require_relative("support/runtime_log_reporter")
+    reporters << RuntimeLogReporter.new(ENV["TEST_RUNTIME_LOG"])
+  end
   Minitest::Reporters.use!(reporters)
 end
 
