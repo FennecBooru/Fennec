@@ -96,7 +96,7 @@ services:
     tty: true
     init: true
 
-  # For this service to work properly, it must be accessible from /tags/autocomplete.json on the same url as the primary app
+  # For this service to work properly, it must be accessible  from /tags/autocomplete.json on the same url as the primary app
   autocompleted: # metrics port: 9396
     image: ghcr.io/gayfurcity/autocompleted:174db500da76689fc9844bee399280fc232069c7
     command: /app/autocompleted

@@ -101,7 +101,8 @@ class AdminConfig < ApplicationRecord
   end
 
   def self.values_for_hash_column(name)
-    column_defaults[name.to_s].keys
+    # the column won't exist yet when the app is loaded before its migration runs
+    column_defaults[name.to_s]&.keys || []
   end
 
   # we technically could have a desync between model and hash columns, but I don't think that's
