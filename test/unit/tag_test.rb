@@ -99,12 +99,19 @@ class TagTest < ActiveSupport::TestCase
       assert_equal("Artist", @tag.category_name)
     end
 
+    should("belong to its category") do
+      tag = create(:artist_tag)
+
+      assert_equal(TagCategory.find(TagCategory.artist), tag.category)
+      assert_includes(TagCategory.find(TagCategory.artist).tags, tag)
+    end
+
     should("reset its category after updating") do
       tag = create(:artist_tag)
 
       assert_equal(TagCategory.artist, Cache.fetch("tc:#{tag.name}"))
 
-      tag.update_attribute(:category, TagCategory.copyright)
+      tag.update_attribute(:category_id, TagCategory.copyright)
 
       assert_equal(TagCategory.copyright, Cache.fetch("tc:#{tag.name}"))
     end
@@ -114,15 +121,15 @@ class TagTest < ActiveSupport::TestCase
       should("only allow existing categories") do
         user = create(:owner_user)
         TagCategory.ids.each do |id|
-          tag = build(:tag, category: id, creator: user)
+          tag = build(:tag, category_id: id, creator: user)
           tag.valid?
 
-          assert_not_includes(tag.errors[:category], "is not a tag category", "category #{id} should be allowed")
+          assert_not_includes(tag.errors[:category_id], "is not a tag category", "category #{id} should be allowed")
         end
-        tag = build(:tag, category: 9999, creator: user)
+        tag = build(:tag, category_id: 9999, creator: user)
 
         assert_not(tag.valid?)
-        assert_includes(tag.errors[:category], "is not a tag category")
+        assert_includes(tag.errors[:category_id], "is not a tag category")
       end
     end
 
@@ -135,8 +142,13 @@ class TagTest < ActiveSupport::TestCase
     should("create a version when category is changed") do
       tag = create(:tag)
       assert_difference("TagVersion.count", 1) do
-        tag.update_with!(@janitor, category: TagCategory.artist)
+        tag.update_with!(@janitor, category_id: TagCategory.artist)
       end
+
+      version = tag.versions.order(:id).last
+
+      assert_equal(TagCategory.find(TagCategory.artist), version.category)
+      assert_predicate(version, :category_changed?)
     end
 
     should("create a version when is_locked is changed") do
@@ -158,11 +170,11 @@ class TagTest < ActiveSupport::TestCase
     should("change the type for an existing tag") do
       tag = create(:tag)
       assert_difference("Tag.count", 0) do
-        assert_equal(TagCategory.general, tag.category)
+        assert_equal(TagCategory.general, tag.category_id)
         Tag.find_or_create_by_name("artist:#{tag.name}", user: @janitor)
         tag.reload
 
-        assert_equal(TagCategory.artist, tag.category)
+        assert_equal(TagCategory.artist, tag.category_id)
       end
     end
 
@@ -173,21 +185,21 @@ class TagTest < ActiveSupport::TestCase
       Tag.find_or_create_by_name("artist:#{tag.name}", user: @janitor)
       tag.reload
 
-      assert_equal(0, tag.category)
+      assert_equal(0, tag.category_id)
     end
 
     should("not change category when the tag is too large to be changed by a janitor") do
       tag = create(:tag, post_count: 1001)
       Tag.find_or_create_by_name("artist:#{tag.name}", user: @janitor)
 
-      assert_equal(0, tag.reload.category)
+      assert_equal(0, tag.reload.category_id)
     end
 
     should("not change category when the tag is too large to be changed by a member") do
       tag = create(:tag, post_count: 101)
       Tag.find_or_create_by_name("artist:#{tag.name}", user: create(:member_user))
 
-      assert_equal(0, tag.reload.category)
+      assert_equal(0, tag.reload.category_id)
     end
 
     should("update post tag counts when the category is changed") do
@@ -197,7 +209,7 @@ class TagTest < ActiveSupport::TestCase
       assert_equal(0, post.tag_count_character)
 
       tag = Tag.find_by_normalized_name("test")
-      with_inline_jobs { tag.update_attribute(:category, 4) }
+      with_inline_jobs { tag.update_attribute(:category_id, 4) }
 
       assert_equal([], tag.errors.full_messages)
       post.reload
@@ -211,7 +223,7 @@ class TagTest < ActiveSupport::TestCase
         tag = Tag.find_or_create_by_name("hoge", user: @janitor)
 
         assert_equal("hoge", tag.name)
-        assert_equal(TagCategory.general, tag.category)
+        assert_equal(TagCategory.general, tag.category_id)
       end
     end
 
@@ -220,7 +232,7 @@ class TagTest < ActiveSupport::TestCase
         tag = Tag.find_or_create_by_name("artist:hoge", user: @janitor)
 
         assert_equal("hoge", tag.name)
-        assert_equal(TagCategory.artist, tag.category)
+        assert_equal(TagCategory.artist, tag.category_id)
       end
     end
 

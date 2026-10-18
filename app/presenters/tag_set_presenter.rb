@@ -79,7 +79,7 @@ class TagSetPresenter < ApplicationPresenter
   def inline_tag_list_html(link_type = :tag)
     tags = safe_join(TagCategory.categories.map do |category|
       tags_for_category(category).map do |tag|
-        h.tag.li(tag_link(tag, tag.name, link_type), class: "category-#{tag.category}")
+        h.tag.li(tag_link(tag, tag.name, link_type), class: "category-#{tag.category_id}")
       end
     end)
     h.tag.ul(tags, class: "inline-tag-list")
@@ -150,7 +150,7 @@ class TagSetPresenter < ApplicationPresenter
   # character-grouped renderings.
   def category_sections_html(tags, highlighted_tags:, followed_tags:, current_query:)
     html = []
-    by_category = tags.group_by(&:category)
+    by_category = tags.group_by(&:category_id)
 
     TagCategory.categories.each do |category|
       typetags = by_category[category.id] || []
@@ -165,11 +165,11 @@ class TagSetPresenter < ApplicationPresenter
   end
 
   def tags
-    @tags ||= Tag.where(name: tag_names).includes(antecedent_alias: :consequent_tag).select(:name, :post_count, :category, :is_deprecated)
+    @tags ||= Tag.where(name: tag_names).includes(antecedent_alias: :consequent_tag).select(:name, :post_count, :category_id, :is_deprecated)
   end
 
   def tags_by_category
-    @tags_by_category ||= ordered_tags.group_by(&:category)
+    @tags_by_category ||= ordered_tags.group_by(&:category_id)
   end
 
   # accepts anything TagCategory.get does
@@ -196,13 +196,13 @@ class TagSetPresenter < ApplicationPresenter
       build_list_item_tag_type(tag, current_query: current_query, highlight: highlight),
       build_list_item_actions(tag, followed: followed),
     ])
-    h.tag.li(html, class: "category-#{tag.category}")
+    h.tag.li(html, class: "category-#{tag.category_id}")
   end
 
   def build_list_item_tag_type(tag, current_query: "", highlight: false)
     name = tag.name
     count = tag.post_count
-    category = tag.category
+    category = tag.category_id
     parts = []
 
     if current_query.present?
@@ -231,7 +231,7 @@ class TagSetPresenter < ApplicationPresenter
 
   def build_list_item_category(tag)
     name = tag.name
-    category = tag.category
+    category = tag.category_id
     marker = tag.is_deprecated? ? h.deprecated_tag_icon : "?"
 
     if category == TagCategory.artist

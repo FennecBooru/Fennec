@@ -7,13 +7,13 @@
     <% end %>
   <% end %>
   <% t.column("From") do |tag_relation| %>
-    <span class="category-<%= tag_relation.antecedent_tag.try(:category) %>">
+    <span class="category-<%= tag_relation.antecedent_tag.try(:category_id) %>">
       <%= link_to_wiki_or_new(tag_relation.antecedent_name) %>
       <span class="count"><%= tag_relation.antecedent_tag.post_count rescue 0 %></span>
     </span>
   <% end %>
   <% t.column("To") do |tag_relation| %>
-    <span class="category-<%= tag_relation.consequent_tag.try(:category) %>">
+    <span class="category-<%= tag_relation.consequent_tag.try(:category_id) %>">
       <%= link_to_wiki_or_new(tag_relation.consequent_name) %>
       <span class="count"><%= tag_relation.consequent_tag.post_count rescue 0 %></span>
       <% if tag_relation.is_a?(TagAlias) %>

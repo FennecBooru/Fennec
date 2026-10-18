@@ -23,7 +23,7 @@ module ArtistsHelper
   def link_to_pool_artists(names)
     safe_join(names.map do |name|
       tag = Tag.find_or_create_by_name(name, user: User.system)
-      link_to(name, show_or_new_artists_path(name: name), class: "tag-type-#{tag.category}")
+      link_to(name, show_or_new_artists_path(name: name), class: "tag-type-#{tag.category_id}")
     end, ", ")
   end
 end

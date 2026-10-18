@@ -5,20 +5,20 @@ FactoryBot.define do
     creator(factory: %i[user])
     sequence(:name) { |n| "tag_name_#{n}" }
     post_count { 0 }
-    category { TagCategory.general }
+    category_id { TagCategory.general }
     related_tags { "" }
     related_tags_updated_at { Time.now }
 
     factory(:artist_tag) do
-      category { TagCategory.artist }
+      category_id { TagCategory.artist }
     end
 
     factory(:copyright_tag) do
-      category { TagCategory.copyright }
+      category_id { TagCategory.copyright }
     end
 
     factory(:character_tag) do
-      category { TagCategory.character }
+      category_id { TagCategory.character }
     end
 
     factory(:deprecated_tag) do

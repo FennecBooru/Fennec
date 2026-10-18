@@ -203,7 +203,7 @@ class TagAliasTest < ActiveSupport::TestCase
       ta = create(:tag_alias, antecedent_name: "aaa", consequent_name: "bbb")
       tag2.reload
 
-      assert_equal(TagCategory.artist, tag2.category)
+      assert_equal(TagCategory.artist, tag2.category_id)
       assert_not_includes(ta.reload.undo_data.map(&:first), "update_tag_category")
     end
 
@@ -213,20 +213,20 @@ class TagAliasTest < ActiveSupport::TestCase
       ta = create(:tag_alias, antecedent_name: "aaa", consequent_name: "bbb")
       with_inline_jobs { ta.approve!(@admin) }
 
-      assert_equal(TagCategory.copyright, tag2.reload.category)
+      assert_equal(TagCategory.copyright, tag2.reload.category_id)
       assert_not_includes(ta.reload.undo_data.map(&:first), "update_tag_category")
     end
 
     should("push the antecedent's category to the consequent") do
       tag = create(:artist_tag, name: "aaa")
       tag2 = create(:tag, name: "bbb")
-      old = tag2.category
+      old = tag2.category_id
       ta = create(:tag_alias, antecedent_name: "aaa", consequent_name: "bbb")
       with_inline_jobs { ta.approve!(@admin) }
 
-      assert_equal(TagCategory.artist, tag2.reload.category)
+      assert_equal(TagCategory.artist, tag2.reload.category_id)
       assert_equal("alias ##{ta.id} (aaa -> bbb)", TagVersion.last.reason)
-      assert_undo_data(ta, :update_tag_category, id: tag2.id, old: old, new: tag.category)
+      assert_undo_data(ta, :update_tag_category, id: tag2.id, old: old, new: tag.category_id)
     end
 
     should("not push the antecedent's category if the consequent is locked") do
@@ -235,14 +235,14 @@ class TagAliasTest < ActiveSupport::TestCase
       ta = create(:tag_alias, antecedent_name: "aaa", consequent_name: "bbb")
       with_inline_jobs { ta.approve!(@admin) }
 
-      assert_equal(TagCategory.copyright, tag2.reload.category)
+      assert_equal(TagCategory.copyright, tag2.reload.category_id)
       assert_not_includes(ta.reload.undo_data.map(&:first), "update_tag_category")
     end
 
     should("update artist name") do
       artist = create(:artist, name: "aaa")
       ta = create(:tag_alias, antecedent_name: "aaa", consequent_name: "bbb")
-      Tag.find_by!(name: "bbb").update(category: TagCategory.artist) # avoid the category being carried down
+      Tag.find_by!(name: "bbb").update(category_id: TagCategory.artist) # avoid the category being carried down
       with_inline_jobs { ta.approve!(@admin) }
 
       assert_equal("bbb", artist.reload.name)
@@ -252,8 +252,8 @@ class TagAliasTest < ActiveSupport::TestCase
     should("not fail if an artist with the same name is locked") do
       ta = create(:tag_alias, antecedent_name: "aaa", consequent_name: "bbb")
       artist = create(:artist, name: "aaa", is_locked: true, creator: @admin)
-      Tag.find_by!(name: "bbb").update(category: TagCategory.artist) # avoid the category being carried down
-      artist.tag.update(category: TagCategory.artist)
+      Tag.find_by!(name: "bbb").update(category_id: TagCategory.artist) # avoid the category being carried down
+      artist.tag.update(category_id: TagCategory.artist)
 
       with_inline_jobs { ta.approve!(@admin) }
 
@@ -393,16 +393,16 @@ class TagAliasTest < ActiveSupport::TestCase
 
     context("undo!") do
       should("undo update_tag_category") do
-        create(:tag, name: "aaa", category: TagCategory.copyright)
+        create(:tag, name: "aaa", category_id: TagCategory.copyright)
         tag = create(:tag, name: "bbb")
         ta = create(:tag_alias, antecedent_name: "aaa", consequent_name: "bbb", status: "pending")
         with_inline_jobs { ta.approve!(@admin) }
 
-        assert_equal(TagCategory.copyright, tag.reload.category)
+        assert_equal(TagCategory.copyright, tag.reload.category_id)
         assert_not_equal([], ta.reload.undo_data)
         with_inline_jobs { ta.undo!(@admin) }
 
-        assert_equal(TagCategory.general, tag.reload.category)
+        assert_equal(TagCategory.general, tag.reload.category_id)
         assert_equal([], ta.reload.undo_data)
       end
 

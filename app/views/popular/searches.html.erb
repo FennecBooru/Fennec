@@ -10,7 +10,7 @@
     <%= rank["count"] %>
   <% end %>
   <% t.column("Tag") do |rank| %>
-    <%= link_to(rank["tag"], posts_path(tags: rank["tag"]), class: "tag-type-#{@tags[rank['tag']].try(:category) || 0}") %>
+    <%= link_to(rank["tag"], posts_path(tags: rank["tag"]), class: "tag-type-#{@tags[rank['tag']].try(:category_id) || 0}") %>
   <% end %>
 <% end %>
 

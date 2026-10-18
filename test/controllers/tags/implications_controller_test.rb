@@ -159,8 +159,8 @@ module Tags
             @updater = create(:user)
             @approver = create(:user)
             @admin = create(:admin_user)
-            create(:tag, name: "foo", category: TagCategory.copyright)
-            create(:tag, name: "bar", category: TagCategory.artist)
+            create(:tag, name: "foo", category_id: TagCategory.copyright)
+            create(:tag, name: "bar", category_id: TagCategory.artist)
             @tag_implication = create(:tag_implication, creator: @creator, creator_ip_addr: "127.0.0.2", updater: @updater, updater_ip_addr: "127.0.0.3", approver: @approver, status: "active", antecedent_name: "foo", consequent_name: "bar")
           end
 

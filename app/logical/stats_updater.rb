@@ -76,7 +76,7 @@ module StatsUpdater
     stats[:total_tags] = Tag.count
     # keyed by id so renaming a category doesn't lose its stats
     TagCategory.categories.each do |category|
-      stats[:"tag_category_#{category.id}_tags"] = Tag.where(category: category.id).count
+      stats[:"tag_category_#{category.id}_tags"] = Tag.where(category_id: category.id).count
     end
     stats
   end

@@ -5,7 +5,7 @@
 
 <%= table_for(@followed_tags) do |t| %>
   <% t.column("Tag") do |follow| %>
-    <span class="category-<%= follow.tag.category %>">
+    <span class="category-<%= follow.tag.category_id %>">
       <%= link_to(follow.tag_name, posts_path(tags: follow.tag_name)) %>
     </span>
   <% end %>

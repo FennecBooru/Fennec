@@ -8,7 +8,7 @@ class TransferTagCategoryTagsJobTest < ActiveSupport::TestCase
       @admin = create(:admin_user)
       @old = create(:tag_category, name: "oldcat", min_level: User::Levels::MEMBER)
       @new = create(:tag_category, name: "newcat")
-      @tags = create_list(:tag, 2, category: @old.id)
+      @tags = create_list(:tag, 2, category_id: @old.id)
       @post = create(:post, tag_string: @tags.map(&:name).join(" "))
     end
 
@@ -17,7 +17,7 @@ class TransferTagCategoryTagsJobTest < ActiveSupport::TestCase
         TransferTagCategoryTagsJob.perform_now(@admin, @old, @new)
       end
 
-      assert_equal([@new.id] * 2, @tags.map { |tag| tag.reload.category })
+      assert_equal([@new.id] * 2, @tags.map { |tag| tag.reload.category_id })
       assert_equal(User::Levels::MEMBER, @old.reload.min_level)
       assert_equal(2, ModAction.last.total)
     end
@@ -26,7 +26,7 @@ class TransferTagCategoryTagsJobTest < ActiveSupport::TestCase
       @new.update!(suffixes: %w[needed], updater: @admin)
       TransferTagCategoryTagsJob.perform_now(@admin, @old, @new)
 
-      assert_equal([@old.id] * 2, @tags.map { |tag| tag.reload.category })
+      assert_equal([@old.id] * 2, @tags.map { |tag| tag.reload.category_id })
       assert_equal(0, ModAction.last.total)
     end
 

@@ -1117,7 +1117,7 @@ class Post < ApplicationRecord
       prefixed, unprefixed = tags.partition { |x| x =~ TagCategory.regexp }
       prefixed = Tag.find_or_create_by_name_list(prefixed, user: updater)
       prefixed.map! do |tag|
-        @bad_type_changes << tag.name if tag.errors.include?(:category)
+        @bad_type_changes << tag.name if tag.errors.include?(:category_id)
         tag.name
       end
       prefixed + unprefixed
@@ -1317,7 +1317,7 @@ class Post < ApplicationRecord
     end
 
     def update_typed_tags(tags = tag_string)
-      self.typed_tag_string = Tag.where(name: tags.split).select(:name, :category).map { |t| "#{t.category}|#{t.name}" }.join(" ")
+      self.typed_tag_string = Tag.where(name: tags.split).select(:name, :category_id).map { |t| "#{t.category_id}|#{t.name}" }.join(" ")
       reset_typed_tags_cache
       clean_typed_tag_string!
     end
@@ -2293,13 +2293,13 @@ class Post < ApplicationRecord
       # Load this only once since it isn't cached
       added = Tag.where(name: added_tags)
       # noinspection RubyArgCount
-      added_invalid_tags = added.select { |t| t.category == TagCategory.invalid }
+      added_invalid_tags = added.select { |t| t.category_id == TagCategory.invalid }
       # noinspection RubyArgCount
       new_tags = added.select { |t| t.post_count <= 0 }
       # noinspection RubyArgCount
-      new_general_tags = new_tags.select { |t| t.category == TagCategory.general }
+      new_general_tags = new_tags.select { |t| t.category_id == TagCategory.general }
       # noinspection RubyArgCount
-      new_artist_tags = new_tags.select { |t| t.category == TagCategory.artist }
+      new_artist_tags = new_tags.select { |t| t.category_id == TagCategory.artist }
       # Deprecated tags are blocked regardless of post_count - a tag that was already in wide use
       # before being deprecated must still be rejected, not just brand-new/unused ones.
       # noinspection RubyArgCount
@@ -2307,7 +2307,7 @@ class Post < ApplicationRecord
       # See https://github.com/e621ng/e621ng/issues/494
       # If the tag is fresh it's safe to assume it was created with a prefix
       # noinspection RubyArgCount
-      repopulated_tags = new_tags.select { |t| t.category != TagCategory.general && t.category != TagCategory.meta && t.created_at < 10.seconds.ago }
+      repopulated_tags = new_tags.select { |t| t.category_id != TagCategory.general && t.category_id != TagCategory.meta && t.created_at < 10.seconds.ago }
 
       if added_invalid_tags.present?
         n = added_invalid_tags.size

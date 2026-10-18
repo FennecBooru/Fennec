@@ -11,9 +11,9 @@ class TransferTagCategoryTagsJob < ApplicationJob
     old_category.update_columns(min_level: User::Levels::LOCKED)
     TagCategory.clear_cache
 
-    Tag.where(category: old_category.id).find_each do |tag|
+    Tag.where(category_id: old_category.id).find_each do |tag|
       # each tag queues UpdateTagCategoryJob to update its posts
-      if tag.update(category: new_category.id, updater: user.resolvable, reason: "Moved from the #{old_category.name} category")
+      if tag.update(category_id: new_category.id, updater: user.resolvable, reason: "Moved from the #{old_category.name} category")
         moved += 1
       else
         Rails.logger.warn("TransferTagCategoryTagsJob: couldn't move #{tag.name}: #{tag.errors.full_messages.join('; ')}")

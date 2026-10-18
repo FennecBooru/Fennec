@@ -250,7 +250,7 @@ class Pool < ApplicationRecord
     posts
       .with_unflattened_tags
       .joins("inner join tags on tags.name = tag")
-      .where("pools.id = ? AND tags.category = ?", id, TagCategory.artist)
+      .where("pools.id = ? AND tags.category_id = ?", id, TagCategory.artist)
       .where.not("tags.name": TagCategory.get(TagCategory.artist)&.format_exclusion || [])
       .pluck("tags.name")
       .uniq

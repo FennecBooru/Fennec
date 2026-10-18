@@ -27,7 +27,7 @@ class RelatedTagCalculator
       posts_with_tags = sample.with_unflattened_tags
 
       if category_constraint
-        posts_with_tags = posts_with_tags.joins("JOIN tags ON tags.name = tag").where("tags.category" => category_constraint)
+        posts_with_tags = posts_with_tags.joins("JOIN tags ON tags.name = tag").where("tags.category_id" => category_constraint)
       end
 
       counts = posts_with_tags.order(count_all: :desc).limit(max_results).group("tag").count(:all)

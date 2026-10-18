@@ -14,8 +14,8 @@ module Tags
       context("index action") do
         setup do
           @tag = create(:tag, creator: @user)
-          @tag.update_with(@user2, category: TagCategory.copyright)
-          @tag.update_with(@user3, category: TagCategory.artist)
+          @tag.update_with(@user2, category_id: TagCategory.copyright)
+          @tag.update_with(@user3, category_id: TagCategory.artist)
 
           @versions = @tag.versions
         end

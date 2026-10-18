@@ -20,8 +20,8 @@ module Tags
         context("with a deleted category") do
           setup do
             @deleted = create(:tag_category, creator: @admin, name: "removed")
-            tag = create(:tag, category: @deleted.id)
-            tag.update!(category: TagCategory.general, updater: @admin)
+            tag = create(:tag, category_id: @deleted.id)
+            tag.update!(category_id: TagCategory.general, updater: @admin)
             @deleted.remove(@admin)
           end
 
@@ -233,7 +233,7 @@ module Tags
       context("transfer tags action") do
         setup do
           @other = create(:tag_category, creator: @admin, name: "other")
-          create(:tag, category: @category.id)
+          create(:tag, category_id: @category.id)
         end
 
         should("render") do
@@ -265,8 +265,8 @@ module Tags
 
       context("destroy action") do
         should("mark a category that had tags as deleted") do
-          tag = create(:tag, category: @category.id)
-          tag.update!(category: TagCategory.general, updater: @admin)
+          tag = create(:tag, category_id: @category.id)
+          tag.update!(category_id: TagCategory.general, updater: @admin)
           delete_auth(tag_category_path(@category), @admin)
 
           assert_redirected_to(tag_categories_path)

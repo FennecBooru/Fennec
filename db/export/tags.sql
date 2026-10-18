@@ -1,7 +1,7 @@
 SELECT tags.id,
        tags.name,
        tags.post_count,
-       tags.category,
+       tags.category_id,
        tags.related_tags,
        tags.related_tags_updated_at,
        tags.created_at,

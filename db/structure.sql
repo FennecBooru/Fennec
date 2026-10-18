@@ -3364,7 +3364,7 @@ CREATE TABLE public.tag_versions (
     id bigint NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    category integer NOT NULL,
+    category_id integer NOT NULL,
     is_locked boolean NOT NULL,
     tag_id bigint NOT NULL,
     updater_id bigint NOT NULL,
@@ -3401,7 +3401,7 @@ CREATE TABLE public.tags (
     id bigint NOT NULL,
     name character varying NOT NULL,
     post_count integer DEFAULT 0 NOT NULL,
-    category smallint NOT NULL,
+    category_id smallint NOT NULL,
     related_tags text,
     related_tags_updated_at timestamp without time zone,
     created_at timestamp without time zone NOT NULL,
@@ -9851,6 +9851,7 @@ ALTER TABLE ONLY public.help_pages
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261018000000'),
 ('20261014031322'),
 ('20261010090000'),
 ('20261009120000'),

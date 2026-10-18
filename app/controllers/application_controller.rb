@@ -315,7 +315,7 @@ class ApplicationController < ActionController::Base
 
   # Remove blank `search` params from the url.
   #
-  # /tags?search[name]=touhou&search[category]=&search[order]=
+  # /tags?search[name]=touhou&search[category_id]=&search[order]=
   # => /tags?search[name]=touhou
   def normalize_search
     return unless request.get? || request.head?

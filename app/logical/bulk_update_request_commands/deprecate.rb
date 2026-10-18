@@ -45,7 +45,7 @@ module BulkUpdateRequestCommands
     def process(_processor, approver)
       ensure_valid!
       t = tag
-      t.category = TagCategory.invalid if t.general? && TagCategory.invalid
+      t.category_id = TagCategory.invalid if t.general? && TagCategory.invalid
       t.is_deprecated = true
       t.updater = approver
       t.save!

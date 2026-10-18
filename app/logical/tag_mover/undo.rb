@@ -51,7 +51,7 @@ class TagMover
 
     def undo_update_tag_category!(id, old, new)
       tag = Tag.find_by(id: id)
-      return false unless tag && tag.category == new
+      return false unless tag && tag.category_id == new
       case request
       when TagAlias
         reason = "undo: alias ##{request.id} (#{request.antecedent_name} -> #{request.consequent_name})"
@@ -63,7 +63,7 @@ class TagMover
         reason = "undo tag move"
       end
 
-      tag.update!(category: old, reason: reason)
+      tag.update!(category_id: old, reason: reason)
       true
     end
 

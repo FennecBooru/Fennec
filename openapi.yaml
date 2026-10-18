@@ -3385,7 +3385,7 @@ components:
         - id
         - name
         - post_count
-        - category
+        - category_id
         - related_tags
         - related_tags_updated_at
         - created_at
@@ -3399,7 +3399,7 @@ components:
           type: string
         post_count:
           type: number
-        category:
+        category_id:
           type: number
           description: A tag category id, see /tags/categories.json
         related_tags:
@@ -3545,7 +3545,7 @@ components:
         - id
         - created_at
         - updated_at
-        - category
+        - category_id
         - is_locked
         - tag_id
         - updater_id
@@ -3559,7 +3559,7 @@ components:
         updated_at:
           type: string
           format: date-time
-        category:
+        category_id:
           type: number
           description: A tag category id, see /tags/categories.json
         is_locked:
@@ -12143,7 +12143,7 @@ paths:
           schema:
             type: string
         - in: query
-          name: search[category]
+          name: search[category_id]
           schema:
             type: number
             description: A tag category id, see /tags/categories.json
@@ -12213,7 +12213,7 @@ paths:
             schema:
               type: object
               properties:
-                category:
+                category_id:
                   type: number
                   description: A tag category id, see /tags/categories.json
                 reason:

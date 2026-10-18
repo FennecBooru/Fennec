@@ -6,14 +6,14 @@ class TagCorrection
 
   attr_reader(:tag)
 
-  delegate(:category, :post_count, :real_post_count, to: :tag)
+  delegate(:category_id, :post_count, :real_post_count, to: :tag)
 
   def initialize(tag_id)
     @tag = Tag.find(tag_id)
   end
 
   def attributes
-    { post_count: post_count, real_post_count: real_post_count, category: category, category_cache: category_cache, tag: tag }
+    { post_count: post_count, real_post_count: real_post_count, category_id: category_id, category_cache: category_cache, tag: tag }
   end
 
   def category_cache

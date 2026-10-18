@@ -149,7 +149,7 @@ class BulkUpdateRequestTest < ActiveSupport::TestCase
         bur = create(:bulk_update_request, script: "category tagme -> meta")
         with_inline_jobs { bur.approve!(@admin) }
 
-        assert_equal(TagCategory.meta, tag.reload.category)
+        assert_equal(TagCategory.meta, tag.reload.category_id)
       end
     end
 

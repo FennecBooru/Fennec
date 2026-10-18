@@ -87,7 +87,7 @@ class BulkUpdateRequestCommandsTest < ActiveSupport::TestCase
       should("process") do
         approve!(@bur, @admin)
 
-        assert_equal(TagCategory.copyright, @tag.reload.category)
+        assert_equal(TagCategory.copyright, @tag.reload.category_id)
       end
 
       should("fail to process if invalid") do
@@ -248,7 +248,7 @@ class BulkUpdateRequestCommandsTest < ActiveSupport::TestCase
         approve!(@bur, @admin)
         @tag.reload
 
-        assert_equal(TagCategory.invalid, @tag.category)
+        assert_equal(TagCategory.invalid, @tag.category_id)
         assert_predicate(@tag, :is_deprecated?)
         assert_predicate(@tag, :is_locked?)
       end
@@ -261,7 +261,7 @@ class BulkUpdateRequestCommandsTest < ActiveSupport::TestCase
         approve!(bur, @admin)
         copyright_tag.reload
 
-        assert_equal(TagCategory.copyright, copyright_tag.category)
+        assert_equal(TagCategory.copyright, copyright_tag.category_id)
         assert_predicate(copyright_tag, :is_deprecated?)
         assert_predicate(copyright_tag, :is_locked?)
       end
@@ -477,7 +477,7 @@ class BulkUpdateRequestCommandsTest < ActiveSupport::TestCase
 
     context("rename") do
       setup do
-        @tag.update_columns(category: TagCategory.artist)
+        @tag.update_columns(category_id: TagCategory.artist)
         @post = create(:post, tag_string: @tag.name)
         @bur = create(:bulk_update_request, script: "rename #{@tag.name} -> #{@tag2.name}", skip_forum: true, title: random)
       end
@@ -495,7 +495,7 @@ class BulkUpdateRequestCommandsTest < ActiveSupport::TestCase
       should("process") do
         approve!(@bur, @admin)
 
-        assert_equal(TagCategory.artist, @tag2.reload.category)
+        assert_equal(TagCategory.artist, @tag2.reload.category_id)
         assert_equal(@tag2.name, @post.reload.tag_string)
       end
 
@@ -530,27 +530,27 @@ class BulkUpdateRequestCommandsTest < ActiveSupport::TestCase
       end
 
       should("validate") do
-        @tag.update_columns(category: TagCategory.general)
+        @tag.update_columns(category_id: TagCategory.general)
 
         assert_comments(@user, "rename missing -> #{@tag2.name}", "antecedent tag missing")
         assert_errors(@user, "rename #{@tag.name} -> #{@tag2.name}", "antecedent tag is not an artist tag")
         assert_errors(@user, "rename #{@tag.name} -> #{@tag2.name}", "antecedent tag has too many posts") do
-          @tag.update_columns(category: TagCategory.artist, post_count: BulkUpdateRequestCommands::Rename::POST_LIMIT + 1)
+          @tag.update_columns(category_id: TagCategory.artist, post_count: BulkUpdateRequestCommands::Rename::POST_LIMIT + 1)
         end
         assert_errors(@user, "rename #{@tag.name} -> #{@tag2.name}", "consequent tag is not an artist tag") do
-          @tag.update_columns(category: TagCategory.artist)
+          @tag.update_columns(category_id: TagCategory.artist)
           @tag2.update_columns(post_count: 1)
         end
         assert_errors(@user, "rename #{@tag.name} -> #{@tag2.name}", "antecedent tag has too many posts") do
-          @tag.update_columns(category: TagCategory.artist)
-          @tag.update_columns(category: TagCategory.artist, post_count: BulkUpdateRequestCommands::Rename::POST_LIMIT + 1)
+          @tag.update_columns(category_id: TagCategory.artist)
+          @tag.update_columns(category_id: TagCategory.artist, post_count: BulkUpdateRequestCommands::Rename::POST_LIMIT + 1)
         end
       end
     end
 
     context("undeprecate") do
       setup do
-        @tag.update_columns(is_deprecated: true, category: TagCategory.invalid)
+        @tag.update_columns(is_deprecated: true, category_id: TagCategory.invalid)
         @bur = create(:bulk_update_request, script: "undeprecate #{@tag.name}", skip_forum: true, title: random)
       end
 
@@ -574,7 +574,7 @@ class BulkUpdateRequestCommandsTest < ActiveSupport::TestCase
         approve!(@bur, @admin)
         @tag.reload
 
-        assert_equal(TagCategory.general, @tag.category)
+        assert_equal(TagCategory.general, @tag.category_id)
         assert_not(@tag.is_deprecated?)
       end
 

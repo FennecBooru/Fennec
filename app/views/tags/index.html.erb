@@ -6,7 +6,7 @@
   <% end %>
   <% t.column("Name", th: { class: "col-expand" }) do |tag| %>
     <% marker = tag.is_deprecated? ? deprecated_tag_icon : "?" %>
-    <span class="category-<%= tag.category %>">
+    <span class="category-<%= tag.category_id %>">
       <% if tag.artist? %>
         <%= link_to(marker, show_or_new_artists_path(name: tag.name), class: "wiki-link") %>
       <% else %>

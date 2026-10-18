@@ -13,7 +13,7 @@ module TagsHelper
 
   def tag_class(tag)
     return nil if tag.blank?
-    "tag-type-#{tag.category}"
+    "tag-type-#{tag.category_id}"
   end
 
   def deprecated_tag_icon

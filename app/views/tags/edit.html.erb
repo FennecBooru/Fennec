@@ -1,4 +1,4 @@
-<h1>Tag: <%= link_to(@tag.name, posts_path(tags: @tag.name), class: "tag-type-#{@tag.category}") %></h1>
+<h1>Tag: <%= link_to(@tag.name, posts_path(tags: @tag.name), class: "tag-type-#{@tag.category_id}") %></h1>
 
 <%= error_messages_for(:tag) %>
 
@@ -6,7 +6,7 @@
   <% if @tag.is_locked? %>
     <p>This tag is category locked</p>
   <% else %>
-    <%= f.input(:category, collection: TagCategory.for_select, include_blank: false) %>
+    <%= f.input(:category_id, label: "Category", collection: TagCategory.for_select, include_blank: false) %>
   <% end %>
 
     <%= f.input(:is_locked, collection: [%w[No false], %w[Yes true]], include_blank: false) %>

@@ -86,7 +86,7 @@ module DTextHelper
       artist = artists.find { |a| a.name == name }
 
       if tag.present?
-        node["class"] += " tag-type-#{tag.category}"
+        node["class"] += " tag-type-#{tag.category_id}"
       end
 
       if tag.present? && tag.artist?

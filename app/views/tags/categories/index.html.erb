@@ -27,7 +27,7 @@
     <% if category.is_deleted? %>
       <%= category.name %> <span class="color-muted">(deleted)</span>
     <% else %>
-      <%= link_to(category.name, tags_path(search: { category: category.id }), class: "tag-type-#{category.id}") %>
+      <%= link_to(category.name, tags_path(search: { category_id: category.id }), class: "tag-type-#{category.id}") %>
     <% end %>
     <% if !category.is_deleted? && category.code_references.any? %>
       <i class="fa-solid fa-triangle-exclamation tag-category-code-warning" title="<%= category.code_references.map { |name, uses| "The code uses #{name} for #{uses}" }.join("\n") %>"></i>

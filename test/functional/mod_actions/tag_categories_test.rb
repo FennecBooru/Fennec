@@ -37,9 +37,9 @@ module ModActions
       end
 
       should("format tag_category_delete correctly for soft deletions") do
-        create(:tag, category: @category.id)
+        create(:tag, category_id: @category.id)
         # the tag version keeps the category id, so it had tags
-        Tag.where(category: @category.id).update_all(category: TagCategory.default_id)
+        Tag.where(category_id: @category.id).update_all(category_id: TagCategory.default_id)
         set_count!
         @category.remove(@admin)
 
@@ -64,7 +64,7 @@ module ModActions
       end
 
       should("format tag_category_tags_transfer correctly") do
-        create_list(:tag, 2, category: @category.id)
+        create_list(:tag, 2, category_id: @category.id)
         @new_category = create(:tag_category, creator: @admin)
         set_count!
         with_inline_jobs { @category.transfer_tags(@new_category, @admin) }

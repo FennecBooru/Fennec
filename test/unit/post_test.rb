@@ -611,7 +611,7 @@ class PostTest < ActiveSupport::TestCase
         end
 
         should("update the category of the tag") do
-          assert_equal(TagCategory.copyright, Tag.find_by(name: "abc").category)
+          assert_equal(TagCategory.copyright, Tag.find_by(name: "abc").category_id)
         end
 
         should("update the category cache of the tag") do
@@ -752,7 +752,7 @@ class PostTest < ActiveSupport::TestCase
             @post = create(:post, locked_tags: "invalid_tag -invalid_tag_2", tag_string: "invalid_tag invalid_tag_2 test_tag")
             @post.warnings.clear
             tag = Tag.where(name: %w[invalid_tag invalid_tag_2])
-            tag.update_all(category: TagCategory.invalid)
+            tag.update_all(category_id: TagCategory.invalid)
             tag.each(&:update_category_cache)
           end
 
@@ -788,7 +788,7 @@ class PostTest < ActiveSupport::TestCase
           end
 
           should("change the type") do
-            assert(Tag.exists?(name: "hoge", category: 4), "expected 'hoge' tag to be created as a character")
+            assert(Tag.exists?(name: "hoge", category_id: 4), "expected 'hoge' tag to be created as a character")
           end
         end
 
@@ -2627,7 +2627,7 @@ class PostTest < ActiveSupport::TestCase
       end
 
       should("not mistake a tag's own literal parentheses for a group") do
-        create(:tag, name: "fluffy_(oc)", category: TagCategory.character)
+        create(:tag, name: "fluffy_(oc)", category_id: TagCategory.character)
         post1 = create(:post, tag_string: "fluffy_(oc)")
         create(:post, tag_string: "solo")
 
@@ -2995,8 +2995,8 @@ class PostTest < ActiveSupport::TestCase
 
   context("Character groups:") do
     setup do
-      create(:tag, name: "fluffy_(oc)", category: TagCategory.character)
-      create(:tag, name: "rex_(oc)", category: TagCategory.character)
+      create(:tag, name: "fluffy_(oc)", category_id: TagCategory.character)
+      create(:tag, name: "rex_(oc)", category_id: TagCategory.character)
     end
 
     should("populate character_groups from character_groups_attributes, folding the tags into tag_string") do
@@ -3067,8 +3067,8 @@ class PostTest < ActiveSupport::TestCase
     end
 
     should("sweep a grouped tag's implications into the same group") do
-      create(:tag, name: "domestic_cat", category: TagCategory.species)
-      create(:tag, name: "felid", category: TagCategory.species)
+      create(:tag, name: "domestic_cat", category_id: TagCategory.species)
+      create(:tag, name: "felid", category_id: TagCategory.species)
       create(:tag_implication, antecedent_name: "domestic_cat", consequent_name: "felid")
       post = create(:post, tag_string: "solo")
       save_with_groups(post, [{ characters: ["fluffy_(oc)"], tags: ["domestic_cat"] }], "solo")
@@ -3077,11 +3077,11 @@ class PostTest < ActiveSupport::TestCase
     end
 
     should("drop artist, meta, and invalid category tags out of a group into the ungrouped tags") do
-      create(:tag, name: "some_artist", category: TagCategory.artist)
+      create(:tag, name: "some_artist", category_id: TagCategory.artist)
       create(:tag, name: "some_meta")
       create(:tag, name: "some_invalid")
-      Tag.where(name: "some_meta").update_all(category: TagCategory.meta)
-      Tag.where(name: "some_invalid").update_all(category: TagCategory.invalid)
+      Tag.where(name: "some_meta").update_all(category_id: TagCategory.meta)
+      Tag.where(name: "some_invalid").update_all(category_id: TagCategory.invalid)
       # update_all skips the callback that keeps the category cache current
       Tag.where(name: %w[some_meta some_invalid]).find_each(&:update_category_cache)
       post = create(:post, tag_string: "solo")

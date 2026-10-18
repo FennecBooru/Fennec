@@ -39,17 +39,17 @@ class TagMover
       else
         reason = "tag move (#{old_tag.name} -> #{new_tag.name})"
       end
-      old = tag.category
-      tag.update!(category: category, reason: reason, updater: user)
+      old = tag.category_id
+      tag.update!(category_id: category, reason: reason, updater: user)
       undos << [:update_tag_category, { id: tag.id, old: old, new: category }]
     end
   end
 
   def tag_category_update
     if !old_tag.is_locked? && old_tag.general? && !new_tag.general? && old_tag.post_count < AdminConfig.instance.alias_category_change_cutoff
-      return [old_tag, new_tag.category]
+      return [old_tag, new_tag.category_id]
     elsif !new_tag.is_locked? && new_tag.general? && !old_tag.general? && new_tag.post_count < AdminConfig.instance.alias_category_change_cutoff
-      return [new_tag, old_tag.category]
+      return [new_tag, old_tag.category_id]
     end
     [nil, nil]
   end

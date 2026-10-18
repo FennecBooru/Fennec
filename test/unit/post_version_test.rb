@@ -130,7 +130,7 @@ class PostVersionTest < ActiveSupport::TestCase
   context("Character groups:") do
     setup do
       @user = create(:user, created_at: 1.month.ago)
-      create(:tag, name: "fluffy_(oc)", category: TagCategory.character)
+      create(:tag, name: "fluffy_(oc)", category_id: TagCategory.character)
       @post = create(:post, tag_string: "solo")
       @v1 = @post.versions.last
     end

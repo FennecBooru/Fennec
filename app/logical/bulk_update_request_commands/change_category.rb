@@ -28,7 +28,7 @@ module BulkUpdateRequestCommands
     end
 
     def approved?
-      Tag.exists?(name: tag_name, category: TagCategory.value_for(category)) || (tag.blank? && TagCategory.value_for(category) == TagCategory.general)
+      Tag.exists?(name: tag_name, category_id: TagCategory.value_for(category)) || (tag.blank? && TagCategory.value_for(category) == TagCategory.general)
     end
 
     def category_changes
@@ -40,7 +40,7 @@ module BulkUpdateRequestCommands
       ensure_valid!
 
       tag = Tag.find_or_create_by_name(tag_name, user: approver)
-      tag.update_with!(approver, category: TagCategory.value_for(category))
+      tag.update_with!(approver, category_id: TagCategory.value_for(category))
     end
   end
 end

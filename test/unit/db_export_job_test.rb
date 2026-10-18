@@ -40,7 +40,7 @@ class DbExportJobTest < ActiveSupport::TestCase
         assert_equal(64, export.checksum.length)
         # jsonb doesn't preserve key insertion order, so compare as a set.
         assert_equal(
-          %w[id name post_count category related_tags related_tags_updated_at created_at updated_at is_locked].sort,
+          %w[id name post_count category_id related_tags related_tags_updated_at created_at updated_at is_locked].sort,
           export.columns.keys.sort,
         )
         assert_equal("bigint", export.columns["id"])

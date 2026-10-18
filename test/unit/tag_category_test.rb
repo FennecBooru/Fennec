@@ -50,8 +50,8 @@ class TagCategoryTest < ActiveSupport::TestCase
         assert_not(build(:tag_category, id: TagCategory::MAX_ID + 1).valid?)
 
         category = create(:tag_category, id: 600)
-        tag = create(:tag, category: 600)
-        tag.update!(category: TagCategory.general, updater: @admin)
+        tag = create(:tag, category_id: 600)
+        tag.update!(category_id: TagCategory.general, updater: @admin)
         category.update_columns(id: 601)
 
         assert_includes(build(:tag_category, id: 600).tap(&:valid?).errors[:id], "has had tags before, so it can't be reused")
@@ -132,7 +132,7 @@ class TagCategoryTest < ActiveSupport::TestCase
 
     context("the default category") do
       should("be given to new tags") do
-        assert_equal(TagCategory.general, Tag.new.category)
+        assert_equal(TagCategory.general, Tag.new.category_id)
       end
 
       should("move when another category is made the default") do
@@ -141,7 +141,7 @@ class TagCategoryTest < ActiveSupport::TestCase
 
         assert_equal(category.id, TagCategory.default_id)
         assert_not(TagCategory.find(TagCategory.general).is_default?)
-        assert_equal(category.id, Tag.new.category)
+        assert_equal(category.id, Tag.new.category_id)
       end
 
       should("not be removable directly") do
@@ -165,8 +165,8 @@ class TagCategoryTest < ActiveSupport::TestCase
       context("a category that had tags") do
         setup do
           @category = create(:tag_category, name: "gone", aliases: %w[gn])
-          tag = create(:tag, category: @category.id)
-          tag.update!(category: TagCategory.general, updater: @admin)
+          tag = create(:tag, category_id: @category.id)
+          tag.update!(category_id: TagCategory.general, updater: @admin)
         end
 
         should("be marked deleted and locked instead") do
@@ -201,7 +201,7 @@ class TagCategoryTest < ActiveSupport::TestCase
         end
 
         should("still need its tags moved first") do
-          create(:tag, category: @category.id)
+          create(:tag, category_id: @category.id)
 
           assert_not(@category.remove(@admin))
           assert_not(@category.reload.is_deleted?)
@@ -270,8 +270,8 @@ class TagCategoryTest < ActiveSupport::TestCase
       should("stop lower users from moving tags into the category") do
         tag = create(:tag)
 
-        assert_not(tag.update(category: TagCategory.invalid, updater: create(:moderator_user)))
-        assert_includes(tag.errors[:category], "can only be used by Admins and above")
+        assert_not(tag.update(category_id: TagCategory.invalid, updater: create(:moderator_user)))
+        assert_includes(tag.errors[:category_id], "can only be used by Admins and above")
       end
 
       should("only allow real levels") do
@@ -284,7 +284,18 @@ class TagCategoryTest < ActiveSupport::TestCase
         tag = create(:tag)
 
         assert_difference(-> { TagCategory.find(TagCategory.general).tag_count } => -1, -> { TagCategory.find(TagCategory.artist).tag_count } => 1) do
-          tag.update!(category: TagCategory.artist, updater: @admin)
+          tag.update!(category_id: TagCategory.artist, updater: @admin)
+        end
+      end
+
+      should("count created and destroyed tags") do
+        tag = nil
+        assert_difference(-> { TagCategory.find(TagCategory.artist).tag_count }, 1) do
+          tag = create(:tag, category_id: TagCategory.artist)
+        end
+        TagVersion.where(tag_id: tag.id).delete_all
+        assert_difference(-> { TagCategory.find(TagCategory.artist).tag_count }, -1) do
+          tag.destroy!
         end
       end
     end

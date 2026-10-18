@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_14_031322) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_18_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -1653,7 +1653,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_031322) do
   end
 
   create_table "tag_versions", force: :cascade do |t|
-    t.integer "category", null: false
+    t.integer "category_id", null: false
     t.datetime "created_at", precision: nil, null: false
     t.boolean "is_deprecated", null: false
     t.boolean "is_locked", null: false
@@ -1667,7 +1667,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_031322) do
   end
 
   create_table "tags", force: :cascade do |t|
-    t.integer "category", limit: 2, null: false
+    t.integer "category_id", limit: 2, null: false
     t.datetime "created_at", precision: nil, null: false
     t.bigint "creator_id", null: false
     t.inet "creator_ip_addr", null: false

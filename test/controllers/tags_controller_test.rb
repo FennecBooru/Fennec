@@ -6,7 +6,7 @@ class TagsControllerTest < ActionDispatch::IntegrationTest
   context("The tags controller") do
     setup do
       @user = create(:janitor_user)
-      @tag = create(:tag, name: "touhou", category: TagCategory.copyright, post_count: 1)
+      @tag = create(:tag, name: "touhou", category_id: TagCategory.copyright, post_count: 1)
     end
 
     context("edit action") do
@@ -40,7 +40,7 @@ class TagsControllerTest < ActionDispatch::IntegrationTest
 
       context("with blank search parameters") do
         should("strip the blank parameters with a redirect") do
-          get(tags_path, params: { search: { name: "touhou", category: "" } })
+          get(tags_path, params: { search: { name: "touhou", category_id: "" } })
 
           assert_redirected_to(tags_path(search: { name: "touhou" }))
         end
@@ -60,10 +60,10 @@ class TagsControllerTest < ActionDispatch::IntegrationTest
           Tag.delete_all
           @creator = create(:user)
           @admin = create(:admin_user)
-          @general_tag = create(:tag, name: "foo", category: TagCategory.general, post_count: 3, creator: @creator, creator_ip_addr: "127.0.0.2", is_locked: false)
-          @artist_tag = create(:tag, name: "bar", category: TagCategory.artist, post_count: 5, creator: @creator, creator_ip_addr: "127.0.0.2", is_locked: true)
-          @copyright_tag = create(:tag, name: "baz", category: TagCategory.copyright, post_count: 5, creator: @creator, creator_ip_addr: "127.0.0.2", is_locked: false)
-          @deprecated_tag = create(:deprecated_tag, name: "qux", category: TagCategory.general, post_count: 3, creator: @creator, creator_ip_addr: "127.0.0.2", is_deprecated: true)
+          @general_tag = create(:tag, name: "foo", category_id: TagCategory.general, post_count: 3, creator: @creator, creator_ip_addr: "127.0.0.2", is_locked: false)
+          @artist_tag = create(:tag, name: "bar", category_id: TagCategory.artist, post_count: 5, creator: @creator, creator_ip_addr: "127.0.0.2", is_locked: true)
+          @copyright_tag = create(:tag, name: "baz", category_id: TagCategory.copyright, post_count: 5, creator: @creator, creator_ip_addr: "127.0.0.2", is_locked: false)
+          @deprecated_tag = create(:deprecated_tag, name: "qux", category_id: TagCategory.general, post_count: 3, creator: @creator, creator_ip_addr: "127.0.0.2", is_deprecated: true)
           @wiki = create(:wiki_page, title: "foo")
           @artist = create(:artist, name: "bar")
         end
@@ -72,8 +72,8 @@ class TagsControllerTest < ActionDispatch::IntegrationTest
           search(:is_locked, "true").records { [@deprecated_tag, @artist_tag] }
           search(:is_deprecated, "true").records { [@deprecated_tag] }
           # categories only exist once a test starts, so these are looked up lazily
-          search(:category, -> { TagCategory.general }).name("general").records { [@deprecated_tag, @general_tag] }
-          search(:category, -> { "#{TagCategory.general},#{TagCategory.artist}" }).name("general,artist").records { [@deprecated_tag, @artist_tag, @general_tag] }
+          search(:category_id, -> { TagCategory.general }).name("general").records { [@deprecated_tag, @general_tag] }
+          search(:category_id, -> { "#{TagCategory.general},#{TagCategory.artist}" }).name("general,artist").records { [@deprecated_tag, @artist_tag, @general_tag] }
           search(:name, "foo").records { [@general_tag] }
           search(:name_matches, "bar").records { [@artist_tag] }
           search(:fuzzy_name_matches, "ba").records { [@copyright_tag, @artist_tag] }
@@ -108,10 +108,10 @@ class TagsControllerTest < ActionDispatch::IntegrationTest
       end
 
       should("update the tag") do
-        put_auth(tag_path(@tag), @user, params: { tag: { category: TagCategory.general } })
+        put_auth(tag_path(@tag), @user, params: { tag: { category_id: TagCategory.general } })
 
         assert_redirected_to(tag_path(@tag))
-        assert_equal(TagCategory.general, @tag.reload.category)
+        assert_equal(TagCategory.general, @tag.reload.category_id)
       end
 
       should("lock the tag for an admin") do
@@ -133,17 +133,17 @@ class TagsControllerTest < ActionDispatch::IntegrationTest
         end
 
         should("not update the category for a trusted user") do
-          put_auth(tag_path(@tag), create(:trusted_user), params: { tag: { category: TagCategory.general } })
+          put_auth(tag_path(@tag), create(:trusted_user), params: { tag: { category_id: TagCategory.general } })
 
-          assert_not_equal(TagCategory.general, @tag.reload.category)
+          assert_not_equal(TagCategory.general, @tag.reload.category_id)
         end
 
         should("update the category for an admin user") do
           @admin = create(:admin_user)
-          put_auth(tag_path(@tag), @admin, params: { tag: { category: TagCategory.general } })
+          put_auth(tag_path(@tag), @admin, params: { tag: { category_id: TagCategory.general } })
 
           assert_redirected_to(@tag)
-          assert_equal(TagCategory.general, @tag.reload.category)
+          assert_equal(TagCategory.general, @tag.reload.category_id)
         end
       end
 
@@ -153,32 +153,32 @@ class TagsControllerTest < ActionDispatch::IntegrationTest
         end
 
         should("not update the category for a janitor user") do
-          put_auth(tag_path(@tag), @user, params: { tag: { category: TagCategory.general } })
+          put_auth(tag_path(@tag), @user, params: { tag: { category_id: TagCategory.general } })
 
-          assert_not_equal(TagCategory.general, @tag.reload.category)
+          assert_not_equal(TagCategory.general, @tag.reload.category_id)
         end
 
         should("update the category for an admin user") do
           @admin = create(:admin_user)
-          put_auth(tag_path(@tag), @admin, params: { tag: { category: TagCategory.general } })
+          put_auth(tag_path(@tag), @admin, params: { tag: { category_id: TagCategory.general } })
 
           assert_redirected_to(@tag)
-          assert_equal(TagCategory.general, @tag.reload.category)
+          assert_equal(TagCategory.general, @tag.reload.category_id)
         end
       end
 
       should("not change category when the tag is too large to be changed by a janitor") do
-        @tag.update_with(@user, category: TagCategory.general, post_count: 10_001)
-        put_auth(tag_path(@tag), @user, params: { tag: { category: TagCategory.artist } })
+        @tag.update_with(@user, category_id: TagCategory.general, post_count: 10_001)
+        put_auth(tag_path(@tag), @user, params: { tag: { category_id: TagCategory.artist } })
 
         assert_response(:forbidden)
-        assert_equal(TagCategory.general, @tag.reload.category)
+        assert_equal(TagCategory.general, @tag.reload.category_id)
       end
 
       context("access control") do
         asserts do
-          access.gte(User::Levels::MEMBER).put { tag_path(@tag) }.params { { tag: { category: TagCategory.general } } }.success(:redirect)
-          access.gte(User::Levels::MEMBER).json.put { tag_path(@tag) }.params { { tag: { category: TagCategory.general } } }
+          access.gte(User::Levels::MEMBER).put { tag_path(@tag) }.params { { tag: { category_id: TagCategory.general } } }.success(:redirect)
+          access.gte(User::Levels::MEMBER).json.put { tag_path(@tag) }.params { { tag: { category_id: TagCategory.general } } }
         end
       end
     end

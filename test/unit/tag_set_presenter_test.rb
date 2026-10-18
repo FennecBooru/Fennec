@@ -5,11 +5,11 @@ require("test_helper")
 class TagSetPresenterTest < ActiveSupport::TestCase
   context("TagSetPresenter") do
     setup do
-      create(:tag, name: "bkub", category: TagCategory.artist)
-      create(:tag, name: "chen", category: TagCategory.character)
-      create(:tag, name: "cirno", category: TagCategory.character)
-      create(:tag, name: "solo", category: TagCategory.general)
-      create(:tag, name: "touhou", category: TagCategory.copyright)
+      create(:tag, name: "bkub", category_id: TagCategory.artist)
+      create(:tag, name: "chen", category_id: TagCategory.character)
+      create(:tag, name: "cirno", category_id: TagCategory.character)
+      create(:tag, name: "solo", category_id: TagCategory.general)
+      create(:tag, name: "touhou", category_id: TagCategory.copyright)
     end
 
     context("#split_tag_list_text method") do
@@ -28,7 +28,7 @@ class TagSetPresenterTest < ActiveSupport::TestCase
 
     context("#post_index_sidebar_tag_list_html method") do
       should("mark a deprecated tag with an icon and strike it through") do
-        create(:deprecated_tag, name: "old_tag", category: TagCategory.general)
+        create(:deprecated_tag, name: "old_tag", category_id: TagCategory.general)
         html = TagSetPresenter.new(%w[bkub old_tag]).post_index_sidebar_tag_list_html(followed_tags: [])
 
         assert_includes(html, "deprecated-tag")

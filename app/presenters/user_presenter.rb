@@ -226,7 +226,7 @@ class UserPresenter < ApplicationPresenter
       {
         name:        tag.name,
         count:       tag.post_count,
-        category_id: tag.category,
+        category_id: tag.category_id,
       }
     end
     tags.sort_by { |entry| indices[entry[:name]] }
@@ -241,7 +241,7 @@ class UserPresenter < ApplicationPresenter
       {
         name:        tag.name,
         count:       tag.post_count,
-        category_id: tag.category,
+        category_id: tag.category_id,
       }
     end
   end

@@ -98,7 +98,7 @@ services:
 
   # For this service to work properly, it must be accessible from /tags/autocomplete.json on the same url as the primary app
   autocompleted: # metrics port: 9396
-    image: ghcr.io/gayfurcity/autocompleted:084afe441b1aa0920a83a741521be550a5e38c5d
+    image: ghcr.io/gayfurcity/autocompleted:174db500da76689fc9844bee399280fc232069c7
     command: /app/autocompleted
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://$$SERVER_ADDR/up || exit 1

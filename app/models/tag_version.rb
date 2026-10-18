@@ -3,6 +3,7 @@
 class TagVersion < ApplicationRecord
   belongs_to_user(:updater, ip: true)
   belongs_to(:tag)
+  belongs_to(:category, class_name: "TagCategory", optional: true)
 
   module SearchMethods
     def query_dsl
@@ -22,7 +23,7 @@ class TagVersion < ApplicationRecord
   end
 
   def category_changed?
-    previous && previous.category != category
+    previous && previous.category_id != category_id
   end
 
   def is_locked_changed?

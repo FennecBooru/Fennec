@@ -7,7 +7,7 @@ class TagCategory < ApplicationRecord
   NAME_REGEX = /\A[a-z]+\z/
   COLOR_REGEX = /\A#(?:\h{3}|\h{4}|\h{6}|\h{8})\z/
   NEVER_MATCH = /(?!)/
-  MAX_ID = 32_767 # tags.category is a smallint
+  MAX_ID = 32_767 # tags.category_id is a smallint
 
   # Names the code looks categories up by (TagCategory.artist, tag.artist?, post.artist_tags, etc), and what stops
   # working when no category has the name. test/unit/tag_category_test.rb checks this matches the code
@@ -23,6 +23,7 @@ class TagCategory < ApplicationRecord
 
   belongs_to_user(:creator, ip: true, clones: :updater)
   belongs_to_user(:updater, ip: true)
+  has_many(:tags, foreign_key: :category_id, inverse_of: :category, dependent: nil)
   resolvable(:destroyer)
   attr_accessor(:new_category_id) # for the transfer tags form
 
@@ -192,7 +193,9 @@ class TagCategory < ApplicationRecord
       # insert_all needs every row to have the same keys, missing ones would be null instead of the column default
       keys = rows.flat_map(&:keys).uniq
       insert_all!(rows.map { |row| keys.index_with { |key| row.fetch(key) { column_defaults[key.to_s] } } }) if rows.any?
-      connection.execute("UPDATE tag_categories SET tag_count = (SELECT COUNT(*) FROM tags WHERE tags.category = tag_categories.id)")
+      # it's still tags.category while 20261014031322 runs, it's renamed after
+      column = connection.column_exists?(:tags, :category_id) ? "category_id" : "category"
+      connection.execute("UPDATE tag_categories SET tag_count = (SELECT COUNT(*) FROM tags WHERE tags.#{column} = tag_categories.id)")
       clear_cache
     end
 
@@ -305,12 +308,12 @@ class TagCategory < ApplicationRecord
   end
 
   def deletable?
-    !is_default? && !Tag.exists?(category: id)
+    !is_default? && !Tag.exists?(category_id: id)
   end
 
   # Tag versions and posts that still count it have the id
   def had_tags?
-    TagVersion.exists?(category: id) || posts_counted?
+    TagVersion.exists?(category_id: id) || posts_counted?
   end
 
   # Deletes the category, or for ones that had tags marks it deleted and locks it, so the id stays taken.
@@ -355,7 +358,7 @@ class TagCategory < ApplicationRecord
 
   # Ids aren't reused, so this skips ids that tags have had, including deleted categories'
   def assign_id
-    self.id ||= [TagCategory.unscoped.maximum(:id), Tag.maximum(:category), TagVersion.maximum(:category)].compact.max.to_i + 1
+    self.id ||= [TagCategory.unscoped.maximum(:id), Tag.maximum(:category_id), TagVersion.maximum(:category_id)].compact.max.to_i + 1
     return if id <= MAX_ID
     errors.add(:id, "would be past #{MAX_ID}, pick an unused one")
     throw(:abort)
@@ -403,7 +406,7 @@ class TagCategory < ApplicationRecord
       errors.add(:id, "must be a whole number from 0 to #{MAX_ID}")
     elsif TagCategory.exists?(id: id)
       errors.add(:id, "is already used by another category, or a deleted one")
-    elsif Tag.exists?(category: id) || TagVersion.exists?(category: id)
+    elsif Tag.exists?(category_id: id) || TagVersion.exists?(category_id: id)
       errors.add(:id, "has had tags before, so it can't be reused")
     end
   end
@@ -415,7 +418,7 @@ class TagCategory < ApplicationRecord
   def validate_deletable(abort: true)
     if is_default?
       errors.add(:base, "The default category can't be deleted")
-    elsif Tag.exists?(category: id)
+    elsif Tag.exists?(category_id: id)
       errors.add(:base, "Move the category's tags to another one before deleting it")
     end
     throw(:abort) if abort && errors.any?

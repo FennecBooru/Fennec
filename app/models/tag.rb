@@ -12,24 +12,23 @@ class Tag < ApplicationRecord
 
   validates(:name, uniqueness: true, tag_name: true, on: :create)
   validates(:name, length: { minimum: 1, maximum: 100 })
-  validates(:category, inclusion: { in: ->(_) { TagCategory.ids }, message: "is not a tag category" })
+  validates(:category_id, inclusion: { in: ->(_) { TagCategory.ids }, message: "is not a tag category" })
   validate(:user_can_create_tag?, on: :create)
-  validate(:user_can_change_category?, if: :category_changed?)
+  validate(:user_can_change_category?, if: :category_id_changed?)
   validate(:validate_deprecation_requires_wiki_page, if: -> { is_deprecated? && is_deprecated_changed? })
 
-  before_save(:update_category, if: :category_changed?)
+  before_save(:update_category, if: :category_id_changed?)
   before_save(:lock_when_deprecated, if: :is_deprecated?)
   after_create(:create_version)
   after_update(:create_version, if: :saved_change_to_watched_attributes?)
-  after_destroy(-> { TagCategory.where(id: category).update_all("tag_count = tag_count - 1") })
-  after_save(:update_category_tag_counts, if: :saved_change_to_category?)
+  belongs_to(:category, class_name: "TagCategory", counter_cache: :tag_count, optional: true, inverse_of: :tags)
   belongs_to_user(:creator, ip: true, clones: :updater)
   resolvable(:updater)
 
-  attribute(:category, :integer, default: -> { TagCategory.default_id })
+  attribute(:category_id, :integer, default: -> { TagCategory.default_id })
   attr_accessor(:reason)
 
-  scope(:in_category, ->(category) { where(category: TagCategory.get(category)&.id) })
+  scope(:in_category, ->(category) { where(category_id: TagCategory.get(category)&.id) })
 
   # Tag.artist etc, scoped to the category with that name or alias. Only defined for categories
   # that exist, use in_category when the category might not
@@ -45,7 +44,7 @@ class Tag < ApplicationRecord
   scope(:nonempty, -> { where.gt(post_count: 0) })
 
   def saved_change_to_watched_attributes?
-    saved_change_to_category? || saved_change_to_is_locked? || saved_change_to_is_deprecated?
+    saved_change_to_category_id? || saved_change_to_is_locked? || saved_change_to_is_deprecated?
   end
 
   module CountMethods
@@ -88,15 +87,15 @@ class Tag < ApplicationRecord
     module ClassMethods
       def category_for(tag_name)
         Cache.fetch("tc:#{tag_name}") do
-          Tag.where(name: tag_name).pick(:category) || TagCategory.default_id
+          Tag.where(name: tag_name).pick(:category_id) || TagCategory.default_id
         end
       end
 
       def categories_for(tag_names, disable_cache: false)
         if disable_cache
           tag_cats = {}
-          Tag.where(name: Array(tag_names)).select(%i[id name category]).find_each do |tag|
-            tag_cats[tag.name] = tag.category
+          Tag.where(name: Array(tag_names)).select(%i[id name category_id]).find_each do |tag|
+            tag_cats[tag.name] = tag.category_id
           end
           tag_cats
         else
@@ -104,9 +103,9 @@ class Tag < ApplicationRecord
           not_found = tag_names - found.keys
           if not_found.any?
             # Is multi_write worth it here? Normal usage of this will be short put lists and then never touched.
-            Tag.where(name: not_found).select(%i[id name category]).find_each do |tag|
-              Cache.write("tc:#{tag.name}", tag.category)
-              found[tag.name] = tag.category
+            Tag.where(name: not_found).select(%i[id name category_id]).find_each do |tag|
+              Cache.write("tc:#{tag.name}", tag.category_id)
+              found[tag.name] = tag.category_id
             end
           end
           found
@@ -123,12 +122,7 @@ class Tag < ApplicationRecord
     end
 
     def category_name
-      TagCategory.get(category)&.title || TagCategory.deleted_name(category)
-    end
-
-    def update_category_tag_counts
-      TagCategory.where(id: category_before_last_save).update_all("tag_count = tag_count - 1") unless category_before_last_save.nil?
-      TagCategory.where(id: category).update_all("tag_count = tag_count + 1")
+      TagCategory.get(category_id)&.title || TagCategory.deleted_name(category_id)
     end
 
     def update_category_post_counts!
@@ -147,18 +141,18 @@ class Tag < ApplicationRecord
     end
 
     def update_category_cache
-      Cache.write("tc:#{name}", category, expires_in: 3.hours)
+      Cache.write("tc:#{name}", category_id, expires_in: 3.hours)
     end
 
     def user_can_change_category?
-      cat = TagCategory.get(category)
+      cat = TagCategory.get(category_id)
       return false unless cat
       unless cat.can_use?(updater)
-        errors.add(:category, "can only be used by #{User::Levels.id_to_name(cat.min_level).pluralize} and above")
+        errors.add(:category_id, "can only be used by #{User::Levels.id_to_name(cat.min_level).pluralize} and above")
         return false
       end
       if cat.suffixes.present? && cat.suffixes.none? { |s| name&.ends_with?("_(#{s})") }
-        errors.add(:category, "can only be applied to tags that end with #{cat.suffixes.map { |s| "'_(#{s})'" }.join(', ')}")
+        errors.add(:category_id, "can only be applied to tags that end with #{cat.suffixes.map { |s| "'_(#{s})'" }.join(', ')}")
         false
       end
     end
@@ -172,7 +166,7 @@ class Tag < ApplicationRecord
       TagVersion.create(tag_id:          id,
                         updater:         updater,
                         updater_ip_addr: updater_ip_addr,
-                        category:        category.to_i,
+                        category_id:     category_id.to_i,
                         is_locked:       is_locked?,
                         is_deprecated:   is_deprecated?,
                         reason:          reason || "")
@@ -184,7 +178,7 @@ class Tag < ApplicationRecord
       category_name = name.to_s.delete_suffix("?")
       return super unless args.empty? && !block_given? && name.end_with?("?") && category_name.match?(TagCategory::NAME_REGEX)
       return super if self.class.attribute_names.include?(category_name)
-      category.present? && category == TagCategory.get(category_name)&.id
+      category_id.present? && category_id == TagCategory.get(category_name)&.id
     end
 
     def respond_to_missing?(name, include_private = false)
@@ -225,11 +219,11 @@ class Tag < ApplicationRecord
       existing.each do |tag|
         cat = names[tag.name]
         category_id = TagCategory.value_for(cat)
-        if cat && category_id != tag.category
+        if cat && category_id != tag.category_id
           if tag.category_editable_by_implicit?(user, artist: artist)
-            tag.update(category: category_id, reason: reason, updater: user)
+            tag.update(category_id: category_id, reason: reason, updater: user)
           else
-            tag.errors.add(:category, "cannot be changed implicitly through a tag prefix")
+            tag.errors.add(:category_id, "cannot be changed implicitly through a tag prefix")
           end
         end
         names.delete(tag.name)
@@ -238,7 +232,7 @@ class Tag < ApplicationRecord
       names.each do |name, cat|
         existing << Tag.new.tap do |t|
           t.name = name
-          t.category = TagCategory.value_for(cat)
+          t.category_id = TagCategory.value_for(cat)
           t.reason = reason
           t.creator = user
           t.save
@@ -265,11 +259,11 @@ class Tag < ApplicationRecord
           # next few lines if the category is changed.
           tag.update_category_cache
 
-          unless category_id == tag.category
+          unless category_id == tag.category_id
             if tag.category_editable_by_implicit?(user, artist: artist)
-              tag.update(category: category_id, reason: reason, updater: user)
+              tag.update(category_id: category_id, reason: reason, updater: user)
             else
-              tag.errors.add(:category, "cannot be changed implicitly through a tag prefix")
+              tag.errors.add(:category_id, "cannot be changed implicitly through a tag prefix")
             end
           end
         end
@@ -278,7 +272,7 @@ class Tag < ApplicationRecord
       else
         Tag.new.tap do |t|
           t.name = name
-          t.category = TagCategory.value_for(category)
+          t.category_id = TagCategory.value_for(category)
           t.reason = reason
           t.creator = user
           t.save
@@ -326,7 +320,7 @@ class Tag < ApplicationRecord
       super
         .field(:is_locked)
         .field(:is_deprecated)
-        .field(:category, multi: true)
+        .field(:category_id, multi: true)
         .field(:ip_addr, :creator_ip_addr)
         .field(:name, normalize: Tag.method(:normalize_name))
         .field(:name_matches, :name, normalize: Tag.method(:normalize_name))
@@ -386,7 +380,7 @@ class Tag < ApplicationRecord
 
   def category_editable_by?(user)
     return false if is_locked? && !user.is_admin?
-    return false if TagCategory.get(category)&.can_use?(user) == false
+    return false if TagCategory.get(category_id)&.can_use?(user) == false
     return true if post_count < AdminConfig.get_user(:tag_type_edit_limit, user)
     false
   end

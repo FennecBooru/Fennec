@@ -295,7 +295,7 @@ class CharacterTest < ActiveSupport::TestCase
       create(:character, name: "abc")
       tag.reload
 
-      assert_equal(TagCategory.character, tag.category)
+      assert_equal(TagCategory.character, tag.category_id)
       assert_equal("character creation", TagVersion.last.reason)
     end
 

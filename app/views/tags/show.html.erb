@@ -1,5 +1,5 @@
 <h1>
-  Tag: <%= link_to(@tag.name, posts_path(tags: @tag.name), class: "tag-type-#{@tag.category}") %>
+  Tag: <%= link_to(@tag.name, posts_path(tags: @tag.name), class: "tag-type-#{@tag.category_id}") %>
   <%= deprecated_tag_icon if @tag.is_deprecated? %>
 </h1>
 

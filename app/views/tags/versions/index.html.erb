@@ -11,9 +11,9 @@
     <% end %>
     <% t.column("Category") do |change| %>
       <% if change.category_changed? %>
-        <a class="<%= "tag-type-#{change.previous.category}" %>"><%= Tag.category_for_value(change.previous.category) %></a> ->
+        <a class="<%= "tag-type-#{change.previous.category_id}" %>"><%= Tag.category_for_value(change.previous.category_id) %></a> ->
       <% end %>
-      <a class="<%= "tag-type-#{change.category}" %>"><%= Tag.category_for_value(change.category) %></a>
+      <a class="<%= "tag-type-#{change.category_id}" %>"><%= Tag.category_for_value(change.category_id) %></a>
     <% end %>
     <% t.column("Locked") do |change| %>
       <% if change.is_locked_changed? %>
