@@ -31,5 +31,5 @@
 ### XXXs
 | Filename | line # | XXX |
 |:------|:------:|:------|
-| [app/models/post.rb](app/models/post.rb#L1856) | 1856 | This must happen *after* the `is_deleted` flag is set to true (issue #3419). |
+| [app/models/post.rb](app/models/post.rb#L1853) | 1853 | This must happen *after* the `is_deleted` flag is set to true (issue #3419). |
 | [test/test_helpers/minitest.rb](test/test_helpers/minitest.rb#L3) | 3 | Testing modules should not have a say in if we can or cannot use assert_equal with nil |
