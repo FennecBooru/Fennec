@@ -46,4 +46,28 @@ class AdminConfigTest < ActiveSupport::TestCase
       assert_not(AdminConfig.usable?(user, :records_per_page))
     end
   end
+
+  context("AdminConfig class readers") do
+    teardown do
+      AdminConfig.reset_column_information
+      AdminConfig.delete_cache
+    end
+
+    should("read columns") do
+      assert_equal(AdminConfig.instance.records_per_page, AdminConfig.records_per_page)
+      assert_equal(AdminConfig.instance.enable_signups, AdminConfig.enable_signups?)
+      assert_respond_to(AdminConfig, :records_per_page)
+      assert_raises(NoMethodError) { AdminConfig.not_a_column }
+    end
+
+    should("read columns added after the schema was loaded") do
+      AdminConfig.column_names
+      AdminConfig.connection.add_column(:admin_config, :test_column, :integer, null: false, default: 5)
+      AdminConfig.reset_column_information
+      AdminConfig.delete_cache
+
+      assert_equal(5, AdminConfig.test_column)
+      assert_equal(5, AdminConfig.instance.test_column)
+    end
+  end
 end

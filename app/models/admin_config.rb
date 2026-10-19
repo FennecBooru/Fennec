@@ -164,20 +164,23 @@ class AdminConfig < ApplicationRecord
     super
   end
 
-  column_names.each do |column|
-    # Every read of a config value (instance readers, the AdminConfig.foo/foo? class delegates
-    # below, and get/get_user/bypass? above, which all funnel through instance.public_send) needs
-    # to see the env override transparently, so it's applied here at the lowest level rather than
-    # in each of those call sites individually.
-    unless %w[id updated_at].include?(column)
-      define_method(column) do
-        next self.class.env_override(column) if self.class.env_override?(column)
-        super()
-      end
-    end
-    define_method("#{column}?") { !!public_send(column) } unless method_defined?(:"#{column}?")
-    define_singleton_method(column) { get(column) } unless singleton_methods.include?(column)
-    define_singleton_method("#{column}?") { !!public_send(column) } unless singleton_methods.include?(:"#{column}?")
+  # Every read of a config value (instance readers, the AdminConfig.foo/foo? class methods below,
+  # and get/get_user/bypass? above, which all funnel through instance.public_send) needs to see
+  # the env override, so it's applied at the lowest level rather than at each call site.
+  def _read_attribute(name, &)
+    return self.class.env_override(name) if self.class.env_override?(name)
+    super
+  end
+
+  # AdminConfig.foo / AdminConfig.foo? for every column
+  def self.method_missing(name, *args, &)
+    column = name.to_s.delete_suffix("?")
+    return super unless args.empty? && column_names.include?(column)
+    name.end_with?("?") ? !!get(column) : get(column)
+  end
+
+  def self.respond_to_missing?(name, include_private = false)
+    column_names.include?(name.to_s.delete_suffix("?")) || super
   end
 
   class << self

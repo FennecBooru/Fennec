@@ -47,6 +47,8 @@ module Migrations
         super
       ensure
         originals.each { |model, original| replace_const(model, original) }
+        # the migration probably changed its columns
+        originals.each_value { |original| original.try(:reset_column_information) }
       end
     end
 
