@@ -3,11 +3,11 @@
 # record: Post
 class PostApprovalPolicy < ApplicationPolicy
   def create?
-    approver? && (!record.is_a?(Post) || record.uploader_id != user.id || user.is_admin?)
+    AdminConfig.enable_post_approvals? && approver? && (!record.is_a?(Post) || record.uploader_id != user.id || user.is_admin?)
   end
 
   def destroy?
-    approver?
+    AdminConfig.enable_post_approvals? && approver?
   end
 
   def permitted_search_params

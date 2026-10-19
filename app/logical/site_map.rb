@@ -59,7 +59,7 @@ module SiteMap
     link("Audio Tracks", policy: AudioTrack)                                      { post_audio_tracks_path }
     link("Uploaders", policy: Post, action: :uploaders?)                          { uploaders_posts_path }
     link("Upload Listing", policy: Upload)                                        { uploads_path }
-    link("Disapprovals", policy: PostDisapproval)                                 { post_disapprovals_path }
+    link("Disapprovals", policy: PostDisapproval, visible: ->(_)                  { AdminConfig.enable_post_approvals? }) { post_disapprovals_path }
     link("Deletion Reasons", policy: PostDeletionReason)                          { post_deletion_reasons_path }
     link("Replacement Rejection Reasons", policy: PostReplacementRejectionReason) { post_replacement_rejection_reasons_path }
     link("Help")                                                                  { help_page_path(id: "posts") }
@@ -67,12 +67,12 @@ module SiteMap
   end
 
   section("Post Events") do
-    link("Listing")      { post_events_path }
-    link("Tag Changes")  { post_versions_path }
-    link("Approvals")    { post_approvals_path }
-    link("Flags")        { post_flags_path }
-    link("Appeals")      { post_appeals_path }
-    link("Replacements") { post_replacements_path }
+    link("Listing")                  { post_events_path }
+    link("Tag Changes")              { post_versions_path }
+    link("Approvals", visible: ->(_) { AdminConfig.enable_post_approvals? }) { post_approvals_path }
+    link("Flags")                    { post_flags_path }
+    link("Appeals")                  { post_appeals_path }
+    link("Replacements")             { post_replacements_path }
   end
 
   section("Popular") do

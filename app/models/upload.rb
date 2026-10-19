@@ -163,7 +163,7 @@ class Upload < ApplicationRecord
 
       if upload_as_in_progress? && uploader.can_upload_in_progress?
         p.is_in_progress = true
-      elsif !uploader.unrestricted_uploads? || (!uploader.can_approve_posts? && p.avoid_posting_artists.any?) || upload_as_pending?
+      elsif AdminConfig.enable_post_approvals? && (!uploader.unrestricted_uploads? || (!uploader.can_approve_posts? && p.avoid_posting_artists.any?) || upload_as_pending?)
         p.is_pending = true
       end
     end

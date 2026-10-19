@@ -5,6 +5,7 @@ class AdminConfig < ApplicationRecord
   validate(:validate_singleton_instance, on: :create)
   before_update(:log_update)
   after_update(-> { AdminConfig.delete_cache })
+  after_update_commit(-> { ApprovePendingPostsJob.perform_later }, if: -> { saved_change_to_enable_post_approvals?(to: false) })
   resolvable(:updater)
 
   def validate_singleton_instance

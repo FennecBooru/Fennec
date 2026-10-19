@@ -259,6 +259,7 @@ class AdminConfig
       add_boolean_field(:enable_bad_sources, hint: "Automatically tags \"bad\" sources (like #{GayFurCity.config.hostname}). Has no effect if autotagging is disabled")
       add_boolean_field(:enable_image_cropping, hint: "Enables generating a cropped 1:1 version of posts. Changing the option will not delete existing crops, or automatically regenerate them on old posts")
       add_boolean_field(:enable_takedowns, hint: "Enable the takedown system.")
+      add_boolean_field(:enable_post_approvals, hint: "Enable approving posts. When disabled, every upload is approved immediately, and posts can only be deleted and undeleted")
       add_boolean_field(:enable_avoid_posting, hint: "Enable the avoid posting (DNP) list. Disabling it keeps existing entries, but they won't be shown or enforced")
       add_boolean_field(:enable_tag_following, hint: "Enable following tags. Disabling it keeps existing follows, but stops new post notifications for them")
       add_boolean_field(:enable_reports, hint: "Enable reports (post views, searches, api key usage). Has no effect if no reports server is configured")

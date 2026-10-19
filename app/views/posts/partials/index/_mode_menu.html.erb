@@ -25,7 +25,9 @@
         <option value="lock-note">Lock notes</option>
       <% end %>
       <% if CurrentUser.user.is_approver? %>
-        <option value="approve">Approve</option>
+        <% if AdminConfig.enable_post_approvals? %>
+          <option value="approve">Approve</option>
+        <% end %>
         <option value="delete">Delete</option>
         <option value="undelete">Undelete</option>
         <option value="unflag">Unflag</option>

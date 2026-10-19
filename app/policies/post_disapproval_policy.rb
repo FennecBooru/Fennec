@@ -6,7 +6,7 @@ class PostDisapprovalPolicy < ApplicationPolicy
   end
 
   def create?
-    approver?
+    AdminConfig.enable_post_approvals? && approver?
   end
 
   def permitted_attributes

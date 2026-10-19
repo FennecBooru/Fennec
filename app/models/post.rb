@@ -436,7 +436,7 @@ class Post < ApplicationRecord
 
   module ApprovalMethods
     def is_approvable?(user)
-      !is_status_locked? && (is_pending? || is_appealed?) && approver.nil? && (uploader_id != user.id || user.is_admin?)
+      AdminConfig.enable_post_approvals? && !is_status_locked? && (is_pending? || is_appealed?) && approver.nil? && (uploader_id != user.id || user.is_admin?)
     end
 
     def is_appealable?
@@ -459,7 +459,7 @@ class Post < ApplicationRecord
     def finish_in_progress!(user)
       return unless is_in_progress?
       forced = uploader_id != user.id
-      update(is_in_progress: false, is_pending: true, approver: nil, updater: user)
+      update(is_in_progress: false, is_pending: AdminConfig.enable_post_approvals?, approver: nil, updater: user)
       PostEvent.add!(id, user, forced ? :in_progress_forced : :in_progress_finished)
     end
 
@@ -481,6 +481,7 @@ class Post < ApplicationRecord
     end
 
     def is_unapprovable?(user)
+      return false unless AdminConfig.enable_post_approvals?
       # Allow unapproval only by the approver
       return false if approver.present? && approver != user
       # Prevent unapproving self approvals by someone else

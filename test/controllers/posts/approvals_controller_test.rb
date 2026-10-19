@@ -119,6 +119,76 @@ module Posts
           end
         end
       end
+
+      should("queue approving all pending posts when approvals are turned off") do
+        assert_enqueued_with(job: ApprovePendingPostsJob) do
+          AdminConfig.instance.update!(enable_post_approvals: false, updater: create(:admin_user))
+        end
+        assert_no_enqueued_jobs(only: ApprovePendingPostsJob) do
+          AdminConfig.instance.update!(enable_post_approvals: true, updater: create(:admin_user))
+        end
+      end
+
+      context("when approvals are disabled") do
+        setup do
+          stub_admin_config(:enable_post_approvals, false)
+          @janitor = create(:janitor_user)
+          @post = create(:post, is_pending: true)
+        end
+
+        should("not allow approving, unapproving, or disapproving") do
+          post_auth(post_approvals_path(post_id: @post.id, format: :json), @janitor)
+
+          assert_response(:forbidden)
+          assert_predicate(@post.reload, :is_pending?)
+          @post.update_columns(is_pending: false, approver_id: @janitor.id)
+          delete_auth(post_approval_path(@post, format: :json), @janitor)
+
+          assert_response(:forbidden)
+          post_auth(post_disapprovals_path(format: :json), @janitor, params: { post_disapproval: { post_id: @post.id, reason: "other" } })
+
+          assert_response(:forbidden)
+        end
+
+        should("still allow deleting and undeleting") do
+          delete_auth(post_path(@post), @janitor, params: { reason: "test" })
+
+          assert_predicate(@post.reload, :is_deleted?)
+          put_auth(undelete_post_path(@post), @janitor, params: { format: :json })
+
+          assert_not(@post.reload.is_deleted?)
+        end
+
+        should("upload posts as approved") do
+          upload = create(:jpg_upload, uploader: create(:user, created_at: 2.weeks.ago), as_pending: true)
+
+          assert_not(upload.post.is_pending?)
+        end
+
+        should("not put finished in progress posts into the queue") do
+          @post.update_columns(is_pending: false, is_in_progress: true)
+          @post.finish_in_progress!(@janitor)
+
+          assert_not(@post.reload.is_pending?)
+        end
+
+        should("approve all pending posts") do
+          deleted = create(:post, is_pending: true, is_deleted: true)
+          ApprovePendingPostsJob.perform_now
+
+          assert_not(@post.reload.is_pending?)
+          assert_equal(User.system, @post.approver)
+          assert_predicate(deleted.reload, :is_pending?)
+        end
+
+        should("not show approval controls") do
+          get_auth(post_path(@post), @janitor)
+
+          assert_select(".approve-post-link", count: 0)
+          assert_select(".disapprove-post-link", count: 0)
+          assert_select("#janitor-toolbar-toggle", count: 0)
+        end
+      end
     end
   end
 end

@@ -15,7 +15,7 @@
         <% if CurrentUser.user.id == post.uploader_id %>
           <%= link_to("Mark as Done", finish_in_progress_post_path(post), method: :put, class: "button btn-neutral") %>
         <% else %>
-          <%= link_to("Force into Pending Queue", finish_in_progress_post_path(post), method: :put, class: "button btn-neutral") %>
+          <%= link_to(AdminConfig.enable_post_approvals? ? "Force into Pending Queue" : "Mark as Done", finish_in_progress_post_path(post), method: :put, class: "button btn-neutral") %>
         <% end %>
       </div>
     <% end %>

@@ -47,9 +47,11 @@
     <% end %>
 
   </div>
+  <% if policy(PostDisapproval).create? %>
   <div class="quick-mod-group">
     <%= link_to("Disapprove", "#", data: { post_id: post.id }, class: "detailed-rejection-link button btn-neutral btn-important") %> |
     <%= tag.a("Borderline Quality", href: "#", data: { pid: post.id, reason: "borderline_quality" }, class: "disapprove-post-link button btn-neutral") %> &bull;
     <%= tag.a("Borderline Relevancy", href: "#", data: { pid: post.id, reason: "borderline_relevancy" }, class: "disapprove-post-link button btn-neutral") %>
   </div>
+  <% end %>
 </div>
