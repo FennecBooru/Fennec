@@ -198,7 +198,7 @@ module SiteMap
     link("Contact")                   { contact_path }
     link("Staff")                     { staff_path }
     link("Takedowns", visible: ->(_)  { AdminConfig.enable_takedowns? }) { takedown_static_path }
-    link("Discord", visible: ->(user) { user.can_discord? }) { discord_get_path }
+    link("Discord", visible: ->(user) { AdminConfig.enable_discord? && user.can_discord? }) { discord_get_path }
     link("Themes")                    { theme_path }
     link("Keyboard Shortcuts")        { keyboard_shortcuts_path }
     link("Help Index")                { help_pages_path }

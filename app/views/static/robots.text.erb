@@ -78,7 +78,9 @@ Disallow: <%= search_wiki_pages_path %>
 Disallow: <%= show_or_new_wiki_pages_path %>
 Disallow: <%= revert_wiki_page_path(id: "*") %>
 Disallow: <%= keyboard_shortcuts_path %>
+<% if AdminConfig.enable_discord? %>
 Disallow: <%= discord_get_path %>
+<% end %>
 Disallow: <%= toggle_mobile_mode_path %>
 Disallow: <%= theme_path %>
 Disallow: <%= qtag_path(id: "*") %>

@@ -80,6 +80,10 @@ class StaticController < ApplicationController
   end
 
   def discord
+    unless AdminConfig.enable_discord?
+      raise(FeatureUnavailable) if CurrentUser.user.is_staff?
+      return render404
+    end
     unless CurrentUser.can_discord?
       raise(User::PrivilegeError, "You must have an account for at least one week in order to join the Discord server.")
     end

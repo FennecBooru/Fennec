@@ -48,5 +48,39 @@ class StaticControllerTest < ActionDispatch::IntegrationTest
         assert_equal(6, response.parsed_body["icons"].length)
       end
     end
+
+    context("the discord action") do
+      setup do
+        @user = create(:user, created_at: 2.weeks.ago)
+      end
+
+      should("render") do
+        get_auth(discord_get_path, @user)
+
+        assert_response(:success)
+        assert_select("#nav a[href='#{discord_get_path}']")
+      end
+
+      context("when discord is disabled") do
+        setup do
+          stub_admin_config(:enable_discord, false)
+        end
+
+        should("not be available") do
+          get_auth(discord_get_path, @user)
+
+          assert_response(:not_found)
+          get_auth(discord_get_path, create(:moderator_user))
+
+          assert_response(:not_implemented)
+        end
+
+        should("hide the links") do
+          get_auth(site_map_path, @user)
+
+          assert_select("a[href='#{discord_get_path}']", count: 0)
+        end
+      end
+    end
   end
 end
