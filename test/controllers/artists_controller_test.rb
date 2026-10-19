@@ -336,5 +336,40 @@ class ArtistsControllerTest < ActionDispatch::IntegrationTest
         assert_equal(name, @avoid_posting.reload.artist_name)
       end
     end
+
+    context("when artist pages are disabled") do
+      setup do
+        stub_admin_config(:enable_artist_pages, false)
+        @member = create(:user)
+      end
+
+      should("not be available to users") do
+        [artists_path, artist_path(@artist), show_or_new_artists_path(name: "masao"), artist_urls_path, artist_versions_path].each do |path|
+          get_auth(path, @member)
+
+          assert_response(:not_implemented, path)
+        end
+      end
+
+      should("still be available to staff") do
+        get_auth(artist_path(@artist), @user)
+
+        assert_response(:success)
+      end
+
+      should("link artist tags to their posts") do
+        @post = create(:post, tag_string: "artist:masao")
+        get_auth(post_path(@post), @member)
+
+        assert_response(:success)
+        assert_select("a[href='#{show_or_new_artists_path(name: 'masao')}']", count: 0)
+        assert_select("a[href='#{artists_path}']", count: 0)
+        assert_includes(DTextHelper.parse("[[masao]]").fetch(:dtext), %(href="/posts?tags=masao"))
+
+        get_auth(site_map_path, @member)
+
+        assert_select("a[href='#{artist_versions_path}']", count: 0)
+      end
+    end
   end
 end

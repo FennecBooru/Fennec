@@ -46,8 +46,10 @@
         <span>Note Changes</span>
         <span><%= presenter.note_version_count %> on <%= presenter.noted_posts_count %> posts</span>
 
-        <span>Artist Changes</span>
-        <span><%= presenter.artist_version_count %></span>
+        <% if AdminConfig.enable_artist_pages? %>
+          <span>Artist Changes</span>
+          <span><%= presenter.artist_version_count %></span>
+        <% end %>
 
         <span>Character Changes</span>
         <span><%= presenter.character_version_count %></span>

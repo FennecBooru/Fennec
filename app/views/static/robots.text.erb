@@ -2,12 +2,16 @@ User-agent: *
 Crawl-delay: 1
 Disallow: /admin
 Disallow: /moderator
+<% if AdminConfig.enable_artist_pages? %>
 Disallow: <%= artist_urls_path %>
 Disallow: <%= artist_versions_path %>
+<% end %>
 Disallow: <%= avoid_postings_path %>
 Disallow: <%= avoid_posting_versions_path %>
 Disallow: <%= api_keys_path %>
+<% if AdminConfig.enable_artist_pages? %>
 Disallow: <%= show_or_new_artists_path %>
+<% end %>
 Disallow: <%= bans_path %>
 Disallow: <%= bulk_update_requests_path %>
 <% if AdminConfig.enable_comments? %>

@@ -1583,6 +1583,15 @@ class PostTest < ActiveSupport::TestCase
           assert_match(/Artist \[\[bkub\]\] requires an artist entry./, @post.warnings.full_messages.join)
         end
 
+        should("not warn about a missing artist entry when artist pages are disabled") do
+          stub_admin_config(:enable_artist_pages, false)
+          @post.add_tag("artist:bkub")
+          @post.updater = @user
+          @post.save
+
+          assert_no_match(/requires an artist entry/, @post.warnings.full_messages.join)
+        end
+
         should("warn when adding a deprecated tag") do
           tag = create(:deprecated_tag)
           @post.add_tag(tag.name)

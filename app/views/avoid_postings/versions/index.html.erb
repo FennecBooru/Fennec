@@ -4,7 +4,7 @@
 
 <%= table_for(@avoid_posting_versions, class: "striped") do |t| %>
   <% t.column("Artist", th: { class: "dnp-artist" }, td: { class: "dnp-artist" }) do |avoid_posting_version| %>
-    <%= link_to(avoid_posting_version.artist_name, artist_path(avoid_posting_version.artist)) %>
+    <%= link_to(avoid_posting_version.artist_name, artist_page_path(avoid_posting_version.artist_name)) %>
   <% end %>
   <% t.column("Details", th: { class: "dnp-details", width: "60%" }, td: { class: "dnp-details" }) do |avoid_posting_version| %>
     <% previous = avoid_posting_version.previous %>

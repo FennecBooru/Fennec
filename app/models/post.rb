@@ -2340,7 +2340,7 @@ class Post < ApplicationRecord
       end
 
       new_artist_tags.each do |tag|
-        if tag.artist.blank?
+        if tag.artist.blank? && AdminConfig.enable_artist_pages?
           warnings.add(:base, "Artist [[#{tag.name}]] requires an artist entry. \"Create new artist entry\":[/artists/new?artist%5Bname%5D=#{CGI.escape(tag.name)}]")
         end
       end

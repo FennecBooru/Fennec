@@ -4,7 +4,7 @@
 <%= table_for(@avoid_postings, class: "striped dnp-list") do |t| %>
   <% t.column("Artist", th: { class: "dnp-artist" }, td: { class: "dnp-artist" }) do |avoid_posting| %>
     <span class="dnp-artist-names">
-      <%= link_to(avoid_posting.artist_name, artist_path(avoid_posting.artist)) %>
+      <%= link_to(avoid_posting.artist_name, artist_page_path(avoid_posting.artist_name)) %>
       <% if avoid_posting.other_names.present? %>
         <span>(<%= link_to_artists(avoid_posting.other_names, hide_new_notice: true) %>)</span>
       <% end %>

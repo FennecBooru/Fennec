@@ -89,7 +89,9 @@ module DTextHelper
         node["class"] += " tag-type-#{tag.category_id}"
       end
 
-      if tag.present? && tag.artist?
+      if tag.present? && tag.artist? && !AdminConfig.enable_artist_pages?
+        node["href"] = "/posts?tags=#{CGI.escape(name)}"
+      elsif tag.present? && tag.artist?
         node["href"] = "/artists/show_or_new?name=#{CGI.escape(name)}"
 
         if artist.blank?

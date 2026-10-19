@@ -261,6 +261,7 @@ class AdminConfig
       add_boolean_field(:enable_takedowns, hint: "Enable the takedown system.")
       add_boolean_field(:enable_post_approvals, hint: "Enable approving posts. When disabled, every upload is approved immediately, and posts can only be deleted and undeleted")
       add_boolean_field(:enable_replacement_approvals, hint: "Enable approving replacements. When disabled, every replacement is approved immediately")
+      add_boolean_field(:enable_artist_pages, hint: "Enable the artist pages. When disabled, only staff can view and edit artists, so avoid posting entries and linked uploaders can still be managed. Artist links go to the artist's posts instead")
       add_boolean_field(:enable_comments, hint: "Enable comments. Disabling it keeps existing comments, but hides them")
       add_boolean_field(:enable_wiki, hint: "Enable the wiki. When disabled, only staff can view and edit wiki pages, so the pages behind the static and help pages can still be edited. Tag links go to the tag's posts instead")
       add_boolean_field(:enable_post_sets, name: "Enable Sets", hint: "Enable sets. When disabled, the set metatags are ignored and posts won't show their sets")

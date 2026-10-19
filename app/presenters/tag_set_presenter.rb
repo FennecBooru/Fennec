@@ -235,6 +235,7 @@ class TagSetPresenter < ApplicationPresenter
     marker = tag.is_deprecated? ? h.deprecated_tag_icon : "?"
 
     if category == TagCategory.artist
+      return "" unless AdminConfig.enable_artist_pages?
       safe_join([link_to(marker, r.show_or_new_artists_path(name: name), class: "wiki-link", rel: "nofollow"), " "])
     elsif AdminConfig.enable_wiki?
       safe_join([link_to(marker, r.show_or_new_wiki_pages_path(title: name), class: "wiki-link", rel: "nofollow"), " "])

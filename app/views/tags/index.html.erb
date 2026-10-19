@@ -8,7 +8,7 @@
     <% marker = tag.is_deprecated? ? deprecated_tag_icon : "?" %>
     <span class="category-<%= tag.category_id %>">
       <% if tag.artist? %>
-        <%= link_to(marker, show_or_new_artists_path(name: tag.name), class: "wiki-link") %>
+        <%= link_to(marker, show_or_new_artists_path(name: tag.name), class: "wiki-link") if AdminConfig.enable_artist_pages? %>
       <% elsif AdminConfig.enable_wiki? %>
         <%= link_to_wiki_or_new(marker, tag.name, class: "wiki-link") %>
       <% end %>

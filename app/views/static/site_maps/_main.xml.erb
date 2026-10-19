@@ -29,11 +29,13 @@
       <% xml.lastmod((ForumPost.maximum(:updated_at) || now).utc.iso8601) %>
     <% end %>
   <% end %>
-  <% xml.url do %>
-    <% xml.loc(artists_url) %>
-    <% xml.priority("0.7") %>
-    <% xml.changefreq("always") %>
-    <% xml.lastmod((Artist.maximum(:updated_at) || now).utc.iso8601) %>
+  <% if AdminConfig.enable_artist_pages? %>
+    <% xml.url do %>
+      <% xml.loc(artists_url) %>
+      <% xml.priority("0.7") %>
+      <% xml.changefreq("always") %>
+      <% xml.lastmod((Artist.maximum(:updated_at) || now).utc.iso8601) %>
+    <% end %>
   <% end %>
   <% xml.url do %>
     <% xml.loc(help_pages_url) %>

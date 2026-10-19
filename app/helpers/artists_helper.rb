@@ -1,7 +1,14 @@
 # frozen_string_literal: true
 
 module ArtistsHelper
+  # without artist pages, artist links go to the artist's posts
+  def artist_page_path(name)
+    return posts_path(tags: name) unless AdminConfig.enable_artist_pages?
+    show_or_new_artists_path(name: name)
+  end
+
   def link_to_artist(name, hide_new_notice: false)
+    return link_to(name, posts_path(tags: name)) unless AdminConfig.enable_artist_pages?
     artist = Artist.find_by(name: name)
 
     if artist
@@ -23,7 +30,7 @@ module ArtistsHelper
   def link_to_pool_artists(names)
     safe_join(names.map do |name|
       tag = Tag.find_or_create_by_name(name, user: User.system)
-      link_to(name, show_or_new_artists_path(name: name), class: "tag-type-#{tag.category_id}")
+      link_to(name, artist_page_path(name), class: "tag-type-#{tag.category_id}")
     end, ", ")
   end
 end

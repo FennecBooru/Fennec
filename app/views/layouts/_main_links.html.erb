@@ -6,7 +6,7 @@
 <% end %>
 <%= nav_link_to("Posts", posts_path) %>
 <%= nav_link_to_if(AdminConfig.enable_comments?, "Comments", comments_path(group_by: "post")) %>
-<%= nav_link_to("Artists", artists_path) %>
+<%= nav_link_to_if(AdminConfig.enable_artist_pages?, "Artists", artists_path) %>
 <%= nav_link_to("Tags", tags_path) %>
 <%= nav_link_to_if(AdminConfig.enable_pools?, "Pools", gallery_pools_path) %>
 <%= nav_link_to_if(AdminConfig.enable_post_sets?, "Sets", post_sets_path) %>

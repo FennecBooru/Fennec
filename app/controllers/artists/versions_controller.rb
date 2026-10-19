@@ -2,6 +2,7 @@
 
 module Artists
   class VersionsController < ApplicationController
+    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_artist_pages? || CurrentUser.user.is_staff? })
     respond_to(:html, :json)
 
     def index

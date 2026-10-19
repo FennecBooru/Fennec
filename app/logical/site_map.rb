@@ -50,6 +50,8 @@ module SiteMap
   pools = ->(_) { AdminConfig.enable_pools? }
   sets = ->(_) { AdminConfig.enable_post_sets? }
   comments = ->(_) { AdminConfig.enable_comments? }
+  # staff can still get to the artists to manage avoid posting entries and linked uploaders
+  artists = ->(user) { AdminConfig.enable_artist_pages? || user.is_staff? }
   # staff can still get to the wiki to edit the static and help pages
   wiki = ->(user) { AdminConfig.enable_wiki? || user.is_staff? }
 
@@ -108,13 +110,13 @@ module SiteMap
   end
 
   section("Artists") do
-    link("Listing")                              { artists_path }
-    link("URLs")                                 { artist_urls_path }
-    link("Changes")                              { artist_versions_path }
+    link("Listing", visible: artists)                                                   { artists_path }
+    link("URLs", visible: artists)                                                      { artist_urls_path }
+    link("Changes", visible: artists)                                                   { artist_versions_path }
     link("Avoid Posting Entries", visible: ->(_) { AdminConfig.enable_avoid_posting? }) { avoid_postings_path }
     link("Avoid Posting Changes", visible: ->(_) { AdminConfig.enable_avoid_posting? }) { avoid_posting_versions_path }
     link("Avoid Posting List", visible: ->(_)    { AdminConfig.enable_avoid_posting? }) { avoid_posting_static_path }
-    link("Help")                                 { help_page_path(id: "artists") }
+    link("Help", visible: artists)                                                      { help_page_path(id: "artists") }
   end
 
   section("Characters") do
