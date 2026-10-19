@@ -120,13 +120,25 @@ module Posts
         end
       end
 
-      should("queue approving all pending posts when approvals are turned off") do
-        assert_enqueued_with(job: ApprovePendingPostsJob) do
+      should("queue the config update job when approvals change") do
+        assert_enqueued_with(job: AdminConfigUpdateJob, args: ["enable_post_approvals", false]) do
           AdminConfig.instance.update!(enable_post_approvals: false, updater: create(:admin_user))
         end
-        assert_no_enqueued_jobs(only: ApprovePendingPostsJob) do
+        assert_enqueued_with(job: AdminConfigUpdateJob, args: ["enable_post_approvals", true]) do
           AdminConfig.instance.update!(enable_post_approvals: true, updater: create(:admin_user))
         end
+        assert_no_enqueued_jobs(only: AdminConfigUpdateJob) do
+          AdminConfig.instance.update!(enable_signups: false, updater: create(:admin_user))
+        end
+      end
+
+      should("not approve pending posts when approvals are on") do
+        post = create(:post, is_pending: true)
+        AdminConfigUpdateJob.perform_now("enable_post_approvals", true)
+        # stale, approvals were turned back on before it ran
+        AdminConfigUpdateJob.perform_now("enable_post_approvals", false)
+
+        assert_predicate(post.reload, :is_pending?)
       end
 
       context("when approvals are disabled") do
@@ -174,7 +186,7 @@ module Posts
 
         should("approve all pending posts") do
           deleted = create(:post, is_pending: true, is_deleted: true)
-          ApprovePendingPostsJob.perform_now
+          AdminConfigUpdateJob.perform_now("enable_post_approvals", false)
 
           assert_not(@post.reload.is_pending?)
           assert_equal(User.system, @post.approver)

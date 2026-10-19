@@ -105,6 +105,44 @@ module Posts
           assert_equal("pending", @post.replacements.last.status)
         end
 
+        context("when replacement approvals are disabled") do
+          setup do
+            stub_admin_config(:enable_replacement_approvals, false)
+            disable_image_size_checks!
+            @member = create(:user, created_at: 2.weeks.ago)
+            @other_post = create(:gif_upload, uploader: create(:user, created_at: 2.weeks.ago)).post
+          end
+
+          should("approve replacements from anyone") do
+            params = { format: :json, post_id: @other_post.id, post_replacement: { file: fixture_file_upload("alpha.png"), reason: "test replacement" } }
+            post_auth(post_replacements_path, @member, params: params)
+
+            assert_response(:success)
+            replacement = @other_post.replacements.find_by!(reason: "test replacement")
+
+            assert_predicate(replacement, :approved?)
+            assert_equal(User.system, replacement.approver)
+            assert_not(replacement.penalize_uploader_on_approve)
+          end
+
+          should("approve pending replacements") do
+            pending = @replacement
+            deleted = create(:apng_replacement, creator: @member, post: @other_post)
+            @other_post.update_columns(is_deleted: true)
+            AdminConfigUpdateJob.perform_now("enable_replacement_approvals", false)
+
+            assert_predicate(pending.reload, :approved?)
+            assert_predicate(deleted.reload, :pending?)
+          end
+
+          should("queue approving pending replacements when turned off") do
+            AdminConfig.any_instance.unstub(:enable_replacement_approvals)
+            assert_enqueued_with(job: AdminConfigUpdateJob, args: ["enable_replacement_approvals", false]) do
+              AdminConfig.instance.update!(enable_replacement_approvals: false, updater: @admin)
+            end
+          end
+        end
+
         should("automatically approve replacements on in-progress posts regardless of approver status") do
           disable_image_size_checks!
           member = create(:user, created_at: 2.weeks.ago)

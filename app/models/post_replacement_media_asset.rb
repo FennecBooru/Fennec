@@ -14,7 +14,9 @@ class PostReplacementMediaAsset < MediaAssetWithVariants
 
   def update_post_replacement
     return unless post_replacement&.valid?
-    post_replacement.pending! if post_replacement.uploading?
+    return unless post_replacement.uploading?
+    post_replacement.pending!
+    AdminConfigUpdateJob.perform_later("enable_replacement_approvals", false) unless AdminConfig.enable_replacement_approvals?
   end
 
   def initialize_storage_id

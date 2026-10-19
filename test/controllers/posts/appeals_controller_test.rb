@@ -129,6 +129,12 @@ module Posts
         end
       end
 
+      should("queue the config update job when appeals are turned off") do
+        assert_enqueued_with(job: AdminConfigUpdateJob, args: ["enable_post_appeals", false]) do
+          AdminConfig.instance.update!(enable_post_appeals: false, updater: create(:admin_user))
+        end
+      end
+
       context("when appeals are disabled") do
         setup do
           stub_admin_config(:enable_post_appeals, false)
@@ -149,6 +155,21 @@ module Posts
           get_auth(post_path(@post), @user)
 
           assert_select("#appeal", count: 0)
+        end
+
+        should("accept pending appeals") do
+          stub_admin_config(:enable_post_appeals, true)
+          locked = create(:post_appeal)
+          locked.post.update_columns(is_status_locked: true)
+          stub_admin_config(:enable_post_appeals, false)
+          AdminConfigUpdateJob.perform_now("enable_post_appeals", false)
+
+          assert_predicate(@appeal.reload, :accepted?)
+          assert_equal(User.system, @appeal.updater)
+          assert_not(@appeal.post.reload.is_deleted?)
+          assert_not(@appeal.post.is_appealed?)
+          assert_predicate(locked.reload, :rejected?)
+          assert_predicate(locked.post.reload, :is_deleted?)
         end
 
         should("still allow rejecting existing appeals") do

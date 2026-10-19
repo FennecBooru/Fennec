@@ -5,8 +5,17 @@ class AdminConfig < ApplicationRecord
   validate(:validate_singleton_instance, on: :create)
   before_update(:log_update)
   after_update(-> { AdminConfig.delete_cache })
-  after_update_commit(-> { ApprovePendingPostsJob.perform_later }, if: -> { saved_change_to_enable_post_approvals?(to: false) })
+  after_update_commit(:enqueue_update_jobs)
   resolvable(:updater)
+
+  # changing any of these runs AdminConfigUpdateJob with the new value
+  UPDATE_JOB_OPTIONS = %i[enable_post_approvals enable_replacement_approvals enable_post_appeals].freeze
+
+  def enqueue_update_jobs
+    saved_changes.slice(*UPDATE_JOB_OPTIONS.map(&:to_s)).each do |name, (_old, value)|
+      AdminConfigUpdateJob.perform_later(name, value)
+    end
+  end
 
   def validate_singleton_instance
     errors.add(:base, "Only one config record per instance is allowed") if AdminConfig.exists?(id: AdminConfig.config_id)

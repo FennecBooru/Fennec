@@ -37,7 +37,7 @@ class PostReplacementPolicy < ApplicationPolicy
 
   def permitted_attributes
     attr = %i[direct_url file reason source checksum]
-    attr += %i[as_pending] if approver?
+    attr += %i[as_pending] if approver? && AdminConfig.enable_replacement_approvals?
     attr
   end
 

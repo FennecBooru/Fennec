@@ -42,6 +42,8 @@ module Posts
       # queue - regardless of who's replacing them or whether they can normally approve posts.
       if @post_replacement.pending? && (@post.is_in_progress? || (CurrentUser.user.can_approve_posts? && @post_replacement.as_pending.to_s.falsy?))
         @post_replacement.approve!(CurrentUser.user, penalize_current_uploader: @post_replacement.post.uploader != @post_replacement.creator)
+      elsif @post_replacement.pending? && !AdminConfig.enable_replacement_approvals?
+        @post_replacement.approve!(User.system, penalize_current_uploader: false)
       end
       respond_to do |format|
         format.json do
