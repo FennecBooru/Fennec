@@ -124,8 +124,9 @@ class PostPolicy < ApplicationPolicy
     attr += %i[is_rating_locked thumbnail_frame] if user.is_trusted?
     attr += %i[is_note_locked bg_color] if user.is_janitor?
     attr += %i[is_unlisted] if user.is_approver?
-    attr += %i[is_comment_locked] if user.is_moderator?
-    attr += %i[is_status_locked is_comment_disabled locked_tags hide_from_anonymous hide_from_search_engines min_edit_level] if user.is_admin?
+    attr += %i[is_comment_locked] if user.is_moderator? && AdminConfig.enable_comments?
+    attr += %i[is_comment_disabled] if user.is_admin? && AdminConfig.enable_comments?
+    attr += %i[is_status_locked locked_tags hide_from_anonymous hide_from_search_engines min_edit_level] if user.is_admin?
     attr
   end
 

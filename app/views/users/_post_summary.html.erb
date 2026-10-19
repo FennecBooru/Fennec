@@ -5,7 +5,7 @@
     </h2>
     <span class="box-extra">
       <%= link_to(sanitize("<b>#{artist.post_count} total</b>"), favorites_path(user_id: user.id)) %>
-      <%= link_to(sanitize("<b>Comments</b>"), comments_path(group_by: "comment", search: { post_tags_match: artist.name })) %>
+      <%= link_to(sanitize("<b>Comments</b>"), comments_path(group_by: "comment", search: { post_tags_match: artist.name })) if AdminConfig.enable_comments? %>
     </span>
     <div class="box-posts">
       <% presenter.artwork(artist.name).each do |post| %>
@@ -27,7 +27,7 @@
       <%= link_to(sanitize("<b>#{user.post_replacement_rejected_count} rejected</b>"), post_replacements_path(search: { creator_id: user.id, status: "rejected" })) %>
       <%= link_to_if(PostVotePolicy.new(CurrentUser.user, presenter).index?, sanitize("<b>#{user.post_vote_count} Votes</b>"), { controller: "posts/votes", search: { user_name: user.name } }) { "" } %>
       <span class="spacer"></span>
-      <%= link_to(sanitize("<b>Comments</b>"), comments_path(group_by: "comment", search: { poster_id: user.id })) %>
+      <%= link_to(sanitize("<b>Comments</b>"), comments_path(group_by: "comment", search: { poster_id: user.id })) if AdminConfig.enable_comments? %>
     </span>
     <div class="box-posts">
       <% presenter.uploads.each do |post| %>

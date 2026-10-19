@@ -10,9 +10,11 @@ Disallow: <%= api_keys_path %>
 Disallow: <%= show_or_new_artists_path %>
 Disallow: <%= bans_path %>
 Disallow: <%= bulk_update_requests_path %>
+<% if AdminConfig.enable_comments? %>
 Disallow: <%= comment_votes_path(comment_id: "*") %>
 Disallow: <%= comment_edits_path(comment_id: "*") %>
 Disallow: <%= url_for(controller: "comments/votes", action: "index") %>
+<% end %>
 Disallow: <%= dmails_path %>
 Disallow: <%= dtext_links_path %>
 Disallow: <%= dtext_preview_path %>
@@ -64,7 +66,9 @@ Disallow: <%= post_similar_path(post_id: "*") %>
 Disallow: <%= post_votes_path(post_id: "*") %>
 Disallow: <%= post_flag_path(post_id: "*") %>
 Disallow: <%= move_favorites_post_path(id: "*") %>
+<% if AdminConfig.enable_comments? %>
 Disallow: <%= comments_post_path(id: "*") %>
+<% end %>
 <% %w[update_eris revert copy_notes show_seq mark_as_translated favorites expunge delete undelete regenerate_thumbnails regenerate_videos regenerate_audio_track add_to_pool remove_from_pool].each do |action| %>
 Disallow: <%= url_for(controller: "posts", action: action, id: "*") %>
 <% end %>

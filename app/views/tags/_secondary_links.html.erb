@@ -12,7 +12,7 @@
   <% if @tag %>
     <li>|</li>
     <%= subnav_link_to("Posts (#{@tag.post_count})", posts_path(tags: @tag.name)) %>
-    <%= subnav_link_to("Comments", comments_path(search: { post_tags_match: tag.name })) %>
+    <%= subnav_link_to_if(AdminConfig.enable_comments?, "Comments", comments_path(search: { post_tags_match: tag.name })) %>
     <%= subnav_link_to_if(AdminConfig.enable_forums?, "Discussions", forum_posts_path(search: { linked_to: tag.name })) %>
     <%= subnav_link_to_if(AdminConfig.enable_wiki?, "Wiki Page", show_or_new_wiki_pages_path(title: @tag.name)) %>
     <%= subnav_link_to("Edit", edit_tag_path(@tag)) %>

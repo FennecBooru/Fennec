@@ -158,11 +158,15 @@
         <li>» <%= link_to("Set maintainer invites", post_set_maintainers_path) %></li>
         <br>
       <% end %>
-      <li>» <%= link_to("Search for myself in comments", comments_path(group_by: :comment, search: { body_matches: CurrentUser.name })) %></li>
+      <% if AdminConfig.enable_comments? %>
+        <li>» <%= link_to("Search for myself in comments", comments_path(group_by: :comment, search: { body_matches: CurrentUser.name })) %></li>
+      <% end %>
       <% if AdminConfig.enable_forums? %>
         <li>» <%= link_to("Search for myself in forums", forum_posts_path(search: { body_matches: CurrentUser.pretty_name })) %></li>
       <% end %>
-      <li>» <%= link_to("Comments on my posts", comments_path(group_by: :comment, search: { poster_id: CurrentUser.user.id })) %></li>
+      <% if AdminConfig.enable_comments? %>
+        <li>» <%= link_to("Comments on my posts", comments_path(group_by: :comment, search: { poster_id: CurrentUser.user.id })) %></li>
+      <% end %>
     </ul>
   </div>
 <% end %>

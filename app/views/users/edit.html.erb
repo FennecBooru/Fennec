@@ -41,7 +41,9 @@
 
     <%= f.input(:receive_email_notifications, as: :select, include_blank: false, collection: [%w[No false], %w[Yes true]]) %>
 
-    <%= f.input(:comment_threshold, hint: "Comments below this score will be hidden by default.") %>
+    <% if AdminConfig.enable_comments? %>
+      <%= f.input(:comment_threshold, hint: "Comments below this score will be hidden by default.") %>
+    <% end %>
 
     <%= f.input(:default_image_size, hint: "Show original image size, scaled to fit, scaled to fit vertically, or show resized #{GayFurCity.config.image.large_width} pixel sample version.", label: "Default image width", collection: [%w[Original original], ["Fit (Horizontal)", "fit"], ["Fit (Vertical)", "fitv"], ["Sample (#{GayFurCity.config.large_image_width}px)", "large"]], include_blank: false) %>
 
@@ -69,8 +71,10 @@
     <%= f.input(:description_collapsed_initially, as: :select, collection: [%w[No false], %w[Yes true]], include_blank: false,
     hint: "Don't expand post descriptions on page load.") %>
 
-    <%= f.input(:hide_comments, as: :select, collection: [%w[No false], %w[Yes true]], include_blank: false,
-    hint: "Do not show the comments section on post pages.") %>
+    <% if AdminConfig.enable_comments? %>
+      <%= f.input(:hide_comments, as: :select, collection: [%w[No false], %w[Yes true]], include_blank: false,
+      hint: "Do not show the comments section on post pages.") %>
+    <% end %>
 
     <%= f.input(:disable_colors, label: "Disable colors", as: :select, collection: [%w[No false], %w[Yes true]], include_blank: false,
                 hint: "If colors (in DText) should be disabled. Only applies to comments and forum posts. Does not apply to yourself.") %>
@@ -95,8 +99,10 @@
     <%= f.input(:disable_cropped_thumbnails, as: :select, collection: [%w[No false], %w[Yes true]], include_blank: false,
     hint: "Disables displaying cropped thumbnails on the mobile layout of the site in favor of scaled thumbnails. Has no effect on the desktop site.") %>
 
-    <%= f.input(:show_hidden_comments, label: "Show Own Hidden Comments", as: :select, collection: [%w[No false], %w[Yes true]], include_blank: false,
-                hint: "Show your own hidden comments on comment pages.") %>
+    <% if AdminConfig.enable_comments? %>
+      <%= f.input(:show_hidden_comments, label: "Show Own Hidden Comments", as: :select, collection: [%w[No false], %w[Yes true]], include_blank: false,
+                  hint: "Show your own hidden comments on comment pages.") %>
+    <% end %>
 
     <% if @user.post_active_count >= AdminConfig.instance.compact_uploader_minimum_posts %>
       <%= f.input(:enable_compact_uploader, label: "Enable Compact Uploader", as: :select,

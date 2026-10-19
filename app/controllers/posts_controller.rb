@@ -64,7 +64,7 @@ class PostsController < ApplicationController
     @parent_post_set = PostSets::PostRelationship.new(@post.parent_id, include_deleted: include_deleted, want_parent: true, current_user: CurrentUser.user)
     @children_post_set = PostSets::PostRelationship.new(@post.id, include_deleted: include_deleted, want_parent: false, current_user: CurrentUser.user)
     @comment_votes = {}
-    @comment_votes = CommentVote.for_comments_and_user(@post.comments.visible(CurrentUser.user).map(&:id), CurrentUser.user.id) if request.format.html?
+    @comment_votes = CommentVote.for_comments_and_user(@post.comments.visible(CurrentUser.user).map(&:id), CurrentUser.user.id) if request.format.html? && AdminConfig.enable_comments?
 
     respond_with(@post)
   end
@@ -76,7 +76,7 @@ class PostsController < ApplicationController
     @parent_post_set = PostSets::PostRelationship.new(@post.parent_id, include_deleted: include_deleted, want_parent: true, current_user: CurrentUser.user)
     @children_post_set = PostSets::PostRelationship.new(@post.id, include_deleted: include_deleted, want_parent: false, current_user: CurrentUser.user)
     @comment_votes = {}
-    @comment_votes = CommentVote.for_comments_and_user(@post.comments.visible(CurrentUser.user).map(&:id), CurrentUser.user.id) if request.format.html?
+    @comment_votes = CommentVote.for_comments_and_user(@post.comments.visible(CurrentUser.user).map(&:id), CurrentUser.user.id) if request.format.html? && AdminConfig.enable_comments?
     @fixup_post_url = true
 
     respond_with(@post) do |fmt|

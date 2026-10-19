@@ -94,7 +94,7 @@ module PostsHelper
       amount = tag.span(post.fav_count, class: "post-score-faves-faves-#{post.id}")
       icon + amount
     end
-    comments = tag.span("C#{post.visible_comment_count(CurrentUser)}", class: "post-score-comments")
+    comments = AdminConfig.enable_comments? ? tag.span("C#{post.visible_comment_count(CurrentUser)}", class: "post-score-comments") : ""
     rating = tag.span(post.rating.upcase, class: "post-score-rating")
     views = tag.span(class: "post-score-views post-score-views-classes-#{post.id}") do
       icon = tag.i("", class: "fa-regular fa-eye")

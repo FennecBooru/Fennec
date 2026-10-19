@@ -49,6 +49,7 @@ module SiteMap
   forums = ->(_) { AdminConfig.enable_forums? }
   pools = ->(_) { AdminConfig.enable_pools? }
   sets = ->(_) { AdminConfig.enable_post_sets? }
+  comments = ->(_) { AdminConfig.enable_comments? }
   # staff can still get to the wiki to edit the static and help pages
   wiki = ->(user) { AdminConfig.enable_wiki? || user.is_staff? }
 
@@ -144,9 +145,9 @@ module SiteMap
   end
 
   section("Comments") do
-    link("Listing") { comments_path }
-    link("Search")  { search_comments_path }
-    link("Help")    { help_page_path(id: "commenting") }
+    link("Listing", visible: comments) { comments_path }
+    link("Search", visible: comments)  { search_comments_path }
+    link("Help", visible: comments)    { help_page_path(id: "commenting") }
   end
 
   section("Forum") do

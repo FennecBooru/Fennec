@@ -2,6 +2,7 @@
 
 module Comments
   class VotesController < ApplicationController
+    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_comments? })
     respond_to(:html, only: %i[index])
     respond_to(:json)
     skip_before_action(:api_check)

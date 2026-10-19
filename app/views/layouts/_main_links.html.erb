@@ -5,7 +5,7 @@
   <%= nav_link_to("Notifications #{unread_notifications(CurrentUser.user)}", notifications_path, class: (CurrentUser.user.has_unread_notifications? ? "unread" : nil)) %>
 <% end %>
 <%= nav_link_to("Posts", posts_path) %>
-<%= nav_link_to("Comments", comments_path(group_by: "post")) %>
+<%= nav_link_to_if(AdminConfig.enable_comments?, "Comments", comments_path(group_by: "post")) %>
 <%= nav_link_to("Artists", artists_path) %>
 <%= nav_link_to("Tags", tags_path) %>
 <%= nav_link_to_if(AdminConfig.enable_pools?, "Pools", gallery_pools_path) %>

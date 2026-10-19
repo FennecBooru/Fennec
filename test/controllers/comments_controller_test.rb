@@ -499,5 +499,42 @@ class CommentsControllerTest < ActionDispatch::IntegrationTest
         end
       end
     end
+
+    context("when comments are disabled") do
+      setup do
+        stub_admin_config(:enable_comments, false)
+      end
+
+      should("not be available") do
+        [comments_path, comment_path(@comment), search_comments_path, comments_post_path(@post)].each do |path|
+          get_auth(path, @mod)
+
+          assert_response(:not_implemented, path)
+        end
+
+        post_auth(comments_path, @user, params: { comment: { post_id: @post.id, body: "abc" }, format: :json })
+
+        assert_response(:not_implemented)
+      end
+
+      should("hide the comments") do
+        get_auth(post_path(@post), @user)
+
+        assert_response(:success)
+        assert_select("#comments", count: 0)
+        assert_select("a[href='#{comments_path(group_by: 'post')}']", count: 0)
+
+        get_auth(site_map_path, @user)
+
+        assert_select("a[href='#{search_comments_path}']", count: 0)
+      end
+
+      should("not let the comment locks be changed") do
+        put_auth(post_path(@post), create(:admin_user), params: { post: { is_comment_locked: true, is_comment_disabled: true } })
+
+        assert_not(@post.reload.is_comment_locked?)
+        assert_not(@post.is_comment_disabled?)
+      end
+    end
   end
 end

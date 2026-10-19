@@ -193,7 +193,7 @@
       <% name = User::Levels.id_to_name(@post.min_edit_level) %>
       <div class="post-protection">Edits are restricted to <%= link_to(name, help_page_path(id: "accounts", anchor: name.downcase), class: "#{User::Levels.level_class(name)} with-style") %> users and above.</div>
     <% end %>
-    <% unless CurrentUser.user.hide_comments? %>
+    <% if AdminConfig.enable_comments? && !CurrentUser.user.hide_comments? %>
       <li class="active"><a href="#comments">Comments</a></li>
     <% end %>
     <% if policy(@post).update? %>
@@ -201,7 +201,7 @@
     <% end %>
   </menu>
 
-  <% unless CurrentUser.user.hide_comments? %>
+  <% if AdminConfig.enable_comments? && !CurrentUser.user.hide_comments? %>
     <section id="comments">
       <%= render("comments/partials/index/list", comments: @post.comments.visible(CurrentUser.user), post: @post, show_header: false) %>
     </section>
@@ -209,7 +209,7 @@
 
   <ul class="menu mobile-only">
     <li><a href="#image-and-nav">Image</a></li>
-    <% unless CurrentUser.user.hide_comments? %>
+    <% if AdminConfig.enable_comments? && !CurrentUser.user.hide_comments? %>
       <li><a href="#comments">Comments</a></li>
     <% end %>
   </ul>
