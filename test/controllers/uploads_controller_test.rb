@@ -142,6 +142,26 @@ class UploadsControllerTest < ActionDispatch::IntegrationTest
         assert_not(@user.notifications.post_approve.exists?)
       end
 
+      should("create a post with character groups") do
+        create(:tag, name: "fluffy_(oc)", category_id: TagCategory.character)
+        file = fixture_file_upload("test.jpg")
+        params = {
+          file:                        file,
+          ungrouped_tag_string:        "solo",
+          character_groups_attributes: [{ characters: ["fluffy_(oc)"], tags: ["blue_eyes"] }],
+          rating:                      "q",
+          source:                      "aaa",
+        }
+        post_auth(uploads_path, @user, params: { upload: params, format: :json })
+
+        assert_response(:success)
+        post = Post.last
+
+        assert_equal([{ "tags" => %w[fluffy_(oc) blue_eyes] }], post.character_groups)
+        assert_empty(%w[blue_eyes fluffy_(oc) solo] - post.tag_array)
+        assert_equal("solo fluffy_(oc) blue_eyes", post.original_tag_string)
+      end
+
       context("with a previously destroyed post") do
         setup do
           @admin = create(:admin_user)

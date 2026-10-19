@@ -13,6 +13,7 @@ class Upload < ApplicationRecord
   belongs_to(:post, optional: true)
 
   after_initialize(:set_locked_tags)
+  before_validation(:merge_grouped_tags, on: :create)
   before_validation(:assign_rating_from_tags)
   before_validation(:normalize_direct_url, on: :create)
 
@@ -112,6 +113,14 @@ class Upload < ApplicationRecord
       return false
     end
     true
+  end
+
+  # the uploader sends its tags split up by character, so put them back together
+  def merge_grouped_tags
+    return if ungrouped_tag_string.nil? && character_groups_attributes.nil?
+    groups = character_groups_attributes.respond_to?(:values) ? character_groups_attributes.values : Array(character_groups_attributes)
+    grouped = groups.flat_map { |g| Array(g[:characters] || g["characters"]) + Array(g[:tags] || g["tags"]) }
+    self.tag_string = [tag_string, ungrouped_tag_string, *grouped].join(" ").split.uniq.join(" ")
   end
 
   def assign_rating_from_tags
