@@ -1,5 +1,5 @@
 <% content_for(:secondary_links) do %>
   <%= subnav_link_to("Listing", notifications_path) %>
   <%= subnav_link_to("Mark All As Read", mark_all_as_read_notifications_path, method: :put, data: { item: "notifications" }) %>
-  <%= subnav_link_to("Followed Tags", followed_tags_path) %>
+  <%= subnav_link_to_if(policy(Tag).followed?, "Followed Tags", followed_tags_path) %>
 <% end %>

@@ -19,19 +19,19 @@ class TagPolicy < ApplicationPolicy
   end
 
   def followed?
-    member?
+    following_enabled? && member?
   end
 
   def followers?
-    member?
+    following_enabled? && member?
   end
 
   def follow?
-    member?
+    following_enabled? && member?
   end
 
   def unfollow?
-    member?
+    following_enabled? && member?
   end
 
   def permitted_attributes
@@ -44,5 +44,11 @@ class TagPolicy < ApplicationPolicy
     params = super + %i[fuzzy_name_matches name_matches name category_id hide_empty has_wiki has_artist is_locked is_deprecated creator_id creator_name] + nested_search_params(creator: User)
     params << :ip_addr if can_search_ip_addr?
     params
+  end
+
+  private
+
+  def following_enabled?
+    AdminConfig.enable_tag_following?
   end
 end

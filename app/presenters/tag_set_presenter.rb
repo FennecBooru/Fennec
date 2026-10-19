@@ -245,7 +245,7 @@ class TagSetPresenter < ApplicationPresenter
     parts = []
     if CurrentUser.user.is_member?
       parts << h.tag.span(link_to(h.tag.i(class: "fas fa-times"), "#", class: "blacklist-tag-toggle", title: "Blacklist Tag"), class: "tag-action-blacklist")
-      parts << h.tag.span(link_to("", "#", class: "follow-button-minor", title: "Follow Tag", data: { followed: followed }), class: "tag-action-follow")
+      parts << h.tag.span(link_to("", "#", class: "follow-button-minor", title: "Follow Tag", data: { followed: followed }), class: "tag-action-follow") if AdminConfig.enable_tag_following?
     end
     h.tag.div(safe_join(parts), class: "tag-actions", data: { tag: tag.name })
   end

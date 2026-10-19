@@ -78,7 +78,7 @@ module SiteMap
   section("Popular") do
     link("Uploads")                        { uploads_popular_index_path }
     link("Views")                          { views_popular_index_path }
-    link("Followed Tags")                  { followed_tags_popular_index_path }
+    link("Followed Tags", visible: ->(_)   { AdminConfig.enable_tag_following? }) { followed_tags_popular_index_path }
     link("Searches", visible: ->(_)        { Reports.enabled? }) { searches_popular_index_path }
     link("Missed Searches", visible: ->(_) { Reports.enabled? }) { missed_searches_popular_index_path }
   end
@@ -178,7 +178,7 @@ module SiteMap
     link("Settings", visible: logged_in)                       { edit_users_path }
     link("Messages", policy: Dmail)                            { dmails_path }
     link("Notifications", policy: Notification)                { notifications_path }
-    link("Followed Tags", visible: logged_in)                  { followed_tags_path }
+    link("Followed Tags", policy: Tag, action: :followed?)     { followed_tags_path }
     link("Events", policy: UserEvent)                          { user_events_path }
     link("Upload Limit", policy: User, action: :upload_limit?) { upload_limit_users_path }
     link("Blocked Users", visible: logged_in)                  { |user| user_blocks_path(user) }

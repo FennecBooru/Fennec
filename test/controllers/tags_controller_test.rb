@@ -315,5 +315,37 @@ class TagsControllerTest < ActionDispatch::IntegrationTest
         end
       end
     end
+
+    context("when following is disabled") do
+      setup do
+        stub_admin_config(:enable_tag_following, false)
+      end
+
+      should("not be available") do
+        put_auth(follow_tag_path(@tag), @user)
+
+        assert_response(:not_implemented)
+        assert_equal(0, @tag.reload.follower_count)
+        [followed_tags_path, followers_tag_path(@tag), followed_tags_popular_index_path].each do |path|
+          get_auth(path, @user)
+
+          assert_response(:not_implemented)
+        end
+      end
+
+      should("not notify followers of new posts") do
+        @tag.follow!(@user)
+        TagFollower.expects(:update_from_post!).never
+        create(:post, tag_string: @tag.name)
+        TagFollowerUpdateJob.perform_now(create(:post).id)
+      end
+
+      should("not show the follow buttons") do
+        post = create(:post, tag_string: @tag.name)
+        get_auth(post_path(post), @user)
+
+        assert_select(".tag-action-follow", count: 0)
+      end
+    end
   end
 end

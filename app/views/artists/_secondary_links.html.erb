@@ -10,7 +10,7 @@
   <% if @artist && !@artist.new_record? %>
     <li>|</li>
     <%= subnav_link_to("Posts (#{@artist.tag.try(:post_count).to_i})", posts_path(tags: @artist.name)) %>
-    <% if @artist.tag.present? %>
+    <% if @artist.tag.present? && AdminConfig.enable_tag_following? %>
       <%= subnav_link_to("Followers (#{@artist.tag.follower_count})", followers_tag_path(@artist.tag)) %>
     <% end %>
     <%= subnav_link_to("Show", artist_path(@artist)) %>

@@ -260,6 +260,7 @@ class AdminConfig
       add_boolean_field(:enable_image_cropping, hint: "Enables generating a cropped 1:1 version of posts. Changing the option will not delete existing crops, or automatically regenerate them on old posts")
       add_boolean_field(:enable_takedowns, hint: "Enable the takedown system.")
       add_boolean_field(:enable_avoid_posting, hint: "Enable the avoid posting (DNP) list. Disabling it keeps existing entries, but they won't be shown or enforced")
+      add_boolean_field(:enable_tag_following, hint: "Enable following tags. Disabling it keeps existing follows, but stops new post notifications for them")
       add_boolean_field(:enable_recommendations, hint: "Enable post recommendations. Has no effect if no recommender server is configured")
       add_boolean_field(:safe_mode, hint: "Enables safe mode, hiding all posts that are not safe.")
       add_boolean_field(:flag_ai_posts, hint: "If posts detected as ai generated should be automatically flagged")

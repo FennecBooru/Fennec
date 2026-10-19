@@ -1,7 +1,7 @@
 <% content_for(:secondary_links) do %>
   <li><%= render("tags/quick_search") %></li>
   <%= subnav_link_to("Listing", tags_path) %>
-  <%= subnav_link_to("Followed", followed_tags_path) %>
+  <%= subnav_link_to_if(policy(Tag).followed?, "Followed", followed_tags_path) %>
   <%= subnav_link_to("MetaSearch", meta_search_tags_path) %>
   <%= subnav_link_to("Aliases", tag_aliases_path) %>
   <%= subnav_link_to("Implications", tag_implications_path) %>

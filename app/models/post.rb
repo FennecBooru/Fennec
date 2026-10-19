@@ -860,6 +860,7 @@ class Post < ApplicationRecord
     end
 
     def should_update_followers?
+      return false unless AdminConfig.enable_tag_following?
       previously_new_record? || (saved_change_to_tag_string? && (tag_array - tag_array_was).any?)
     end
 

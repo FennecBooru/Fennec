@@ -148,7 +148,9 @@
       <% end %>
       <li>» <%= link_to("My blocked users", user_blocks_path(CurrentUser.user)) %></li>
       <li>» <%= link_to("My notifications", notifications_path) %></li>
-      <li>» <%= link_to("My followed tags", followed_tags_path) %></li>
+      <% if AdminConfig.enable_tag_following? %>
+        <li>» <%= link_to("My followed tags", followed_tags_path) %></li>
+      <% end %>
       <br>
       <li>» <%= link_to("My sets", post_sets_path(search: { creator_id: CurrentUser.user.id })) %></li>
       <li>» <%= link_to("Sets I maintain", post_sets_path(search: { maintainer_id: CurrentUser.user.id })) %></li>

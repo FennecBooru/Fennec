@@ -3,7 +3,9 @@
 <ul>
   <%= li_link_to("Uploads", uploads_popular_index_path) %>
   <%= li_link_to("Views", views_popular_index_path) %>
-  <%= li_link_to("Followed Tags", followed_tags_popular_index_path) %>
+  <% if AdminConfig.enable_tag_following? %>
+    <%= li_link_to("Followed Tags", followed_tags_popular_index_path) %>
+  <% end %>
   <%= li_link_to("Searches", searches_popular_index_path) %>
   <%= li_link_to("Missed Searches", missed_searches_popular_index_path) %>
 </ul>
