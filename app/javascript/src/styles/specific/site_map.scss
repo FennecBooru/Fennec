@@ -1,17 +1,14 @@
 div#c-static {
   div#a-site-map {
-    width: 80em;
+    columns: 18em;
+    column-gap: 2em;
 
     section {
-      width: 20em;
-      float: left;
+      break-inside: avoid;
+      margin-bottom: 1.5em;
 
       h1 {
         font-size: $h3-size;
-      }
-
-      ul {
-        margin-bottom: 1.5em;
       }
     }
   }

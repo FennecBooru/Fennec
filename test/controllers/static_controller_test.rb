@@ -10,6 +10,22 @@ class StaticControllerTest < ActionDispatch::IntegrationTest
       end
     end
 
+    context("the site map action") do
+      should("render for anonymous users") do
+        get(site_map_path)
+
+        assert_response(:success)
+        assert_select("#a-site-map section h1", text: "Posts")
+      end
+
+      should("render for staff") do
+        get_auth(site_map_path, create(:owner_user))
+
+        assert_response(:success)
+        assert_select("#a-site-map section h1", text: "Admin")
+      end
+    end
+
     context("the browserconfig action") do
       should("use the site icons") do
         get("/browserconfig.xml")
