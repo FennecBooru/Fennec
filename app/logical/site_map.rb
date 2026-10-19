@@ -164,7 +164,7 @@ module SiteMap
     link("Listing")                             { users_path }
     link("Search")                              { search_users_path }
     link("Bans")                                { bans_path }
-    link("Feedback")                            { user_feedbacks_path }
+    link("Feedback", visible: ->(_)             { AdminConfig.enable_user_feedback? }) { user_feedbacks_path }
     link("Sign Up", visible: logged_out)        { new_user_path }
     link("Sign In", visible: logged_out)        { new_session_path }
     link("Reset Password", visible: logged_out) { new_users_password_reset_path }

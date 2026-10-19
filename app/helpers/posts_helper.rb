@@ -111,6 +111,7 @@ module PostsHelper
   end
 
   def user_record_meta(user)
+    return "" unless AdminConfig.enable_user_feedback?
     positive = user.positive_feedback_count
     neutral = user.neutral_feedback_count
     negative = user.negative_feedback_count

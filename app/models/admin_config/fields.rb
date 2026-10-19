@@ -261,6 +261,7 @@ class AdminConfig
       add_boolean_field(:enable_takedowns, hint: "Enable the takedown system.")
       add_boolean_field(:enable_post_approvals, hint: "Enable approving posts. When disabled, every upload is approved immediately, and posts can only be deleted and undeleted")
       add_boolean_field(:enable_replacement_approvals, hint: "Enable approving replacements. When disabled, every replacement is approved immediately")
+      add_boolean_field(:enable_user_feedback, name: "Enable Records", hint: "Enable user records (feedback). Disabling it keeps existing records, but hides them, and bans stop creating one")
       add_boolean_field(:enable_rules, hint: "Enable the rules page, rule categories, and quick rules. Disabling it also removes the record builder from bans and feedback")
       add_boolean_field(:enable_post_appeals, hint: "Enable appealing deleted posts. Disabling it accepts all pending appeals")
       add_boolean_field(:enable_avoid_posting, hint: "Enable the avoid posting (DNP) list. Disabling it keeps existing entries, but they won't be shown or enforced")

@@ -281,6 +281,33 @@ module Users
           end
         end
       end
+
+      context("when records are disabled") do
+        setup do
+          stub_admin_config(:enable_user_feedback, false)
+          @feedback = create(:user_feedback, user: @user, creator: @critic)
+        end
+
+        should("not be available") do
+          [user_feedbacks_path, user_feedback_path(@feedback), new_user_feedback_path].each do |path|
+            get_auth(path, @mod)
+
+            assert_response(:not_implemented, path)
+          end
+        end
+
+        should("not create one for bans") do
+          assert_no_difference("UserFeedback.count") do
+            create(:ban, user: create(:user), creator: @admin)
+          end
+        end
+
+        should("hide records on profiles") do
+          get_auth(user_path(@user), @mod)
+
+          assert_select("a[href^='#{user_feedbacks_path}']", count: 0)
+        end
+      end
     end
   end
 end
