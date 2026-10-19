@@ -2,7 +2,7 @@
 
 require_relative("../../app/logical/reports")
 
-if Reports.enabled?
+if Reports.configured?
   ClickHouse.config do |config|
     config.url = GayFurCity.config.clickhouse_url
   end

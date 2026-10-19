@@ -179,6 +179,7 @@ module PostsHelper
   end
 
   def view_count_js(post)
+    return unless Reports.view_tracking_enabled?
     sig = generate_report_signature(purpose: "view", post_id: post.id)
     render(partial: "posts/partials/common/report_js", locals: { sig: sig, url: "/views" })
   end

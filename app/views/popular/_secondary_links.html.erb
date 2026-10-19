@@ -1,7 +1,7 @@
 <% content_for(:secondary_links) do %>
   <%= subnav_link_to("Uploads", uploads_popular_index_path) %>
-  <%= subnav_link_to("Views", views_popular_index_path) %>
+  <%= subnav_link_to_if(Reports.enabled?, "Views", views_popular_index_path) %>
   <%= subnav_link_to_if(AdminConfig.enable_tag_following?, "Followed Tags", followed_tags_popular_index_path) %>
-  <%= subnav_link_to("Searches", searches_popular_index_path) %>
-  <%= subnav_link_to("Missed Searches", missed_searches_popular_index_path) %>
+  <%= subnav_link_to_if(Reports.enabled?, "Searches", searches_popular_index_path) %>
+  <%= subnav_link_to_if(Reports.enabled?, "Missed Searches", missed_searches_popular_index_path) %>
 <% end %>

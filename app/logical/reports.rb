@@ -5,8 +5,25 @@ module Reports
 
   LIMIT = 100
 
-  def enabled?
+  # whether the server is set up, this is checked at boot before the database is available
+  def configured?
     !Rails.env.test? && GayFurCity.config.reports.enabled?
+  end
+
+  def enabled?
+    configured? && AdminConfig.enable_reports?
+  end
+
+  def view_tracking_enabled?
+    enabled? && AdminConfig.enable_view_tracking?
+  end
+
+  def search_tracking_enabled?
+    enabled? && AdminConfig.enable_search_tracking?
+  end
+
+  def api_key_usage_tracking_enabled?
+    enabled? && AdminConfig.enable_api_key_usage_tracking?
   end
 
   def request(method, path, body = nil)
@@ -155,7 +172,7 @@ module Reports
   end
 
   def log_api_key_usage(key_id, controller, action, method, request_uri, ip_address)
-    return false unless enabled?
+    return false unless api_key_usage_tracking_enabled?
     post("/api_key_usages", { msg: generate_body_signature(purpose: "api-key-usages", ip_address: ip_address, key_id: key_id, action: action, controller: controller, method: method, request_uri: request_uri) })
   rescue Faraday::ConnectionFailed, Faraday::TimeoutError, Faraday::ServerError => e
     ExceptionLog.add!(e, source: "Reports#log_api_key_usage", args: get_arguments(binding))

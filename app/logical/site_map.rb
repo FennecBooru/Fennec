@@ -77,7 +77,7 @@ module SiteMap
 
   section("Popular") do
     link("Uploads")                        { uploads_popular_index_path }
-    link("Views")                          { views_popular_index_path }
+    link("Views", visible: ->(_)           { Reports.enabled? }) { views_popular_index_path }
     link("Followed Tags", visible: ->(_)   { AdminConfig.enable_tag_following? }) { followed_tags_popular_index_path }
     link("Searches", visible: ->(_)        { Reports.enabled? }) { searches_popular_index_path }
     link("Missed Searches", visible: ->(_) { Reports.enabled? }) { missed_searches_popular_index_path }

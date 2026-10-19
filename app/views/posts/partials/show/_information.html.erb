@@ -69,6 +69,8 @@
     Favorites: <span id="favcount-for-post-<%= post.id %>"><%= post.fav_count %></span>
     <%= link_to("Show", favorites_post_path(post), style: ("display: none;" if post.fav_count == 0)) %>
   </li>
-  <li>Views Today: <span id="daily-viewcount-for-post-<%= post.id %>"><%= post.daily_views %></span></li>
-  <li>Total Views: <span id="total-viewcount-for-post-<%= post.id %>"><%= post.total_views %></span></li>
+  <% if Reports.enabled? %>
+    <li>Views Today: <span id="daily-viewcount-for-post-<%= post.id %>"><%= post.daily_views %></span></li>
+    <li>Total Views: <span id="total-viewcount-for-post-<%= post.id %>"><%= post.total_views %></span></li>
+  <% end %>
 </ul>
