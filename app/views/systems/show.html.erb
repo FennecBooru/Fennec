@@ -230,44 +230,46 @@
       </tr>
     </tbody>
   <% end %>
-  <thead>
-    <tr>
-      <th colspan="3" style="text-align: center">Elasticsearch</th>
-    </tr>
-    <tr>
-      <th>Data</th>
-      <th colspan="2">Value</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Version</td>
-      <td colspan="2"><%= @info.elasticsearch.version %></td>
-    </tr>
-    <tr>
-      <td>Latency</td>
-      <td colspan="2"><%= @info.elasticsearch.latency %>ms</td>
-    </tr>
-    <tr>
-      <td>Date</td>
-      <td colspan="2"><%= @info.elasticsearch.date %></td>
-    </tr>
-    <tr>
-      <td>Status</td>
-      <td colspan="2"><%= @info.elasticsearch.status %></td>
-    </tr>
-    <tr>
-      <td>Indexes</td>
-      <td colspan="2">
-        <% @info.elasticsearch.indexes.each do |index| %>
-          <dl>
-            <dt><%= index %></dt>
-            <dd><%= @info.elasticsearch.docs_per_index[index] %><%= " document".pluralize(@info.elasticsearch.docs_per_index[index]) %></dd>
-          </dl>
-        <% end %>
-      </td>
-    </tr>
-  </tbody>
+  <% if @info.elasticsearch.enabled %>
+    <thead>
+      <tr>
+        <th colspan="3" style="text-align: center">Elasticsearch</th>
+      </tr>
+      <tr>
+        <th>Data</th>
+        <th colspan="2">Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Version</td>
+        <td colspan="2"><%= @info.elasticsearch.version %></td>
+      </tr>
+      <tr>
+        <td>Latency</td>
+        <td colspan="2"><%= @info.elasticsearch.latency %>ms</td>
+      </tr>
+      <tr>
+        <td>Date</td>
+        <td colspan="2"><%= @info.elasticsearch.date %></td>
+      </tr>
+      <tr>
+        <td>Status</td>
+        <td colspan="2"><%= @info.elasticsearch.status %></td>
+      </tr>
+      <tr>
+        <td>Indexes</td>
+        <td colspan="2">
+          <% @info.elasticsearch.indexes.each do |index| %>
+            <dl>
+              <dt><%= index %></dt>
+              <dd><%= @info.elasticsearch.docs_per_index[index] %><%= " document".pluralize(@info.elasticsearch.docs_per_index[index]) %></dd>
+            </dl>
+          <% end %>
+        </td>
+      </tr>
+    </tbody>
+  <% end %>
   <% if @info.eris.enabled %>
     <thead>
       <tr>

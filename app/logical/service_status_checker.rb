@@ -18,7 +18,7 @@ class ServiceStatusChecker
     {
       "PostgreSQL"    => method(:check_postgres),
       "Redis"         => method(:check_redis),
-      "Elasticsearch" => method(:check_elasticsearch),
+      "Elasticsearch" => (method(:check_elasticsearch) unless DocumentStore.sql_search?),
       "Memcached"     => method(:check_memcached),
       "Eris"          => (method(:check_eris) if ErisProxy.enabled?),
       "Recommender"   => (method(:check_recommender) if Recommender.enabled?),

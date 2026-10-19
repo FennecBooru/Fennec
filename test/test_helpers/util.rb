@@ -16,6 +16,14 @@ module TestHelpers
       end
     end
 
+    # searches with sql instead of opensearch for the block
+    def with_sql_search
+      GayFurCity.config.stubs(:sql_search?).returns(true)
+      yield
+    ensure
+      GayFurCity.config.unstub(:sql_search?)
+    end
+
     # perform_enqueued_jobs(&block) runs each job the instant it's enqueued - including mid-callback,
     # e.g. from a before_save (Tag#update_category -> UpdateTagCategoryJob). That's a problem: the
     # job's own fresh find sees the record as it was before the triggering save's UPDATE reached the

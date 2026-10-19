@@ -25,20 +25,26 @@ module DocumentStore
       # outside test: dev/production need a stable index name across restarts.
       klass.document_store.index_name = "#{klass.model_name.plural}_#{Rails.env}#{"-p#{Process.pid}" if Rails.env.test?}"
 
-      klass.after_commit(on: %i[create], unless: :skip_index_update) do
+      klass.after_commit(on: %i[create], unless: :skip_index_update?) do
         document_store.update_index(refresh: Rails.env.test?.to_s)
       end
 
-      klass.after_commit(on: %i[update], unless: :skip_index_update) do
+      klass.after_commit(on: %i[update], unless: :skip_index_update?) do
         update_index
       end
 
-      klass.after_commit(on: %i[destroy], unless: :skip_index_update) do
+      klass.after_commit(on: %i[destroy], unless: :skip_index_update?) do
         document_store.delete_document(refresh: Rails.env.test?.to_s)
       end
     end
 
+    # nothing is indexed when searching with sql
+    def skip_index_update?
+      DocumentStore.sql_search? || skip_index_update
+    end
+
     def update_index(queue: :high)
+      return if DocumentStore.sql_search?
       # Only reached when skip_index_update is explicitly false (see attr default above) - i.e. only
       # for tests that opted into synchronous indexing via reset_post_index/resets_post_index!, not
       # the whole suite.
@@ -51,6 +57,10 @@ module DocumentStore
   # request_timeout is baked into the client at construction (the transport has no per-request
   # override), so distinct timeout values - one per config tier that's actually in use - each get
   # their own memoized client/connection instead of building one from scratch per search.
+  def self.sql_search?
+    GayFurCity.config.sql_search?
+  end
+
   def self.client(request_timeout: 120)
     @clients ||= {}
     @clients[request_timeout] ||= Elasticsearch::Client.new(host: GayFurCity.config.elasticsearch_host, request_timeout: request_timeout)

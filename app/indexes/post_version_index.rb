@@ -41,6 +41,32 @@ module PostVersionIndex
       },
     }
 
+    # the same values as_indexed_json gives each field, see DocumentStore::SQLQuery
+    base.document_store.sql = {
+      fields: {
+        "id"                  => { type: :integer, sql: "post_versions.id" },
+        "post_id"             => { type: :integer, sql: "post_versions.post_id" },
+        "version"             => { type: :integer, sql: "post_versions.version" },
+        "updater_id"          => { type: :integer, sql: "post_versions.updater_id" },
+        "parent_id"           => { type: :integer, sql: "post_versions.parent_id" },
+        "rating"              => { type: :keyword, sql: "post_versions.rating" },
+        "source"              => { type: :keyword, sql: "post_versions.source" },
+        "description"         => { type: :text, sql: "post_versions.description" },
+        "reason"              => { type: :text, sql: "post_versions.reason" },
+        "description_changed" => { type: :boolean, sql: "post_versions.description_changed" },
+        "parent_id_changed"   => { type: :boolean, sql: "post_versions.parent_changed" },
+        "source_changed"      => { type: :boolean, sql: "post_versions.source_changed" },
+        "rating_changed"      => { type: :boolean, sql: "post_versions.rating_changed" },
+        "tags_added"          => { type: :keyword, array: "post_versions.added_tags" },
+        "tags_removed"        => { type: :keyword, array: "post_versions.removed_tags" },
+        "tags"                => { type: :keyword, array: "string_to_array(post_versions.tags, ' ')" },
+        "updated_at"          => { type: :date, sql: "post_versions.updated_at" },
+        "locked_tags_added"   => { type: :keyword, array: "post_versions.added_locked_tags" },
+        "locked_tags_removed" => { type: :keyword, array: "post_versions.removed_locked_tags" },
+        "locked_tags"         => { type: :keyword, array: "string_to_array(post_versions.locked_tags, ' ')" },
+      },
+    }
+
     base.document_store.extend(ClassMethods)
   end
 

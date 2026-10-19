@@ -105,6 +105,79 @@ module PostIndex
       },
     }
 
+    # the same values as_indexed_json gives each field, see DocumentStore::SQLQuery
+    last_deletion = "SELECT %s FROM post_flags WHERE post_flags.post_id = posts.id AND post_flags.is_resolved = FALSE AND post_flags.is_deletion = TRUE ORDER BY post_flags.id DESC LIMIT 1"
+    width = "upload_media_assets.image_width"
+    height = "upload_media_assets.image_height"
+    base.document_store.sql = {
+      joins:          "LEFT JOIN upload_media_assets ON upload_media_assets.id = posts.upload_media_asset_id",
+      fields:         {
+        "created_at"               => { type: :date, sql: "posts.created_at" },
+        "updated_at"               => { type: :date, sql: "posts.updated_at" },
+        "commented_at"             => { type: :date, sql: "posts.last_commented_at" },
+        "comment_bumped_at"        => { type: :date, sql: "posts.last_comment_bumped_at" },
+        "noted_at"                 => { type: :date, sql: "posts.last_noted_at" },
+        "id"                       => { type: :integer, sql: "posts.id" },
+        "up_score"                 => { type: :integer, sql: "posts.up_score" },
+        "down_score"               => { type: :integer, sql: "posts.down_score" },
+        "score"                    => { type: :integer, sql: "posts.score" },
+        "fav_count"                => { type: :integer, sql: "posts.fav_count" },
+        "tag_count"                => { type: :integer, sql: "posts.tag_count" },
+        "change_seq"               => { type: :long, sql: "posts.change_seq" },
+        "comment_count"            => { type: :integer, sql: "posts.comment_count" },
+        "disapproval_count"        => { type: :integer, sql: "(SELECT COUNT(*) FROM post_disapprovals WHERE post_disapprovals.post_id = posts.id)" },
+        "file_size"                => { type: :integer, sql: "upload_media_assets.file_size" },
+        "parent"                   => { type: :integer, sql: "posts.parent_id" },
+        "pools"                    => { type: :integer, array: "ARRAY(SELECT pools.id FROM pools WHERE posts.id = ANY(pools.post_ids))", term: "posts.id IN (SELECT unnest(pools.post_ids) FROM pools WHERE pools.id = %<value>s)" },
+        "sets"                     => { type: :integer, array: "ARRAY(SELECT post_sets.id FROM post_sets WHERE posts.id = ANY(post_sets.post_ids))", term: "posts.id IN (SELECT unnest(post_sets.post_ids) FROM post_sets WHERE post_sets.id = %<value>s)" },
+        "commenters"               => { type: :integer, array: "ARRAY(SELECT comments.creator_id FROM comments WHERE comments.post_id = posts.id AND comments.is_hidden = FALSE)", term: "posts.id IN (SELECT comments.post_id FROM comments WHERE comments.creator_id = %<value>s AND comments.is_hidden = FALSE)" },
+        "noters"                   => { type: :integer, array: "ARRAY(SELECT notes.creator_id FROM notes WHERE notes.post_id = posts.id AND notes.is_active = TRUE)", term: "posts.id IN (SELECT notes.post_id FROM notes WHERE notes.creator_id = %<value>s AND notes.is_active = TRUE)" },
+        "notes"                    => { type: :text, array: "ARRAY(SELECT notes.body FROM notes WHERE notes.post_id = posts.id AND notes.is_active = TRUE)" },
+        "faves"                    => { type: :integer, array: "ARRAY(SELECT favorites.user_id FROM favorites WHERE favorites.post_id = posts.id)", term: "posts.id IN (SELECT favorites.post_id FROM favorites WHERE favorites.user_id = %<value>s)" },
+        "upvotes"                  => { type: :integer, array: "ARRAY(SELECT post_votes.user_id FROM post_votes WHERE post_votes.post_id = posts.id AND post_votes.score > 0)", term: "posts.id IN (SELECT post_votes.post_id FROM post_votes WHERE post_votes.user_id = %<value>s AND post_votes.score > 0)" },
+        "downvotes"                => { type: :integer, array: "ARRAY(SELECT post_votes.user_id FROM post_votes WHERE post_votes.post_id = posts.id AND post_votes.score < 0)", term: "posts.id IN (SELECT post_votes.post_id FROM post_votes WHERE post_votes.user_id = %<value>s AND post_votes.score < 0)" },
+        "children"                 => { type: :integer, array: "ARRAY(SELECT children.id FROM posts AS children WHERE children.parent_id = posts.id)" },
+        "uploader"                 => { type: :integer, sql: "posts.uploader_id" },
+        "approver"                 => { type: :integer, sql: "posts.approver_id" },
+        "disapprovers"             => { type: :integer, array: "ARRAY(SELECT post_disapprovals.user_id FROM post_disapprovals WHERE post_disapprovals.post_id = posts.id)", term: "posts.id IN (SELECT post_disapprovals.post_id FROM post_disapprovals WHERE post_disapprovals.user_id = %<value>s)" },
+        "deleter"                  => { type: :integer, sql: "(#{format(last_deletion, 'post_flags.creator_id')})" },
+        "del_reason"               => { type: :keyword, sql: "(#{format(last_deletion, 'lower(post_flags.reason)')})" },
+        "width"                    => { type: :integer, sql: width },
+        "height"                   => { type: :integer, sql: height },
+        "mpixels"                  => { type: :float, sql: "CASE WHEN #{width} IS NULL OR #{height} IS NULL THEN 0 ELSE ROUND(#{width}::numeric * #{height} / 1000000, 2) END" },
+        "aspect_ratio"             => { type: :float, sql: "CASE WHEN #{width} IS NULL OR #{height} IS NULL THEN 1 ELSE ROUND(#{width}::numeric / GREATEST(#{height}, 1), 10) END" },
+        "duration"                 => { type: :float, sql: "upload_media_assets.duration" },
+        "framecount"               => { type: :integer, sql: "upload_media_assets.framecount" },
+        # views are only in the reports database
+        "views"                    => { type: :integer, sql: "0" },
+        "tags"                     => { type: :keyword, array: "string_to_array(posts.tag_string, ' ')" },
+        "character_groups"         => { nested: "jsonb_array_elements(posts.character_groups) AS character_group(value)", fields: { "character_groups.tags" => { type: :keyword, array: "ARRAY(SELECT jsonb_array_elements_text(character_group.value->'tags'))" } } },
+        "md5"                      => { type: :keyword, sql: "upload_media_assets.md5" },
+        "rating"                   => { type: :keyword, sql: "posts.rating::text" },
+        "file_ext"                 => { type: :keyword, sql: "upload_media_assets.file_ext" },
+        "source"                   => { type: :keyword, array: "ARRAY(SELECT lower(source) FROM unnest(string_to_array(posts.source, E'\\n')) AS source WHERE btrim(source) <> '')" },
+        "description"              => { type: :text, sql: "NULLIF(btrim(posts.description), '')" },
+        "qtags"                    => { type: :keyword, array: "posts.qtags" },
+        "rating_locked"            => { type: :boolean, sql: "posts.is_rating_locked" },
+        "note_locked"              => { type: :boolean, sql: "posts.is_note_locked" },
+        "status_locked"            => { type: :boolean, sql: "posts.is_status_locked" },
+        "flagged"                  => { type: :boolean, sql: "posts.is_flagged" },
+        "pending"                  => { type: :boolean, sql: "posts.is_pending" },
+        "deleted"                  => { type: :boolean, sql: "posts.is_deleted" },
+        "appealed"                 => { type: :boolean, sql: "posts.is_appealed" },
+        "unlisted"                 => { type: :boolean, sql: "posts.is_unlisted" },
+        "in_progress"              => { type: :boolean, sql: "posts.is_in_progress" },
+        "has_children"             => { type: :boolean, sql: "posts.has_children" },
+        "has_pending_replacements" => { type: :boolean, sql: "EXISTS (SELECT 1 FROM post_replacements WHERE post_replacements.post_id = posts.id AND post_replacements.status = 'pending')" },
+        "has_pending_audio"        => { type: :boolean, sql: "EXISTS (SELECT 1 FROM audio_tracks WHERE audio_tracks.post_id = posts.id AND audio_tracks.status = 'pending' AND audio_tracks.file_md5 = upload_media_assets.md5)" },
+        "audiocount"               => { type: :integer, sql: "(SELECT COUNT(*) FROM audio_tracks WHERE audio_tracks.post_id = posts.id AND audio_tracks.status = 'approved' AND audio_tracks.file_md5 = upload_media_assets.md5)" },
+        "artverified"              => { type: :boolean, sql: "EXISTS (SELECT 1 FROM artists WHERE artists.linked_user_id = posts.uploader_id AND artists.name = ANY(string_to_array(posts.tag_string, ' ')))" },
+      },
+      # posts only have a key for categories they have tags in
+      dynamic_fields: { "tag_category_counts." => ->(id) { { type: :integer, sql: "(posts.tag_category_data->>'#{Integer(id)}')::integer" } } },
+      scripts:        { ElasticPostQueryBuilder::RANK_SCRIPT => ElasticPostQueryBuilder::RANK_SQL },
+    }
+
     base.document_store.extend(ClassMethods)
   end
 

@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 class ElasticPostQueryBuilder < ElasticQueryBuilder
+  RANK_SCRIPT = "Math.log(doc['score'].value) / params.log3 + (doc['created_at'].value.millis / 1000 - params.date2024_05_18) / 35000"
+  # the same as RANK_SCRIPT, including its integer division
+  RANK_SQL = "(LN(posts.score) / LN(3) + (((EXTRACT(EPOCH FROM date_trunc('milliseconds', posts.created_at)) * 1000)::bigint / 1000 - 1715990400000) / 35000))"
+
   LOCK_TYPE_TO_INDEX_FIELD = {
     rating: :rating_locked,
     note:   :note_locked,
@@ -377,7 +381,7 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
         script_score: {
           script: {
             params: { log3: Math.log(3), date2024_05_18: 1_715_990_400_000 }, # rubocop:disable Naming/VariableNumber
-            source: "Math.log(doc['score'].value) / params.log3 + (doc['created_at'].value.millis / 1000 - params.date2024_05_18) / 35000",
+            source: RANK_SCRIPT,
           },
         },
       }
@@ -402,6 +406,14 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
 
     else # rubocop:disable Lint/DuplicateBranch
       order.push({ id: :desc })
+    end
+
+    # without this ties come back in whatever order the index has them, which can change between
+    # requests and can't be matched when searching with sql
+    unless order.any? { |o| o.keys.first.to_s.in?(%w[id _score]) }
+      sort = order.first.values.first
+      sort = sort[:order] if sort.is_a?(Hash)
+      order.push({ id: sort.to_s == "asc" ? :asc : :desc })
     end
 
     if !user.is_staff? && Security::Lockdown.hide_pending_posts_for > 0

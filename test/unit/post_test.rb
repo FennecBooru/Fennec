@@ -3,8 +3,12 @@
 require("test_helper")
 
 class PostTest < ActiveSupport::TestCase
+  # also checks searching with sql gives the same results
   def assert_tag_match(posts, query, user = User.anonymous)
     assert_equal(posts.map(&:id), Post.tag_match(query, user).pluck(:id), "Query: #{query}")
+    with_sql_search do
+      assert_equal(posts.map(&:id), Post.tag_match(query, user).pluck(:id), "SQL query: #{query}")
+    end
   end
 
   def save_with_groups(post, groups, ungrouped)
@@ -2475,7 +2479,7 @@ class PostTest < ActiveSupport::TestCase
       GayFurCity.config.expects(:is_unlimited_tag).with("rating:s").once.returns(true)
       GayFurCity.config.expects(:is_unlimited_tag).with(anything).twice.returns(false)
 
-      assert_tag_match([post1], "aaa bbb rating:s")
+      assert_equal([post1.id], Post.tag_match("aaa bbb rating:s", User.anonymous).pluck(:id))
     end
 
     should("succeed for exclusive tag searches with no other tag") do

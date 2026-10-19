@@ -18,7 +18,7 @@ module Maintenance
   end
 
   def hourly
-    ignoring_exceptions { Post.document_store.import_views }
+    ignoring_exceptions { Post.document_store.import_views } unless DocumentStore.sql_search?
     ignoring_exceptions { MediaAsset.prune_expired! }
   end
 

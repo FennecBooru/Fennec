@@ -3,14 +3,19 @@
 module DocumentStore
   class ClassMethodProxy
     delegate_missing_to(:@target)
-    attr_accessor(:index, :index_name)
+    # sql is the SQL for each indexed field, see SQLQuery
+    attr_accessor(:index, :index_name, :sql)
 
     def initialize(target)
       @target = target
     end
 
     def search(body, request_timeout: nil)
-      search = SearchRequest.new({ index: index_name, body: body }, client(request_timeout: request_timeout || 120))
+      search = if DocumentStore.sql_search?
+                 SQLSearchRequest.new({ index: index_name, body: body }, @target)
+               else
+                 SearchRequest.new({ index: index_name, body: body }, client(request_timeout: request_timeout || 120))
+               end
       Response.new(@target, search)
     end
 

@@ -92,7 +92,9 @@ module GayFurCity
     config(:eris_circuit_cooldown, :integer) { 30 }
     config(:eris_anon_lockdown_duration, :integer) { 3600 }
     config(:autocompleted_server) { nil }
-    config(:elasticsearch_host, required: true) { required!(:elasticsearch_host) }
+    # search with sql instead of opensearch, nothing is indexed and opensearch isn't needed
+    config(:sql_search, :boolean) { false }
+    config(:elasticsearch_host, required: true) { required!(:elasticsearch_host) unless sql_search? }
     config(:redis_url, required: true) { required!(:redis_url) }
     config(:clickhouse_url) { nil }
     subconfig(:reports) do

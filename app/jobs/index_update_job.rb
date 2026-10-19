@@ -5,6 +5,7 @@ class IndexUpdateJob < ApplicationJob
   good_job_control_concurrency_with(enqueue_limit: 1, key: -> { "IndexUpdateJob-#{arguments[0]}-#{arguments[1]}" })
 
   def perform(klass, id)
+    return if DocumentStore.sql_search?
     obj = klass.constantize.find(id)
     obj.document_store.update_index
   rescue ActiveRecord::RecordNotFound

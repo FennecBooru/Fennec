@@ -97,6 +97,7 @@ class SystemInfo
   end
 
   def elasticsearch
+    return OpenHash.from(enabled: false) if DocumentStore.sql_search?
     @elasticsearch ||= begin
       info = DocumentStore.client.info
       version = info["version"]["number"]
@@ -105,7 +106,7 @@ class SystemInfo
         { name: r["index"], docs: r["docs.count"].to_i }
       end
       health = DocumentStore.client.cat.health(format: "json").first
-      OpenHash.from(version: version, latency: latency, indexes: indexes.pluck(:name), docs_per_index: indexes.to_h { |i| [i[:name], i[:docs]] }, date: Time.at(health["epoch"].to_i).utc.iso8601, status: health["status"])
+      OpenHash.from(enabled: true, version: version, latency: latency, indexes: indexes.pluck(:name), docs_per_index: indexes.to_h { |i| [i[:name], i[:docs]] }, date: Time.at(health["epoch"].to_i).utc.iso8601, status: health["status"])
     end
   end
 
