@@ -90,6 +90,7 @@ class SessionLoader
   end
 
   def load_session_for_api
+    raise(AuthenticationFailure, "API keys are disabled") unless AdminConfig.enable_api_keys?
     if request.authorization
       authenticate_basic_auth
     elsif params[:login].present? && params[:api_key].present?

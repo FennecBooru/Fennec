@@ -79,6 +79,24 @@ class ApplicationControllerTest < ActionDispatch::IntegrationTest
         end
       end
 
+      context("with api keys disabled") do
+        setup do
+          stub_admin_config(:enable_api_keys, false)
+        end
+
+        should("reject api key authentication") do
+          get(edit_users_path, params: { login: @user.name, api_key: @api_key.key })
+
+          assert_response(:unauthorized)
+
+          basic_auth_string = "Basic #{::Base64.encode64("#{@user.name}:#{@api_key.key}")}"
+          get(edit_users_path, headers: { HTTP_AUTHORIZATION: basic_auth_string }, as: :json)
+
+          assert_response(:unauthorized)
+          assert_equal(0, @api_key.reload.uses)
+        end
+      end
+
       context("using the api_key parameter") do
         should("succeed for api key matches") do
           get(edit_users_path, params: { login: @user.name, api_key: @api_key.key })

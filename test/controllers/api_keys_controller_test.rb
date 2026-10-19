@@ -154,5 +154,34 @@ class ApiKeysControllerTest < ActionDispatch::IntegrationTest
         end
       end
     end
+
+    context("when api keys are disabled") do
+      setup do
+        stub_admin_config(:enable_api_keys, false)
+      end
+
+      should("not be available") do
+        [user_api_keys_path(@user), new_user_api_key_path(@user), edit_api_key_path(@api_key), usage_api_key_path(@api_key)].each do |path|
+          get_auth(path, @user)
+
+          assert_response(:not_implemented, path)
+        end
+      end
+
+      should("hide the api key links") do
+        get_auth(user_path(@user), @user)
+
+        assert_response(:success)
+        assert_select("a[href='#{user_api_keys_path(@user)}']", count: 0)
+
+        get_auth(home_users_path, @user)
+
+        assert_select("a[href='#{user_api_keys_path(@user)}']", count: 0)
+
+        get_auth(site_map_path, @user)
+
+        assert_select("a[href='#{user_api_keys_path(@user)}']", count: 0)
+      end
+    end
   end
 end

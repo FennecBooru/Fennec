@@ -22,7 +22,7 @@ class UserPresenterPolicy < ApplicationPolicy
   end
 
   def show_api_keys?
-    user.is_owner? || user == record
+    AdminConfig.enable_api_keys? && (user.is_owner? || user == record)
   end
 
   def show_email?

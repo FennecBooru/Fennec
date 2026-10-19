@@ -133,7 +133,9 @@
       <li>» <%= link_to("Sign out", session_path, method: :delete) %></li>
       <li>» <%= link_to("Settings", edit_users_path) %></li>
       <li>» <%= link_to("Change password", edit_user_password_path(CurrentUser.user)) %></li>
-      <li>» <%= link_to("Manage API Access", user_api_keys_path(CurrentUser.user)) %></li>
+      <% if AdminConfig.enable_api_keys? %>
+        <li>» <%= link_to("Manage API Access", user_api_keys_path(CurrentUser.user)) %></li>
+      <% end %>
       <li>» <%= link_to("Change username", new_user_name_change_request_path) %></li>
       <% if AdminConfig.instance.enable_email_verification && !CurrentUser.user.is_verified? %>
         <li>» <%= link_to("Resend activation email", resend_confirmation_email_path) %></li>

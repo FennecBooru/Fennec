@@ -54,6 +54,7 @@ module SiteMap
   artists = ->(user) { AdminConfig.enable_artist_pages? || user.is_staff? }
   characters = ->(_) { AdminConfig.enable_character_pages? }
   notes = ->(_) { AdminConfig.enable_notes? }
+  api_keys = ->(_) { AdminConfig.enable_api_keys? }
   # staff can still get to the wiki to edit the static and help pages
   wiki = ->(user) { AdminConfig.enable_wiki? || user.is_staff? }
 
@@ -192,7 +193,7 @@ module SiteMap
     link("Events", policy: UserEvent)                          { user_events_path }
     link("Upload Limit", policy: User, action: :upload_limit?) { upload_limit_users_path }
     link("Blocked Users", visible: logged_in)                  { |user| user_blocks_path(user) }
-    link("API Keys", policy: ApiKey)                           { |user| user_api_keys_path(user) }
+    link("API Keys", policy: ApiKey, visible: api_keys)        { |user| user_api_keys_path(user) }
     link("Passkeys", visible: logged_in)                       { user_passkeys_path }
     link("DMail Filter", visible: logged_in)                   { users_dmail_filter_path }
     link("Email Notifications", visible: logged_in)            { users_email_notification_path }

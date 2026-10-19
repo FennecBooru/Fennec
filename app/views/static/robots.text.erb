@@ -8,7 +8,9 @@ Disallow: <%= artist_versions_path %>
 <% end %>
 Disallow: <%= avoid_postings_path %>
 Disallow: <%= avoid_posting_versions_path %>
+<% if AdminConfig.enable_api_keys? %>
 Disallow: <%= api_keys_path %>
+<% end %>
 <% if AdminConfig.enable_artist_pages? %>
 Disallow: <%= show_or_new_artists_path %>
 <% end %>

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class ApiKeysController < ApplicationController
+  before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_api_keys? })
   before_action(:requires_reauthentication)
   before_action(:load_api_key, except: %i[index new create])
   respond_to(:html, :json)

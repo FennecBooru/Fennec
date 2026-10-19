@@ -261,6 +261,7 @@ class AdminConfig
       add_boolean_field(:enable_takedowns, hint: "Enable the takedown system.")
       add_boolean_field(:enable_post_approvals, hint: "Enable approving posts. When disabled, every upload is approved immediately, and posts can only be deleted and undeleted")
       add_boolean_field(:enable_replacement_approvals, hint: "Enable approving replacements. When disabled, every replacement is approved immediately")
+      add_boolean_field(:enable_api_keys, name: "Enable API Keys", hint: "Enable API keys. Disabling it keeps existing keys, but requests using them are rejected")
       add_boolean_field(:enable_notes, hint: "Enable notes. Disabling it keeps existing notes, but hides them")
       add_boolean_field(:enable_character_groups, name: "Enable Character Group Tagging", hint: "Enable grouping tags by character. Disabling it keeps existing groups, but hides them, and any groups that are submitted are added as plain tags")
       add_boolean_field(:enable_character_pages, hint: "Enable the character pages. Disabling it keeps existing characters, but hides them. Character groups on posts still work")
