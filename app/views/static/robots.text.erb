@@ -90,7 +90,9 @@ Disallow: <%= tags_path %>
 Disallow: <%= takedowns_path %>
 <% end %>
 Disallow: <%= tickets_path %>
+<% if AdminConfig.enable_upload_whitelist? %>
 Disallow: <%= upload_whitelists_path %>
+<% end %>
 Disallow: <%= uploads_path %>
 Disallow: <%= users_path %>
 <% if AdminConfig.enable_wiki? %>

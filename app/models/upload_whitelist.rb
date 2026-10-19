@@ -50,6 +50,16 @@ class UploadWhitelist < ApplicationRecord
       return [false, "URLs with embedded credentials are not allowed"]
     end
 
+    unless AdminConfig.enable_upload_whitelist?
+      return [false, "invalid url"] if url.host.blank?
+      begin
+        Downloads::File.public_address!(url.host)
+      rescue Downloads::File::Error => e
+        return [false, e.message]
+      end
+      return [true, nil]
+    end
+
     entries = Cache.fetch("upload_whitelist", expires_in: 6.hours) do
       all
     end

@@ -55,6 +55,7 @@ module SiteMap
   characters = ->(_) { AdminConfig.enable_character_pages? }
   notes = ->(_) { AdminConfig.enable_notes? }
   api_keys = ->(_) { AdminConfig.enable_api_keys? }
+  upload_whitelist = ->(_) { AdminConfig.enable_upload_whitelist? }
   # staff can still get to the wiki to edit the static and help pages
   wiki = ->(user) { AdminConfig.enable_wiki? || user.is_staff? }
 
@@ -233,7 +234,7 @@ module SiteMap
     link("Tickets")                                                               { tickets_path }
     link("Mod Actions")                                                           { mod_actions_path }
     link("Takedowns", policy: Takedown)                                           { takedowns_path }
-    link("Upload Whitelist")                                                      { upload_whitelists_path }
+    link("Upload Whitelist", visible: upload_whitelist)                           { upload_whitelists_path }
     link("User Approvals", policy: UserApproval)                                  { moderator_user_approvals_path }
     link("Name Change Requests", policy: UserNameChangeRequest)                   { user_name_change_requests_path }
     link("User Text Versions", policy: UserTextVersion)                           { moderator_user_text_versions_path }
