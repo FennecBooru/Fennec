@@ -15,17 +15,19 @@
     <% xml.changefreq("always") %>
     <% xml.lastmod((Post.maximum(:updated_at) || now).utc.iso8601) %>
   <% end %>
-  <% xml.url do %>
-    <% xml.loc(forum_topics_url) %>
-    <% xml.priority("0.8") %>
-    <% xml.changefreq("always") %>
-    <% xml.lastmod((ForumTopic.maximum(:updated_at) || now).utc.iso8601) %>
-  <% end %>
-  <% xml.url do %>
-    <% xml.loc(forum_posts_url) %>
-    <% xml.priority("0.4") %>
-    <% xml.changefreq("always") %>
-    <% xml.lastmod((ForumPost.maximum(:updated_at) || now).utc.iso8601) %>
+  <% if AdminConfig.enable_forums? %>
+    <% xml.url do %>
+      <% xml.loc(forum_topics_url) %>
+      <% xml.priority("0.8") %>
+      <% xml.changefreq("always") %>
+      <% xml.lastmod((ForumTopic.maximum(:updated_at) || now).utc.iso8601) %>
+    <% end %>
+    <% xml.url do %>
+      <% xml.loc(forum_posts_url) %>
+      <% xml.priority("0.4") %>
+      <% xml.changefreq("always") %>
+      <% xml.lastmod((ForumPost.maximum(:updated_at) || now).utc.iso8601) %>
+    <% end %>
   <% end %>
   <% xml.url do %>
     <% xml.loc(artists_url) %>

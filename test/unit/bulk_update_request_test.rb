@@ -98,6 +98,39 @@ class BulkUpdateRequestTest < ActiveSupport::TestCase
       end
     end
 
+    context("when forums are disabled") do
+      setup do
+        stub_admin_config(:enable_forums, false)
+      end
+
+      should("not create a topic or post, even with a topic given") do
+        @topic = create(:forum_topic)
+        assert_no_difference(%w[ForumTopic.count ForumPost.count]) do
+          @bur = create(:bulk_update_request, forum_topic: @topic, reason: "")
+        end
+
+        assert_nil(@bur.forum_topic_id)
+        assert_nil(@bur.forum_post_id)
+      end
+
+      should("not post to an existing topic when approved") do
+        @alias_topic = create(:forum_topic)
+        @tag_alias = create(:tag_alias, antecedent_name: "aaa", consequent_name: "bbb", status: "pending", forum_topic: @alias_topic)
+        @bur = create(:bulk_update_request, script: "alias ccc -> ddd")
+        @bur.update_columns(forum_topic_id: @alias_topic.id)
+
+        assert_no_difference("ForumPost.count") do
+          with_inline_jobs do
+            @tag_alias.approve!(@admin)
+            @bur.approve!(@admin)
+          end
+        end
+
+        assert_equal("active", @tag_alias.reload.status)
+        assert_equal("approved", @bur.reload.status)
+      end
+    end
+
     context("that has an invalid alias") do
       setup do
         @alias1 = create(:tag_alias)

@@ -3,7 +3,7 @@
 class TagRelationshipRequest
   include(ActiveModel::Validations)
 
-  attr_reader(:antecedent_name, :consequent_name, :user, :tag_relationship, :reason, :forum_topic, :forum_topic_id, :skip_forum)
+  attr_reader(:antecedent_name, :consequent_name, :user, :tag_relationship, :reason, :forum_topic, :forum_topic_id)
 
   validates(:reason, length: { minimum: 5 }, unless: :skip_forum)
   validate(:validate_tag_relationship)
@@ -89,6 +89,10 @@ class TagRelationshipRequest
     if ft.invalid?
       errors.add(:base, ft.errors.full_messages.join("; "))
     end
+  end
+
+  def skip_forum
+    @skip_forum || !AdminConfig.enable_forums?
   end
 
   def skip_forum=(value)

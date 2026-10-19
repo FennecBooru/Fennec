@@ -50,6 +50,23 @@ class TagAliasRequestTest < ActiveSupport::TestCase
       end
     end
 
+    context("when forums are disabled") do
+      setup do
+        stub_admin_config(:enable_forums, false)
+      end
+
+      should("not create a topic or post, even with a topic given") do
+        @topic = create(:forum_topic)
+        assert_no_difference(%w[ForumTopic.count ForumPost.count]) do
+          @tar = TagAliasRequest.create(antecedent_name: "aaa", consequent_name: "bbb", forum_topic: @topic, user: @user).tag_relationship
+        end
+
+        assert_predicate(@tar, :persisted?)
+        assert_nil(@tar.forum_topic_id)
+        assert_nil(@tar.forum_post_id)
+      end
+    end
+
     should("fail validation if the reason is too short") do
       tar = TagAliasRequest.create(antecedent_name: "aaa", consequent_name: "bbb", reason: "", user: @user)
 

@@ -33,13 +33,15 @@
         <span>Wiki Page Changes</span>
         <span><%= presenter.wiki_page_version_count %></span>
 
-        <span>Forum Posts</span>
-        <span>
-          <%= presenter.forum_post_count %>
-          <%= link_to_enclosed("mentions", forum_posts_path(search: { body_matches: user.name })) %>
-          <%= link_to_enclosed_if(ForumPostVotePolicy.new(CurrentUser.user, user).index?, "#{user.forum_post_vote_count} votes", action: "index", controller: "forums/posts/votes", search: { user_name: user.name }) %>
-          <%= link_to_enclosed_if(policy(EditHistory).index?, "edits", edit_histories_path(search: { versionable_type: "ForumPost", user_id: user.id })) %>
-        </span>
+        <% if AdminConfig.enable_forums? %>
+          <span>Forum Posts</span>
+          <span>
+            <%= presenter.forum_post_count %>
+            <%= link_to_enclosed("mentions", forum_posts_path(search: { body_matches: user.name })) %>
+            <%= link_to_enclosed_if(ForumPostVotePolicy.new(CurrentUser.user, user).index?, "#{user.forum_post_vote_count} votes", action: "index", controller: "forums/posts/votes", search: { user_name: user.name }) %>
+            <%= link_to_enclosed_if(policy(EditHistory).index?, "edits", edit_histories_path(search: { versionable_type: "ForumPost", user_id: user.id })) %>
+          </span>
+        <% end %>
 
         <span>Note Changes</span>
         <span><%= presenter.note_version_count %> on <%= presenter.noted_posts_count %> posts</span>

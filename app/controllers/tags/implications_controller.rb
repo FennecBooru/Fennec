@@ -34,7 +34,7 @@ module Tags
         respond_with(@tag_implication_request) do |format|
           format.html { redirect_back_or_to(new_tag_alias_path, notice: @tag_implication_request.errors.full_messages.join("; ")) }
         end
-      elsif @tag_implication_request.forum_topic
+      elsif @tag_implication_request.tag_relationship.forum_post
         respond_with(@tag_implication_request.tag_relationship, location: forum_topic_path(@tag_implication_request.forum_topic, page: @tag_implication_request.tag_relationship.forum_post.forum_topic_page, anchor: "forum_post_#{@tag_implication_request.tag_relationship.forum_post_id}"))
       else
         respond_with(@tag_implication_request.tag_relationship)

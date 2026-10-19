@@ -1,15 +1,15 @@
 <%= custom_form_for(tag_implication) do |f| %>
   <%= f.input(:antecedent_name, label: "From", autocomplete: "tag") %>
   <%= f.input(:consequent_name, label: "To", autocomplete: "tag") %>
-  <% if tag_implication.new_record? %>
+  <% if tag_implication.new_record? && AdminConfig.enable_forums? %>
     <%= f.input(:reason, as: :dtext, limit: AdminConfig.instance.forum_post_max_size) %>
   <% end %>
 
-  <% if tag_implication.new_record? %>
+  <% if tag_implication.new_record? && AdminConfig.enable_forums? %>
     <%= f.input(:forum_topic_id, as: :string, hint: " (optional)") %>
   <% end %>
 
-  <% if tag_implication.new_record? && can_use_attribute?(tag_implication, :skip_forum) %>
+  <% if tag_implication.new_record? && AdminConfig.enable_forums? && can_use_attribute?(tag_implication, :skip_forum) %>
     <%= f.input(:skip_forum, as: :boolean, label: "Skip forum topic creation") %>
   <% end %>
   <%= f.button(:submit, "Submit") %>

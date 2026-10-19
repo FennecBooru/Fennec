@@ -30,12 +30,14 @@ undeprecate bbb
     <% end %>
   </div>
 
-  <div class="input">
-    <label for="bulk_update_request_import_forum_topic_id">
-      Topic ID
-    </label>
-    <%= text_field("bulk_update_request_import", "forum_topic_id", value: @import.forum_topic_id) %>
-  </div>
+  <% if AdminConfig.enable_forums? %>
+    <div class="input">
+      <label for="bulk_update_request_import_forum_topic_id">
+        Topic ID
+      </label>
+      <%= text_field("bulk_update_request_import", "forum_topic_id", value: @import.forum_topic_id) %>
+    </div>
+  <% end %>
 
   <%= submit_tag("Update & Retry") %>
 <% end %>

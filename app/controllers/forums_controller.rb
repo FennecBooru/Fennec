@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class ForumsController < ApplicationController
+  before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_forums? })
   respond_to(:html, :json)
 
   def index

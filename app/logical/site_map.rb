@@ -46,6 +46,7 @@ module SiteMap
 
   logged_in = ->(user) { !user.is_anonymous? }
   logged_out = ->(user) { user.is_anonymous? }
+  forums = ->(_) { AdminConfig.enable_forums? }
 
   section("Posts") do
     link("Listing")                                                               { posts_path }
@@ -145,12 +146,12 @@ module SiteMap
   end
 
   section("Forum") do
-    link("Listing")                                             { forums_path }
-    link("Topics")                                              { forum_topics_path }
-    link("Posts")                                               { forum_posts_path }
-    link("Search")                                              { search_forums_path }
-    link("Categories", policy: ForumCategory, action: :create?) { forum_categories_path }
-    link("Help")                                                { help_page_path(id: "forums") }
+    link("Listing", visible: forums)                                             { forums_path }
+    link("Topics", visible: forums)                                              { forum_topics_path }
+    link("Posts", visible: forums)                                               { forum_posts_path }
+    link("Search", visible: forums)                                              { search_forums_path }
+    link("Categories", policy: ForumCategory, action: :create?, visible: forums) { forum_categories_path }
+    link("Help", visible: forums)                                                { help_page_path(id: "forums") }
   end
 
   section("Wiki") do

@@ -7,7 +7,7 @@
   <%= subnav_link_to("Help", help_page_path(id: "tag_aliases")) %>
   <% if @tag_alias %>
     |
-    <% if @tag_alias.forum_topic %>
+    <% if @tag_alias.forum_topic && AdminConfig.enable_forums? %>
       <% if @tag_alias.forum_post && !@tag_alias.forum_post.is_original_post? %>
         <%= subnav_link_to("Forum Post", @tag_alias.forum_post.topic_link) %>
       <% else %>

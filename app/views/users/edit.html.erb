@@ -131,11 +131,13 @@
     <%= f.input(:hover_zoom_sticky_shift, label: "Hover Zoom: Sticky Shift", as: :select, collection: [%w[No false], %w[Yes true]], include_blank: false,
                 hint: "If enabled, shift does not need to continuously be held down while hovering over a post.") %>
 
-    <%= f.input(:go_to_recent_forum_post, label: "Go To Recent Forum Post", as: :select, collection: [%w[No false], %w[Yes true]], include_blank: false,
-                hint: "When enabled, clicking on a forum topic will take you to the most recent post.") %>
+    <% if AdminConfig.enable_forums? %>
+      <%= f.input(:go_to_recent_forum_post, label: "Go To Recent Forum Post", as: :select, collection: [%w[No false], %w[Yes true]], include_blank: false,
+                  hint: "When enabled, clicking on a forum topic will take you to the most recent post.") %>
 
-    <%= f.input(:forum_unread_form, label: "Forum Unread Indicator", as: :select, collection: [%w[Bubble bubble], %w[Italic italic], %w[None false]], include_blank: false,
-                hint: "When set to bubble, a red bubble will be shown near \"Forum\" when any topic is unread. When set to italic, \"Forum\" will be in italic.") %>
+      <%= f.input(:forum_unread_form, label: "Forum Unread Indicator", as: :select, collection: [%w[Bubble bubble], %w[Italic italic], %w[None false]], include_blank: false,
+                  hint: "When set to bubble, a red bubble will be shown near \"Forum\" when any topic is unread. When set to italic, \"Forum\" will be in italic.") %>
+    <% end %>
   </fieldset>
 
   <fieldset id="security-settings-section">

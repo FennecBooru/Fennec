@@ -40,6 +40,15 @@ module Tags
           assert_redirected_to(forum_topic_path(topic, page: post.forum_topic_page, anchor: "forum_post_#{post.id}"))
         end
 
+        should("skip the forum when forums are disabled") do
+          stub_admin_config(:enable_forums, false)
+          assert_no_difference("ForumTopic.count") do
+            post_auth(tag_aliases_path, @user, params: { tag_alias: { antecedent_name: "aaa", consequent_name: "bbb" } })
+          end
+
+          assert_redirected_to(tag_alias_path(TagAlias.last))
+        end
+
         context("access control") do
           asserts do
             access.gte(User::Levels::MEMBER).post(tag_aliases_path).params { { tag_alias: { antecedent_name: SecureRandom.hex(6), consequent_name: SecureRandom.hex(6), reason: "ccccc" } } }.success(:redirect)

@@ -25,6 +25,7 @@ class BulkUpdateRequest < ApplicationRecord
   validate(:check_validate_script, on: :update)
   validates(:reason, length: { minimum: 5, maximum: -> { AdminConfig.instance.forum_post_max_size } }, on: :create, unless: :skip_forum)
   before_validation(:normalize_text)
+  before_validation(-> { self.forum_topic_id = nil unless AdminConfig.enable_forums? }, on: :create)
   after_create(:create_forum_topic)
   after_create(:create_version)
   after_update(:create_version, if: :saved_change_to_watched_attributes?)
@@ -206,6 +207,10 @@ class BulkUpdateRequest < ApplicationRecord
 
   def normalize_text
     self.script = script.downcase
+  end
+
+  def skip_forum # rubocop:disable Lint/DuplicateMethods
+    @skip_forum || !AdminConfig.enable_forums?
   end
 
   def skip_forum=(value) # rubocop:disable Lint/DuplicateMethods

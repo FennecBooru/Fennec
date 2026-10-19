@@ -1,7 +1,9 @@
 <%= table_for(bulk_update_requests) do |t| %>
-  <% t.column("Votes") do |request| %>
-    <% if request.forum_post_id.present? %>
-      <%= render(partial: "forums/posts/votes/overview", locals: { votes: request.forum_post.votes, forum_post: request.forum_post }) %>
+  <% if AdminConfig.enable_forums? %>
+    <% t.column("Votes") do |request| %>
+      <% if request.forum_post_id.present? %>
+        <%= render(partial: "forums/posts/votes/overview", locals: { votes: request.forum_post.votes, forum_post: request.forum_post }) %>
+      <% end %>
     <% end %>
   <% end %>
   <% t.column("Creator") do |request| %>
@@ -17,11 +19,13 @@
       <p><%= compact_time(request.updated_at) %></p>
     <% end %>
   <% end %>
-  <% t.column("Forum") do |request| %>
-    <% if request.forum_post_id.present? && request.forum_post.present? %>
-      <%= link_to(request.forum_topic_id, forum_topic_path(request.forum_topic_id, page: request.forum_post.forum_topic_page, anchor: "forum_post_#{request.forum_post_id}")) %>
-    <% elsif request.forum_topic_id.present? %>
-      <%= link_to(request.forum_topic_id, forum_topic_path(request.forum_topic_id)) %>
+  <% if AdminConfig.enable_forums? %>
+    <% t.column("Forum") do |request| %>
+      <% if request.forum_post_id.present? && request.forum_post.present? %>
+        <%= link_to(request.forum_topic_id, forum_topic_path(request.forum_topic_id, page: request.forum_post.forum_topic_page, anchor: "forum_post_#{request.forum_post_id}")) %>
+      <% elsif request.forum_topic_id.present? %>
+        <%= link_to(request.forum_topic_id, forum_topic_path(request.forum_topic_id)) %>
+      <% end %>
     <% end %>
   <% end %>
   <% t.column("Script") do |request| %>

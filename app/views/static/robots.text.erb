@@ -20,10 +20,12 @@ Disallow: <%= edit_histories_path %>
 Disallow: <%= email_blacklists_path %>
 Disallow: /email
 Disallow: <%= favorites_path %>
+<% if AdminConfig.enable_forums? %>
 Disallow: <%= forum_categories_path %>
 Disallow: <%= forum_post_edits_path(forum_post_id: "*") %>
 Disallow: <%= forum_post_votes_path(forum_post_id: "*") %>
 Disallow: <%= url_for(controller: "forums/posts/votes", action: "index") %>
+<% end %>
 Disallow: <%= ip_bans_path %>
 Disallow: <%= mascots_path %>
 Disallow: <%= mod_actions_path %>

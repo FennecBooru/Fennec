@@ -626,6 +626,28 @@ module Forums
           end
         end
       end
+
+      context("when forums are disabled") do
+        setup do
+          stub_admin_config(:enable_forums, false)
+        end
+
+        should("not be available") do
+          [forums_path, forum_topics_path, forum_topic_path(@forum_topic), forum_posts_path, forum_categories_path, new_forum_topic_path].each do |path|
+            get_auth(path, @admin)
+
+            assert_response(:not_implemented, path)
+          end
+        end
+
+        should("hide the forum links") do
+          get_auth(site_map_path, @user)
+
+          assert_response(:success)
+          assert_select("a[href='#{forums_path}']", count: 0)
+          assert_select("a[href='#{forum_topics_path}']", count: 0)
+        end
+      end
     end
   end
 end
