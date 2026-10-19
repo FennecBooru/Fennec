@@ -227,7 +227,7 @@ CREATE TABLE public.admin_config (
     elasticsearch_query_timeout jsonb DEFAULT '{"0": 3000, "15": 6000, "19": 9000}'::jsonb NOT NULL,
     elasticsearch_request_timeout jsonb DEFAULT '{"0": 5, "15": 10, "19": 15}'::jsonb NOT NULL,
     request_cycle_timeout jsonb DEFAULT '{"0": 10000, "15": 20000, "19": 30000}'::jsonb NOT NULL,
-    db_exports_enabled boolean DEFAULT false NOT NULL,
+    enable_db_exports boolean DEFAULT false CONSTRAINT admin_config_db_exports_enabled_not_null NOT NULL,
     blacklisted_preview_url character varying DEFAULT '/images/blacklisted-preview.png'::character varying NOT NULL,
     deleted_preview_url character varying DEFAULT '/images/deleted-preview.png'::character varying NOT NULL,
     download_preview_url character varying DEFAULT '/images/download-preview.png'::character varying NOT NULL,
@@ -261,7 +261,34 @@ CREATE TABLE public.admin_config (
     site_icon_size jsonb DEFAULT '{"max": 10000, "min": 512}'::jsonb NOT NULL,
     max_site_asset_file_sizes jsonb DEFAULT '{"jpg": 10240, "png": 10240, "webp": 10240}'::jsonb NOT NULL,
     domain_icon_size jsonb DEFAULT '{"max": 256, "min": 16}'::jsonb NOT NULL,
-    max_domain_icon_file_sizes jsonb DEFAULT '{"gif": 256, "jpg": 256, "png": 256, "webp": 256}'::jsonb NOT NULL
+    max_domain_icon_file_sizes jsonb DEFAULT '{"gif": 256, "jpg": 256, "png": 256, "webp": 256}'::jsonb NOT NULL,
+    enable_recommendations boolean DEFAULT true NOT NULL,
+    enable_avoid_posting boolean DEFAULT true NOT NULL,
+    enable_tag_following boolean DEFAULT true NOT NULL,
+    enable_reports boolean DEFAULT true NOT NULL,
+    enable_view_tracking boolean DEFAULT true NOT NULL,
+    enable_search_tracking boolean DEFAULT true NOT NULL,
+    enable_api_key_usage_tracking boolean DEFAULT true NOT NULL,
+    enable_post_approvals boolean DEFAULT true NOT NULL,
+    enable_post_appeals boolean DEFAULT true NOT NULL,
+    enable_replacement_approvals boolean DEFAULT true NOT NULL,
+    enable_rules boolean DEFAULT true NOT NULL,
+    enable_user_feedback boolean DEFAULT true NOT NULL,
+    enable_discord boolean DEFAULT true NOT NULL,
+    enable_forums boolean DEFAULT true NOT NULL,
+    enable_pools boolean DEFAULT true NOT NULL,
+    enable_post_sets boolean DEFAULT true NOT NULL,
+    enable_wiki boolean DEFAULT true NOT NULL,
+    enable_comments boolean DEFAULT true NOT NULL,
+    enable_artist_pages boolean DEFAULT true NOT NULL,
+    enable_character_pages boolean DEFAULT true NOT NULL,
+    enable_character_groups boolean DEFAULT true NOT NULL,
+    enable_notes boolean DEFAULT true NOT NULL,
+    enable_api_keys boolean DEFAULT true NOT NULL,
+    enable_upload_whitelist boolean DEFAULT true NOT NULL,
+    enable_mascots boolean DEFAULT true NOT NULL,
+    enable_tickets boolean DEFAULT true NOT NULL,
+    enable_post_flags boolean DEFAULT true NOT NULL
 );
 
 
@@ -9851,6 +9878,7 @@ ALTER TABLE ONLY public.help_pages
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261019232458'),
 ('20261018000000'),
 ('20261014031322'),
 ('20261010090000'),

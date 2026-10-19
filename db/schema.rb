@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_18_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_19_232458) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -52,7 +52,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_18_000000) do
     t.string "contact_wiki_page", default: "help:contact", null: false
     t.string "content_tag_placeholder", default: "cub scatplay watersports diaper my_little_pony vore rape hyper etc.", null: false
     t.integer "custom_style_max_size", default: 500000, null: false
-    t.boolean "db_exports_enabled", default: false, null: false
     t.string "default_blacklist", default: "", null: false
     t.integer "default_forum_category", default: 1, null: false
     t.string "default_user_timezone", default: "Central Time (US & Canada)"
@@ -71,14 +70,42 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_18_000000) do
     t.string "download_preview_url", default: "/images/download-preview.png", null: false
     t.jsonb "elasticsearch_query_timeout", default: {"0" => 3000, "15" => 6000, "19" => 9000}, null: false
     t.jsonb "elasticsearch_request_timeout", default: {"0" => 5, "15" => 10, "19" => 15}, null: false
+    t.boolean "enable_api_key_usage_tracking", default: true, null: false
+    t.boolean "enable_api_keys", default: true, null: false
+    t.boolean "enable_artist_pages", default: true, null: false
     t.boolean "enable_autotagging", default: true, null: false
+    t.boolean "enable_avoid_posting", default: true, null: false
     t.boolean "enable_bad_sources", default: true, null: false
+    t.boolean "enable_character_groups", default: true, null: false
+    t.boolean "enable_character_pages", default: true, null: false
+    t.boolean "enable_comments", default: true, null: false
+    t.boolean "enable_db_exports", default: false, null: false
+    t.boolean "enable_discord", default: true, null: false
     t.boolean "enable_email_verification", default: false, null: false
+    t.boolean "enable_forums", default: true, null: false
     t.boolean "enable_image_cropping", default: true, null: false
+    t.boolean "enable_mascots", default: true, null: false
+    t.boolean "enable_notes", default: true, null: false
+    t.boolean "enable_pools", default: true, null: false
+    t.boolean "enable_post_appeals", default: true, null: false
+    t.boolean "enable_post_approvals", default: true, null: false
+    t.boolean "enable_post_flags", default: true, null: false
+    t.boolean "enable_post_sets", default: true, null: false
+    t.boolean "enable_recommendations", default: true, null: false
+    t.boolean "enable_replacement_approvals", default: true, null: false
+    t.boolean "enable_reports", default: true, null: false
+    t.boolean "enable_rules", default: true, null: false
+    t.boolean "enable_search_tracking", default: true, null: false
     t.boolean "enable_signups", default: true, null: false
     t.boolean "enable_sock_puppet_validation", default: false, null: false
     t.boolean "enable_stale_forum_topics", default: true, null: false
+    t.boolean "enable_tag_following", default: true, null: false
     t.boolean "enable_takedowns", default: false, null: false
+    t.boolean "enable_tickets", default: true, null: false
+    t.boolean "enable_upload_whitelist", default: true, null: false
+    t.boolean "enable_user_feedback", default: true, null: false
+    t.boolean "enable_view_tracking", default: true, null: false
+    t.boolean "enable_wiki", default: true, null: false
     t.boolean "flag_ai_posts", default: true, null: false
     t.string "flag_notice_wiki_page", default: "internal:flag_notice", null: false
     t.jsonb "followed_tag_limit", default: {"10" => 100, "15" => 500, "20" => 1000}, null: false
