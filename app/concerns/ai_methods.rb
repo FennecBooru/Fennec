@@ -6,8 +6,8 @@ module AiMethods
     "novelai", "nai", "stable diffusion", "sdxl", "automatic1111", "a1111",
     "comfyui", "invokeai", "midjourney", "dall·e", "dall-e", "openai",
     "bing image creator", "firefly", "adobe generative fill", "adobe firefly",
-    "leonardo", "playground",
-  ].to_set.freeze
+    "leonardo", "playground", "google generative ai", "synthid",
+  ].freeze
 
   # Parameter/telltale tokens commonly embedded in PNG/JPEG comments or EXIF
   SD_TOKENS = [
@@ -15,12 +15,80 @@ module AiMethods
     "hires fix", "denoising strength", "clip skip", "refiner:",
     '"sampler":', '"seed":', '"model":', '"workflow":', "sd-metadata",
     "comfy", "parameters:", "seed:", "cfg:", "hires:",
-  ].to_set.freeze
+  ].freeze
 
   # C2PA / Content Credentials indicators (usually in XMP/JUMBF)
-  C2PA_TOKENS = %w[c2pa.org jumbf manifeststore c2pa].to_set.freeze
+  C2PA_TOKENS = %w[c2pa.org jumbf manifeststore c2pa].freeze
 
   CAMERA_TOKENS = %w[Make Model DateTimeOriginal ExposureTime FNumber ISO].freeze
+
+  # plain words only match whole words, so "nai" doesn't match inside other words
+  def self.build_token_regex(tokens)
+    patterns = tokens.map do |token|
+      token.match?(/[^a-z0-9]/) ? Regexp.escape(token) : "\\b#{Regexp.escape(token)}\\b"
+    end
+    Regexp.new(patterns.join("|"), Regexp::IGNORECASE)
+  end
+
+  AI_GENERATORS_REGEX = build_token_regex(AI_GENERATORS)
+  SD_TOKENS_REGEX = build_token_regex(SD_TOKENS)
+  C2PA_TOKENS_REGEX = build_token_regex(C2PA_TOKENS)
+
+  # IPTC digitalSourceType values that declare AI generation in a C2PA manifest
+  C2PA_AI_SOURCE_REGEX = /trainedalgorithmicmedia/i
+
+  C2PA_BLOB_LIMIT = 4.megabytes
+
+  # C2PA manifests live where libvips doesn't expose them, a caBX chunk in PNGs and APP11/JUMBF segments in JPEGs,
+  # so they're read straight off the file
+  def self.raw_c2pa_blob(file_path, type)
+    case type
+    when :png then png_c2pa_blob(file_path)
+    when :jpg then jpeg_c2pa_blob(file_path)
+    else ""
+    end
+  rescue StandardError
+    ""
+  end
+
+  def self.png_c2pa_blob(file_path)
+    File.open(file_path, "rb") do |file|
+      return "" unless file.read(8) == "\x89PNG\r\n\x1a\n".b
+      blob = +""
+      while (header = file.read(8)) && header.bytesize == 8
+        length, type = header.unpack("Na4")
+        break if %w[IEND IDAT].include?(type)
+        if type == "caBX" && blob.bytesize + length <= C2PA_BLOB_LIMIT
+          blob << file.read(length).to_s
+          file.seek(4, IO::SEEK_CUR) # CRC
+        else
+          file.seek(length + 4, IO::SEEK_CUR)
+        end
+      end
+      blob
+    end
+  end
+
+  def self.jpeg_c2pa_blob(file_path)
+    File.open(file_path, "rb") do |file|
+      return "" unless file.read(2) == "\xFF\xD8".b
+      blob = +""
+      while (marker = file.read(2)) && marker.bytesize == 2
+        break unless marker.getbyte(0) == 0xFF
+        code = marker.getbyte(1)
+        break if [0xDA, 0xD9].include?(code) # SOS / EOI
+        length = file.read(2).to_s.unpack1("n").to_i - 2
+        break if length < 0
+        if code == 0xEB && blob.bytesize + length <= C2PA_BLOB_LIMIT # APP11
+          data = file.read(length).to_s
+          blob << data if data.start_with?("JP")
+        else
+          file.seek(length, IO::SEEK_CUR)
+        end
+      end
+      blob
+    end
+  end
 
   # Checks if the file at the specified path is AI-generated.
   # Uses metadata analysis to determine likelihood of AI generation.
@@ -57,9 +125,14 @@ module AiMethods
     png_text_blob = is_png ? fields.grep(/^png-comment-/).map { |k| fetch.call(k) }.join("\n") : ""
     jpeg_comment = is_jpeg ? [fetch.call("jpeg-comment"), fetch.call("jpeg-com")].compact_blank.join("\n") : ""
 
+    c2pa_type = (:png if is_png) || (:jpg if is_jpeg)
+    c2pa_text = AiMethods.raw_c2pa_blob(file_path, c2pa_type)
+                         .encode("ASCII", invalid: :replace, undef: :replace, replace: " ")
+                         .downcase
+
     combined_text = [
       png_text_blob, exif_data, exif_software, exif_image_desc,
-      exif_user_comment, xmp_data, jpeg_comment,
+      exif_user_comment, xmp_data, jpeg_comment, c2pa_text,
     ].join("\n").downcase
 
     # === Calculate score based on various heuristics === #
@@ -67,20 +140,26 @@ module AiMethods
     reasons = []
 
     # C2PA
-    if C2PA_TOKENS.any? { |t| xmp_data.include?(t) }
+    if xmp_data.match?(C2PA_TOKENS_REGEX) || c2pa_text.match?(C2PA_TOKENS_REGEX)
       score += 80
       reasons << "c2pa manifest present"
     end
 
+    # Manifest explicitly declares an AI digitalSourceType
+    if c2pa_text.match?(C2PA_AI_SOURCE_REGEX)
+      score += 60
+      reasons << "c2pa declares ai source"
+    end
+
     # Known generators
-    matched_generators = AI_GENERATORS.select { |m| combined_text.include?(m) }
-    unless matched_generators.empty?
+    matched_generator = combined_text.match(AI_GENERATORS_REGEX)
+    if matched_generator
       score += 70
-      reasons << "ai generator: #{matched_generators.first}"
+      reasons << "ai generator: #{matched_generator[0]}"
     end
 
     # SD pipeline tokens
-    sd_tokens_found = SD_TOKENS.any? { |t| combined_text.include?(t) }
+    sd_tokens_found = combined_text.match?(SD_TOKENS_REGEX)
     if sd_tokens_found
       score += 60
       reasons << "ai parameter tokens found"
@@ -95,7 +174,7 @@ module AiMethods
 
     # Heuristic: camera EXIF present and no AI markers -> reduce score
     if is_jpeg &&
-       matched_generators.empty? &&
+       matched_generator.nil? &&
        !sd_tokens_found &&
        CAMERA_TOKENS.any? { |t| exif_data.include?(t) }
       score -= 30

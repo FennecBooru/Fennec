@@ -43,6 +43,7 @@ class AiMethodsTest < ActiveSupport::TestCase
       MediaAsset.stubs(:file_header_to_file_ext).with("/tmp/nonexistent.jpg").returns("jpg")
       MediaAsset.stubs(:file_header_to_file_ext).with("/app/test/fixtures/files/ai/generator.png").returns("png")
       MediaAsset.stubs(:file_header_to_file_ext).with("/app/test/fixtures/files/ai/tokens.png").returns("png")
+      MediaAsset.stubs(:file_header_to_file_ext).with("/app/test/fixtures/files/ai/c2pa.png").returns("png")
     end
 
     should("return not an image for non-image files") do
@@ -183,6 +184,26 @@ class AiMethodsTest < ActiveSupport::TestCase
 
       assert_operator(result[:score], :>=, 60)
       assert_includes(result[:reason], "ai parameter tokens found")
+    end
+
+    should("flag the c2pa manifest in fixture c2pa.png") do
+      path = file_fixture("ai/c2pa.png").to_s
+      result = MediaAsset.is_ai_generated?(path)
+
+      assert_equal(100, result[:score])
+      assert_includes(result[:reason], "c2pa manifest present")
+      assert_includes(result[:reason], "c2pa declares ai source")
+      assert_includes(result[:reason], "ai generator: google generative ai")
+    end
+
+    should("only match whole words for generators") do
+      stub_vips_image(values: {
+        "exif-ifd0-ImageDescription" => "a naive drawing on a nail",
+      })
+
+      result = MediaAsset.is_ai_generated?("/tmp/photo.jpg")
+
+      assert_equal("no ai signals", result[:reason])
     end
 
     should("flag known generator for fixture generator.png") do
