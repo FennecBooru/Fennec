@@ -9,6 +9,12 @@ module Downloads
 
     class Error < StandardError; end
 
+    # addresses downloads can't connect to, on top of IPAddr's private, loopback, and link local checks
+    BLOCKED_RANGES = %w[
+      0.0.0.0/8 100.64.0.0/10 192.0.0.0/24 192.0.2.0/24 198.18.0.0/15 198.51.100.0/24 203.0.113.0/24 224.0.0.0/4 240.0.0.0/4
+      ::/96 64:ff9b::/96 64:ff9b:1::/48 100::/64 2001:db8::/32 ff00::/8
+    ].map { |range| IPAddr.new(range) }.freeze
+
     attr_reader(:user, :url)
 
     validate(:validate_url)
@@ -36,6 +42,8 @@ module Downloads
       conn = Faraday.new(GayFurCity.config.faraday_options) do |f|
         f.response(:follow_redirects, callback: ->(_old_env, new_env) { validate_uri_allowed!(new_env.url) })
         f.request(:retry, max: retries, retry_block: ->(*) { file = Tempfile.new(binmode: true) })
+        # connect to the address that was checked, so the host can't resolve somewhere else in between
+        f.adapter(:net_http) { |http| http.ipaddr = self.class.public_address!(http.address) }
       end
 
       res = conn.get(uncached_url, nil, strategy.headers) do |req|
@@ -82,12 +90,24 @@ module Downloads
       CloudflareService.ips.any? { |subnet| subnet.include?(ip_addr) }
     end
 
+    def self.blocked_address?(ip)
+      ip = ip.native # ipv4 mapped ipv6 addresses are checked as ipv4
+      ip.private? || ip.loopback? || ip.link_local? || BLOCKED_RANGES.any? { |range| range.family == ip.family && range.include?(ip) }
+    end
+
+    # every address the host resolves to has to be public, returns the one to connect to
+    def self.public_address!(host)
+      addresses = Addrinfo.getaddrinfo(host, nil, nil, :STREAM).map { |info| IPAddr.new(info.ip_address) }.uniq
+      raise(Error, "Couldn't resolve #{host}") if addresses.empty?
+      blocked = addresses.find { |ip| blocked_address?(ip) }
+      raise(Error, "Downloads from #{blocked} are not allowed") if blocked
+      addresses.first.to_s
+    rescue SocketError, IPAddr::InvalidAddressError
+      raise(Error, "Couldn't resolve #{host}")
+    end
+
     def validate_uri_allowed!(uri)
-      # noinspection RubyArgCount
-      ip_addr = IPAddr.new(Resolv.getaddress(uri.hostname))
-      if ip_addr.private? || ip_addr.loopback? || ip_addr.link_local?
-        raise(Downloads::File::Error, "Downloads from #{ip_addr} are not allowed")
-      end
+      self.class.public_address!(uri.hostname)
 
       valid, _reason = UploadWhitelist.is_whitelisted?(uri, user)
       unless valid

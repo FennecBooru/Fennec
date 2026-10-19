@@ -38,7 +38,7 @@ module Downloads
 
       context("for a banned IP") do
         setup do
-          Resolv.expects(:getaddress).returns("127.0.0.1").at_least_once
+          Addrinfo.expects(:getaddrinfo).returns([Addrinfo.tcp("127.0.0.1", 0)]).at_least_once
         end
 
         should("not try to download the file") do
@@ -66,6 +66,53 @@ module Downloads
             Downloads::File.new(url).download!
           end
           assert_match("from 127.0.0.1 are not", error.message)
+        end
+      end
+
+      context("address checks") do
+        should("block internal and reserved addresses") do
+          %w[127.0.0.1 10.0.0.1 172.16.0.1 192.168.1.1 169.254.169.254 0.0.0.0 100.64.0.1 192.0.0.1 198.18.0.1 224.0.0.1 255.255.255.255
+             ::1 :: fd00::1 fe80::1 ff02::1 ::ffff:127.0.0.1 ::ffff:169.254.169.254 ::127.0.0.1 64:ff9b::a00:1 2001:db8::1].each do |ip|
+            assert(Downloads::File.blocked_address?(IPAddr.new(ip)), "#{ip} should be blocked")
+          end
+        end
+
+        should("allow public addresses") do
+          %w[93.184.216.34 1.1.1.1 2606:4700:4700::1111 ::ffff:93.184.216.34].each do |ip|
+            assert_not(Downloads::File.blocked_address?(IPAddr.new(ip)), "#{ip} should be allowed")
+          end
+        end
+
+        should("block a host if any of its addresses are internal") do
+          Addrinfo.stubs(:getaddrinfo).returns([Addrinfo.tcp("93.184.216.34", 0), Addrinfo.tcp("10.0.0.1", 0)])
+
+          error = assert_raises(Downloads::File::Error) { Downloads::File.new("https://example.com/file.png") }
+          assert_match("from 10.0.0.1 are not", error.message)
+        end
+
+        should("block hosts that don't resolve") do
+          Addrinfo.stubs(:getaddrinfo).raises(SocketError)
+
+          error = assert_raises(Downloads::File::Error) { Downloads::File.new("https://example.com/file.png") }
+          assert_match("Couldn't resolve", error.message)
+        end
+
+        should("connect to the address that was checked") do
+          Addrinfo.stubs(:getaddrinfo).returns([Addrinfo.tcp("93.184.216.34", 0)])
+          stub_request(:get, "https://example.com/file.png").to_return(body: "abc")
+          Net::HTTP.any_instance.expects(:ipaddr=).with("93.184.216.34")
+
+          assert_equal("abc", Downloads::File.new("https://example.com/file.png").download!.read)
+        end
+
+        should("not connect if the host resolves somewhere else after it was checked") do
+          Addrinfo.stubs(:getaddrinfo).returns([Addrinfo.tcp("93.184.216.34", 0)]).then.returns([Addrinfo.tcp("127.0.0.1", 0)])
+          request = stub_request(:get, "https://example.com/file.png").to_return(body: "abc")
+          download = Downloads::File.new("https://example.com/file.png")
+
+          error = assert_raises(Downloads::File::Error) { download.download! }
+          assert_match("from 127.0.0.1 are not", error.message)
+          assert_not_requested(request)
         end
       end
 
