@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 class PostAppealPolicy < ApplicationPolicy
+  def create?
+    AdminConfig.enable_post_appeals? && super
+  end
+
   def destroy?
     approver? && (!record.is_a?(PostAppeal) || record.pending?)
   end

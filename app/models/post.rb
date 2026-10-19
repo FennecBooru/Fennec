@@ -440,7 +440,7 @@ class Post < ApplicationRecord
     end
 
     def is_appealable?
-      is_deleted? && !is_appealed?
+      AdminConfig.enable_post_appeals? && is_deleted? && !is_appealed?
     end
 
     def is_active?

@@ -128,6 +128,36 @@ module Posts
           end
         end
       end
+
+      context("when appeals are disabled") do
+        setup do
+          stub_admin_config(:enable_post_appeals, false)
+          @user = create(:user)
+          @post = create(:post, is_deleted: true)
+        end
+
+        should("not allow appealing") do
+          assert_no_difference("PostAppeal.count") do
+            post_auth(post_appeals_path, @user, params: { post_appeal: { post_id: @post.id, reason: "xxx" }, format: :json })
+          end
+
+          assert_response(:forbidden)
+          assert_not(PostAppeal.new(creator: @user, post: @post).valid?)
+        end
+
+        should("not show the appeal link") do
+          get_auth(post_path(@post), @user)
+
+          assert_select("#appeal", count: 0)
+        end
+
+        should("still allow rejecting existing appeals") do
+          appeal = @appeal
+          delete_auth(post_appeal_path(appeal), create(:janitor_user))
+
+          assert_predicate(appeal.reload, :rejected?)
+        end
+      end
     end
   end
 end
