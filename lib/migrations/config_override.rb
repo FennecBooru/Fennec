@@ -17,9 +17,14 @@ module Migrations
             find_or_create_by!(id: config_id)
           end
 
+          # the same as AdminConfig.cache_key
+          def self.cache_key
+            "admin_config:#{config_id}:#{Digest::MD5.hexdigest(column_names.join(','))}"
+          end
+
           def self.delete_cache
-            Cache.delete("admin_config:#{config_id}")
-            Cache.delete("admin_config:hash_columns")
+            Cache.delete(cache_key)
+            Cache.delete("#{cache_key}:hash_columns")
           end
         end
         return yield(klass) if block_given?

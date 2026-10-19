@@ -69,5 +69,13 @@ class AdminConfigTest < ActiveSupport::TestCase
       assert_equal(5, AdminConfig.test_column)
       assert_equal(5, AdminConfig.instance.test_column)
     end
+
+    should("not use a row cached before a column was added") do
+      AdminConfig.instance
+      AdminConfig.connection.add_column(:admin_config, :test_column, :integer, null: false, default: 5)
+      AdminConfig.reset_column_information
+
+      assert_equal(5, AdminConfig.instance.test_column)
+    end
   end
 end

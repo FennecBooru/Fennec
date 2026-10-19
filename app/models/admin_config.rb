@@ -99,13 +99,18 @@ class AdminConfig < ApplicationRecord
   end
 
   def self.instance
-    Cache.fetch("admin_config:#{config_id}") do
+    Cache.fetch(cache_key) do
       uncached
     end
   end
 
+  # includes the columns, otherwise a row cached before a migration added one would be missing it
+  def self.cache_key
+    "admin_config:#{config_id}:#{Digest::MD5.hexdigest(column_names.join(','))}"
+  end
+
   def self.hash_columns
-    Cache.fetch("admin_config:hash_columns") do
+    Cache.fetch("#{cache_key}:hash_columns") do
       columns_hash.select { |_k, v| %i[json jsonb].include?(v.type) }.keys
     end
   end
@@ -122,8 +127,8 @@ class AdminConfig < ApplicationRecord
   end
 
   def self.delete_cache
-    Cache.delete("admin_config:#{config_id}")
-    Cache.delete("admin_config:hash_columns")
+    Cache.delete(cache_key)
+    Cache.delete("#{cache_key}:hash_columns")
   end
 
   def self.config_id
