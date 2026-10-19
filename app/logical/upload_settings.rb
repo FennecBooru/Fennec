@@ -3,7 +3,7 @@
 class UploadSettings
   include(ActiveModel::Serializers::JSON)
 
-  ATTRIBUTES = %i[compact_mode safe_site post_tags character_groups upload_tags recent_tags allow_locked_tags allow_rating_lock allow_upload_as_pending allow_upload_as_in_progress max_file_size max_file_size_map max_file_size_per_request wiki_enabled tag_genders_howto_wiki_url tag_what_you_see_wiki_url artist_tag_placeholder character_tag_placeholder species_tag_placeholder content_tag_placeholder].freeze
+  ATTRIBUTES = %i[compact_mode safe_site post_tags character_groups_enabled character_groups upload_tags recent_tags allow_locked_tags allow_rating_lock allow_upload_as_pending allow_upload_as_in_progress max_file_size max_file_size_map max_file_size_per_request wiki_enabled tag_genders_howto_wiki_url tag_what_you_see_wiki_url artist_tag_placeholder character_tag_placeholder species_tag_placeholder content_tag_placeholder].freeze
 
   attr_accessor(:user, :post)
 
@@ -23,11 +23,16 @@ class UploadSettings
   # The plain "general tags" box: everything not attributed to a character group.
   def post_tags
     return if post.nil?
-    "#{post.ungrouped_tags.sort.join(' ')} "
+    tags = character_groups_enabled ? post.ungrouped_tags : post.tag_array
+    "#{tags.sort.join(' ')} "
+  end
+
+  def character_groups_enabled
+    AdminConfig.enable_character_groups?
   end
 
   def character_groups
-    return [] if post.nil?
+    return [] if post.nil? || !character_groups_enabled
     post.character_groups_for_api
   end
 

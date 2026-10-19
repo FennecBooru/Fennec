@@ -70,7 +70,7 @@
     <div class="post-search-add-piece">
       <select v-model="pickerValue">
         <option value="">+ Add a search option...</option>
-        <option value="__character_group__">Character Group</option>
+        <option v-if="characterGroupsEnabled" value="__character_group__">Character Group</option>
         <option value="__bool_group__">Tag Group</option>
         <optgroup v-for="cat in categoriesWithFields" :key="cat" :label="cat">
           <option v-for="f in fieldsByCategory[cat]" :key="f.metatag" :value="f.metatag">{{ f.name }}</option>
@@ -93,6 +93,7 @@
       fields: { type: Array, required: true },
       initialGeneralTags: { type: String, default: "" },
       initialGroups: { type: Array, default: () => [] },
+      characterGroupsEnabled: { type: Boolean, default: true },
       initialBoolGroups: { type: Array, default: () => [] },
       initialValues: { type: Object, default: () => ({}) },
       initialModes: { type: Object, default: () => ({}) },

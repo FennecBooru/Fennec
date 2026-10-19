@@ -1,6 +1,6 @@
 <template>
     <div>
-        <character-group-editor param-name="post" :initial-groups="initialCharacterGroups"></character-group-editor>
+        <character-group-editor v-if="characterGroupsEnabled" param-name="post" :initial-groups="initialCharacterGroups"></character-group-editor>
         <div v-show="!preview.show">
             <label for="post_tag_string">General Tags</label>
             <textarea class="tag-textarea" id="post_tag_string" v-model="tags" rows="5" data-autocomplete="tag-edit"
@@ -58,6 +58,7 @@
         expandRelated: true,
         tags: Uploader.settings.post_tags,
         initialCharacterGroups: Uploader.settings.character_groups || [],
+        characterGroupsEnabled: Uploader.settings.character_groups_enabled,
         relatedTags: [],
         loadingRelated: false,
       };

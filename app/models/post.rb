@@ -677,24 +677,36 @@ class Post < ApplicationRecord
 
       @pending_character_groups = []
       @character_groups_provided = false
+      # with character groups disabled, submitted groups are just plain tags and existing ones are left alone
+      grouping = AdminConfig.enable_character_groups?
+      plain_group_tags = []
 
       if parsed.groups.any?
-        @character_groups_provided = true
-        @pending_character_groups.concat(parsed.groups)
+        if grouping
+          @character_groups_provided = true
+          @pending_character_groups.concat(parsed.groups)
+        else
+          plain_group_tags.concat(parsed.groups.flatten)
+        end
       end
 
       if character_groups_attributes_input
-        @character_groups_provided = true
-        @pending_character_groups.concat(character_groups_attributes_input)
+        if grouping
+          @character_groups_provided = true
+          @pending_character_groups.concat(character_groups_attributes_input)
+        else
+          plain_group_tags.concat(character_groups_attributes_input.flatten)
+        end
       end
 
       # Whatever isn't being explicitly resubmitted this save falls back to what's already
       # stored, so it doesn't silently vanish from tag_string just because this request
-      # doesn't mention it.
-      preserved_group_tags = character_groups_attributes_input ? [] : Array(character_groups).flat_map { |g| Array(g["tags"]) }
+      # doesn't mention it. With grouping disabled, the general tags box holds every tag instead.
+      resubmitted = grouping ? character_groups_attributes_input : ungrouped_tag_string_input
+      preserved_group_tags = resubmitted ? [] : Array(character_groups).flat_map { |g| Array(g["tags"]) }
       general_tags = ungrouped_tag_string_input ? ungrouped_tag_string_input.to_s.split : ungrouped_tags
 
-      all_tags = (parsed.tags + @pending_character_groups.flatten + preserved_group_tags + general_tags).uniq
+      all_tags = (parsed.tags + @pending_character_groups.flatten + plain_group_tags + preserved_group_tags + general_tags).uniq
 
       # Some callers (TagRelationship#update_posts, several tests) intentionally set
       # tag_string to whitespace-different-but-same-tags content, purely to flip

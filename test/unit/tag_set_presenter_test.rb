@@ -69,6 +69,16 @@ class TagSetPresenterTest < ActiveSupport::TestCase
         end
       end
 
+      should("fall back to the flat list when character groups are disabled") do
+        stub_admin_config(:enable_character_groups, false)
+        CurrentUser.scoped(@user) do # rubocop:disable YiffSpace/CurrentOutsideOfRequests
+          html = @presenter.post_show_sidebar_tag_list_html(highlighted_tags: [], followed_tags: [])
+
+          assert_not_includes(html, "character-group-header")
+          assert_includes(html, "chen")
+        end
+      end
+
       should("fall back to the flat list when there are no character groups, even with grouping enabled") do
         presenter = TagSetPresenter.new(%w[bkub chen cirno solo touhou])
         CurrentUser.scoped(@user) do # rubocop:disable YiffSpace/CurrentOutsideOfRequests

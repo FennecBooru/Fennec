@@ -83,7 +83,7 @@
                                 data-autocomplete="tag-edit"></textarea>
                     </div>
                 </div>
-                <div class="flex-grid border-bottom">
+                <div class="flex-grid border-bottom" v-if="characterGroupsEnabled">
                     <div class="col">
                         <label class="section-label">Character Tagging</label>
                         <div>
@@ -430,6 +430,7 @@
         normalMode: !Uploader.settings.compact_mode,
         maxFileSizePerRequest: Uploader.settings.max_file_size_per_request,
         wikiEnabled: Uploader.settings.wiki_enabled,
+        characterGroupsEnabled: Uploader.settings.character_groups_enabled,
         tagGendersHowtoWikiUrl: Uploader.settings.tag_genders_howto_wiki_url,
         tagWhatYouSeeWikiUrl: Uploader.settings.tag_what_you_see_wiki_url,
         artistTagPlaceholder: Uploader.settings.artist_tag_placeholder,

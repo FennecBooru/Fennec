@@ -3045,6 +3045,45 @@ class PostTest < ActiveSupport::TestCase
       create(:tag, name: "rex_(oc)", category_id: TagCategory.character)
     end
 
+    context("when disabled") do
+      setup do
+        @post = create(:post, tag_string: "solo")
+        save_with_groups(@post, [{ characters: ["fluffy_(oc)"], tags: ["blue_eyes"] }], "solo")
+        stub_admin_config(:enable_character_groups, false)
+      end
+
+      should("add submitted groups as plain tags and keep the existing groups") do
+        save_with_groups(@post, [{ characters: ["rex_(oc)"], tags: ["red_eyes"] }], "solo fluffy_(oc) blue_eyes")
+
+        assert_equal(%w[blue_eyes fluffy_(oc) red_eyes rex_(oc) solo], @post.tag_array.sort)
+        assert_equal([{ "tags" => %w[fluffy_(oc) blue_eyes] }], @post.character_groups)
+      end
+
+      should("treat {} as plain tags") do
+        @post.update!(tag_string: "solo fluffy_(oc) blue_eyes {rex_(oc) red_eyes}", updater: @janitor)
+
+        assert_includes(@post.tag_array, "red_eyes")
+        assert_equal([{ "tags" => %w[fluffy_(oc) blue_eyes] }], @post.character_groups)
+      end
+
+      should("remove grouped tags missing from the general tags") do
+        @post.ungrouped_tag_string = "solo fluffy_(oc)"
+        @post.updater = @janitor
+        @post.save!
+
+        assert_equal(%w[fluffy_(oc) solo], @post.tag_array.sort)
+        assert_equal([{ "tags" => %w[fluffy_(oc)] }], @post.character_groups)
+      end
+
+      should("send every tag to the editor without groups") do
+        settings = UploadSettings.new(@janitor, @post)
+
+        assert_not(settings.character_groups_enabled)
+        assert_equal([], settings.character_groups)
+        assert_equal("blue_eyes fluffy_(oc) solo ", settings.post_tags)
+      end
+    end
+
     should("populate character_groups from character_groups_attributes, folding the tags into tag_string") do
       post = create(:post, tag_string: "solo")
       save_with_groups(post, [{ characters: ["fluffy_(oc)"], tags: ["blue_eyes"] }], "solo")

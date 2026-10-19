@@ -32,7 +32,7 @@ class TagSetPresenter < ApplicationPresenter
   end
 
   def post_show_sidebar_tag_list_html(highlighted_tags:, followed_tags:, current_query: "")
-    if @character_groups.present? && !CurrentUser.user.disable_character_tag_grouping?
+    if @character_groups.present? && AdminConfig.enable_character_groups? && !CurrentUser.user.disable_character_tag_grouping?
       return post_show_sidebar_grouped_tag_list_html(highlighted_tags: highlighted_tags, followed_tags: followed_tags, current_query: current_query)
     end
 
