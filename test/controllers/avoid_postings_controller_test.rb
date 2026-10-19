@@ -266,5 +266,41 @@ class AvoidPostingsControllerTest < ActionDispatch::IntegrationTest
         end
       end
     end
+
+    context("when disabled") do
+      setup do
+        AdminConfig.any_instance.stubs(:enable_avoid_posting).returns(false)
+      end
+
+      should("not be available") do
+        get_auth(avoid_postings_path, @owner_user)
+
+        assert_response(:not_implemented)
+        get_auth(avoid_posting_path(@avoid_posting), @owner_user)
+
+        assert_response(:not_implemented)
+        get_auth(avoid_posting_versions_path, @owner_user)
+
+        assert_response(:not_implemented)
+      end
+
+      should("hide the list from non-staff") do
+        get_auth(avoid_posting_static_path, @user)
+
+        assert_response(:not_found)
+      end
+
+      should("not treat the artist as dnp") do
+        assert_not(@artist.reload.is_dnp?)
+        assert_predicate(@artist, :has_any_dnp?)
+
+        post = create(:post, tag_string: @artist.name)
+
+        assert_empty(post.avoid_posting_artists)
+        get_auth(artist_path(@artist), @user)
+
+        assert_select("#avoid-posting", count: 0)
+      end
+    end
   end
 end

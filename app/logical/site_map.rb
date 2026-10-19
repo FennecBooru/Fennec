@@ -102,13 +102,13 @@ module SiteMap
   end
 
   section("Artists") do
-    link("Listing")               { artists_path }
-    link("URLs")                  { artist_urls_path }
-    link("Changes")               { artist_versions_path }
-    link("Avoid Posting Entries") { avoid_postings_path }
-    link("Avoid Posting Changes") { avoid_posting_versions_path }
-    link("Avoid Posting List")    { avoid_posting_static_path }
-    link("Help")                  { help_page_path(id: "artists") }
+    link("Listing")                              { artists_path }
+    link("URLs")                                 { artist_urls_path }
+    link("Changes")                              { artist_versions_path }
+    link("Avoid Posting Entries", visible: ->(_) { AdminConfig.enable_avoid_posting? }) { avoid_postings_path }
+    link("Avoid Posting Changes", visible: ->(_) { AdminConfig.enable_avoid_posting? }) { avoid_posting_versions_path }
+    link("Avoid Posting List", visible: ->(_)    { AdminConfig.enable_avoid_posting? }) { avoid_posting_static_path }
+    link("Help")                                 { help_page_path(id: "artists") }
   end
 
   section("Characters") do

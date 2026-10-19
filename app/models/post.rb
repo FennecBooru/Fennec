@@ -2508,6 +2508,7 @@ class Post < ApplicationRecord
   end
 
   def avoid_posting_artists
+    return AvoidPosting.none unless AdminConfig.enable_avoid_posting?
     AvoidPosting.active.joins(:artist).where("artists.name": artist_tag_array)
   end
 

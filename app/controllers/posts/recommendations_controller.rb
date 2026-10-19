@@ -3,6 +3,7 @@
 module Posts
   class RecommendationsController < ApplicationController
     respond_to(:json, :html)
+    before_action(:validate_enabled)
 
     def show
       authorize(:recommender)
@@ -14,6 +15,12 @@ module Posts
       @posts = @recs.pluck(:post)
 
       respond_with(@recs)
+    end
+
+    private
+
+    def validate_enabled
+      raise(FeatureUnavailable) unless Recommender.enabled?
     end
   end
 end

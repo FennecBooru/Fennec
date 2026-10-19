@@ -31,6 +31,10 @@ class StaticController < ApplicationController
   end
 
   def avoid_posting
+    unless AdminConfig.enable_avoid_posting?
+      raise(FeatureUnavailable) if CurrentUser.user.is_staff?
+      return render404
+    end
     @page = view_context.safe_wiki(AdminConfig.instance.avoid_posting_notice_wiki_page)
   end
 

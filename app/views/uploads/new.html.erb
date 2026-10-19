@@ -1,8 +1,11 @@
 <div style="margin-bottom: 1rem;" class="section">
   <h2>Before uploading, read
     the <%= link_to("how to upload guide", help_page_path(id: "uploading")) %>.</h2>
-  <p>Make sure you're not posting something on
-    the <%= link_to("Avoid Posting List", avoid_posting_static_path) %><br>
+  <p>
+    <% if AdminConfig.enable_avoid_posting? %>
+      Make sure you're not posting something on
+      the <%= link_to("Avoid Posting List", avoid_posting_static_path) %><br>
+    <% end %>
     Review the <%= link_to("Uploading Guidelines", help_page_path(id: "uploading_guidelines")) %>
     <br>
     Unsure what to tag your post

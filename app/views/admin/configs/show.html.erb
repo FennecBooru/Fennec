@@ -5,7 +5,7 @@
       <% bypass = fields.any?(&:bypass?) %>
       <thead>
       <tr>
-        <th colspan="3" class="section-header">Action Limits</th>
+        <th colspan="3" class="section-header"><%= name %></th>
       </tr>
       <tr>
         <th>Name</th>
@@ -53,23 +53,6 @@
       </tr>
       </tbody>
     <% end %>
-    <thead>
-    <tr>
-      <th colspan="3" class="section-header">Action Limits</th>
-    </tr>
-    <tr>
-      <th>Name</th>
-      <th>Value</th>
-      <th>Bypass</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-      <td colspan="3" class="submit-button">
-        <%= submit_tag %>
-      </td>
-    </tr>
-    </tbody>
   </table>
 <% end %>
 

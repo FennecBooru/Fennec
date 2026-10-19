@@ -143,7 +143,9 @@
       <li>» <%= link_to("My profile", user_path(CurrentUser.user)) %></li>
       <li>» <%= link_to("My messages", dmails_path) %></li>
       <li>» <%= link_to("My favorites", favorites_path) %></li>
-      <li>» <%= link_to("My recommendations", post_recommendations_path(search: { user_id: CurrentUser.user.id })) %></li>
+      <% if Recommender.enabled? %>
+        <li>» <%= link_to("My recommendations", post_recommendations_path(search: { user_id: CurrentUser.user.id })) %></li>
+      <% end %>
       <li>» <%= link_to("My blocked users", user_blocks_path(CurrentUser.user)) %></li>
       <li>» <%= link_to("My notifications", notifications_path) %></li>
       <li>» <%= link_to("My followed tags", followed_tags_path) %></li>

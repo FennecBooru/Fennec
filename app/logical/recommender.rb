@@ -7,7 +7,7 @@ module Recommender
   MIN_USER_FAVS = 50
 
   def enabled?
-    GayFurCity.config.recommender_server.present?
+    GayFurCity.config.recommender_server.present? && AdminConfig.enable_recommendations?
   end
 
   def available_for_post?(post)
@@ -44,7 +44,7 @@ module Recommender
   end
 
   def train!
-    return if Rails.env.test?
+    return if Rails.env.test? || !enabled?
     Faraday.new(GayFurCity.config.faraday_options).put("#{GayFurCity.config.recommender_server}/train")
   end
 

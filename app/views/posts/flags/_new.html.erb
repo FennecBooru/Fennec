@@ -22,6 +22,10 @@
           <% next %>
         <% end %>
 
+        <% if flag_reason[:name] == "dnp_artist" && !AdminConfig.enable_avoid_posting? %>
+          <% next %>
+        <% end %>
+
         <label class="flag-reason-label">
           <%= radio_button_tag("post_flag[reason_name]", flag_reason[:name], false, data: { require_explanation: flag_reason[:require_explanation] }) %>
           <span class="flag-reason-description">

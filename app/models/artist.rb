@@ -470,11 +470,12 @@ class Artist < ApplicationRecord
     end
 
     def is_dnp?
-      avoid_posting.present?
+      AdminConfig.enable_avoid_posting? && avoid_posting.present?
     end
 
+    # entries still exist while the list is disabled
     def has_any_dnp?
-      is_dnp? || inactive_dnp.present?
+      avoid_posting.present? || inactive_dnp.present?
     end
 
     def dnp_restricted?(user)
