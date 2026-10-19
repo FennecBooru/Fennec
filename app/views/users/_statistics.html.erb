@@ -43,8 +43,10 @@
           </span>
         <% end %>
 
-        <span>Note Changes</span>
-        <span><%= presenter.note_version_count %> on <%= presenter.noted_posts_count %> posts</span>
+        <% if AdminConfig.enable_notes? %>
+          <span>Note Changes</span>
+          <span><%= presenter.note_version_count %> on <%= presenter.noted_posts_count %> posts</span>
+        <% end %>
 
         <% if AdminConfig.enable_artist_pages? %>
           <span>Artist Changes</span>

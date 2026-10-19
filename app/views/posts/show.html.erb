@@ -24,7 +24,9 @@
     <h1>History</h1>
     <ul>
       <li><%= link_to("Tags/Desc", post_versions_path(search: { post_id: @post.id })) %></li>
-      <li><%= link_to("Notes", note_versions_path(search: { post_id: @post.id })) %></li>
+      <% if AdminConfig.enable_notes? %>
+        <li><%= link_to("Notes", note_versions_path(search: { post_id: @post.id })) %></li>
+      <% end %>
       <li><%= link_to("Events", post_events_path(search: { post_id: @post.id })) %></li>
       <li><%= link_to("Replacements", post_replacements_path(search: { post_id: @post.id })) %></li>
     </ul>
@@ -72,8 +74,10 @@
     </div>
 
     <%= tag.section(id: "image-container", class: "blacklistable", **PostPresenter.data_attributes(@post, include_post: true)) do -%>
-      <div id="note-container"></div>
-      <div id="note-preview"></div>
+      <% if AdminConfig.enable_notes? %>
+        <div id="note-container"></div>
+        <div id="note-preview"></div>
+      <% end %>
       <%= render("posts/partials/show/embedded", post: @post) %>
     <% end -%>
 
@@ -106,16 +110,18 @@
         <%= link_to_if(policy(PostSet).add_posts?, "+ Set", "#", id: "set", class: "button btn-neutral") { "" } %>
         <%= link_to_if(policy(@post).add_to_pool?, "+ Pool", "#", id: "pool", class: "button btn-neutral") { "" } %>
       </div>
-      <div id="image-note-buttons">
-        <%= link_to("Notes: ON", "#", id: "toggle-notes-button", class: "button btn-neutral") %>
-        <% if policy(Note.new(post: @post)).create? %>
-          <% if @post.is_note_locked? %>
-            <%= link_to("Notes Locked", "#", class: "button btn-neutral") %>
-          <% else %>
-            <%= link_to("+ Note", "#", id: "translate", title: "shortcut is n", class: "button btn-neutral", data: { shortcut: "n" }) %>
+      <% if AdminConfig.enable_notes? %>
+        <div id="image-note-buttons">
+          <%= link_to("Notes: ON", "#", id: "toggle-notes-button", class: "button btn-neutral") %>
+          <% if policy(Note.new(post: @post)).create? %>
+            <% if @post.is_note_locked? %>
+              <%= link_to("Notes Locked", "#", class: "button btn-neutral") %>
+            <% else %>
+              <%= link_to("+ Note", "#", id: "translate", title: "shortcut is n", class: "button btn-neutral", data: { shortcut: "n" }) %>
+            <% end %>
           <% end %>
-        <% end %>
-      </div>
+        </div>
+      <% end %>
     <% end %>
     <% unless @post.force_original_size? %>
       <div>
@@ -147,28 +153,30 @@
     <% end %>
   </div>
 
-  <section id="mark-as-translated-section" style="display: none;">
-    <%= form_tag(mark_as_translated_post_path(@post), class: "simple_form") do |f| %>
-      <%= hidden_field_tag(:tags_query, params[:q]) %>
-      <%= hidden_field_tag(:pool_id, params[:pool_id]) %>
+  <% if AdminConfig.enable_notes? %>
+    <section id="mark-as-translated-section" style="display: none;">
+      <%= form_tag(mark_as_translated_post_path(@post), class: "simple_form") do |f| %>
+        <%= hidden_field_tag(:tags_query, params[:q]) %>
+        <%= hidden_field_tag(:pool_id, params[:pool_id]) %>
 
-      <fieldset>
-        <label for="post_translation_check">
-          <%= check_box("post", "translation_check", checked: @post.has_tag?("translation_check")) %>
-          Check translation
-        </label>
+        <fieldset>
+          <label for="post_translation_check">
+            <%= check_box("post", "translation_check", checked: @post.has_tag?("translation_check")) %>
+            Check translation
+          </label>
 
-        <label for="post_partially_translated">
-          <%= check_box("post", "partially_translated", checked: @post.has_tag?("partially_translated")) %>
-          Partially translated
-        </label>
-      </fieldset>
+          <label for="post_partially_translated">
+            <%= check_box("post", "partially_translated", checked: @post.has_tag?("partially_translated")) %>
+            Partially translated
+          </label>
+        </fieldset>
 
-      <div class="input">
-        <%= submit_tag("Mark as translated") %>
-      </div>
-    <% end %>
-  </section>
+        <div class="input">
+          <%= submit_tag("Mark as translated") %>
+        </div>
+      <% end %>
+    </section>
+  <% end %>
 
   <% if @post.description.present? %>
     <div id="post-description-container" class="styled-dtext">
@@ -215,7 +223,7 @@
   </ul>
 
   <section id="notes" style="display: none;">
-    <% if @post.has_notes? %>
+    <% if AdminConfig.enable_notes? && @post.has_notes? %>
       <% cache("p/#{@post.id}/n/#{@post.last_noted_at.to_i}") do %>
         <%= render(partial: "notes/note", collection: @post.notes.active) %>
       <% end %>

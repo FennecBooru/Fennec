@@ -24,7 +24,9 @@
       <% end %>
       <% if CurrentUser.user.is_staff? %>
         <option value="remove-parent">Remove Parent</option>
-        <option value="lock-note">Lock notes</option>
+        <% if AdminConfig.enable_notes? %>
+          <option value="lock-note">Lock notes</option>
+        <% end %>
       <% end %>
       <% if CurrentUser.user.is_approver? %>
         <% if AdminConfig.enable_post_approvals? %>

@@ -2,6 +2,7 @@
 
 module Notes
   class VersionsController < ApplicationController
+    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_notes? })
     respond_to(:html, :json)
 
     def index

@@ -53,6 +53,7 @@ module SiteMap
   # staff can still get to the artists to manage avoid posting entries and linked uploaders
   artists = ->(user) { AdminConfig.enable_artist_pages? || user.is_staff? }
   characters = ->(_) { AdminConfig.enable_character_pages? }
+  notes = ->(_) { AdminConfig.enable_notes? }
   # staff can still get to the wiki to edit the static and help pages
   wiki = ->(user) { AdminConfig.enable_wiki? || user.is_staff? }
 
@@ -141,10 +142,10 @@ module SiteMap
   end
 
   section("Notes") do
-    link("Listing") { notes_path }
-    link("Search")  { search_notes_path }
-    link("Changes") { note_versions_path }
-    link("Help")    { help_page_path(id: "notes") }
+    link("Listing", visible: notes) { notes_path }
+    link("Search", visible: notes)  { search_notes_path }
+    link("Changes", visible: notes) { note_versions_path }
+    link("Help", visible: notes)    { help_page_path(id: "notes") }
   end
 
   section("Comments") do

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class NotesController < ApplicationController
+  before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_notes? })
   respond_to(:html, :json, :js)
 
   def search

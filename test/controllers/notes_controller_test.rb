@@ -242,5 +242,45 @@ class NotesControllerTest < ActionDispatch::IntegrationTest
         end
       end
     end
+
+    context("when notes are disabled") do
+      setup do
+        stub_admin_config(:enable_notes, false)
+      end
+
+      should("not be available") do
+        [notes_path, note_path(@note), search_notes_path, note_versions_path].each do |path|
+          get_auth(path, create(:admin_user))
+
+          assert_response(:not_implemented, path)
+        end
+
+        post_auth(notes_path, @user, params: { note: { post_id: @post.id, x: 0, y: 0, width: 10, height: 10, body: "abc" }, format: :json })
+
+        assert_response(:not_implemented)
+      end
+
+      should("not copy notes") do
+        other = create(:post)
+        put_auth(copy_notes_post_path(@post), @user, params: { other_post_id: other.id, format: :json })
+
+        assert_response(:forbidden)
+        assert_equal(0, other.notes.count)
+      end
+
+      should("hide the notes on posts") do
+        get_auth(post_path(@post), @user)
+
+        assert_response(:success)
+        assert_select("#note-container", count: 0)
+        assert_select("#notes article", count: 0)
+        assert_select("#translate", count: 0)
+        assert_select("a[href='#{note_versions_path(search: { post_id: @post.id })}']", count: 0)
+
+        get_auth(site_map_path, @user)
+
+        assert_select("a[href='#{search_notes_path}']", count: 0)
+      end
+    end
   end
 end

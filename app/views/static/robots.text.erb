@@ -35,7 +35,9 @@ Disallow: <%= url_for(controller: "forums/posts/votes", action: "index") %>
 Disallow: <%= ip_bans_path %>
 Disallow: <%= mascots_path %>
 Disallow: <%= mod_actions_path %>
+<% if AdminConfig.enable_notes? %>
 Disallow: <%= notes_path %>
+<% end %>
 <% if AdminConfig.enable_pools? %>
 Disallow: <%= edit_pool_order_path(pool_id: "*") %>
 Disallow: <%= pool_versions_path %>
