@@ -56,6 +56,7 @@ module SiteMap
   notes = ->(_) { AdminConfig.enable_notes? }
   api_keys = ->(_) { AdminConfig.enable_api_keys? }
   upload_whitelist = ->(_) { AdminConfig.enable_upload_whitelist? }
+  mascots = ->(_) { AdminConfig.enable_mascots? }
   # staff can still get to the wiki to edit the static and help pages
   wiki = ->(user) { AdminConfig.enable_wiki? || user.is_staff? }
 
@@ -218,7 +219,7 @@ module SiteMap
 
   section("Tools") do
     link("News Updates")              { news_updates_path }
-    link("Mascots")                   { mascots_path }
+    link("Mascots", visible: mascots) { mascots_path }
     link("Domain Icons")              { domain_icons_path }
     link("DText Links")               { dtext_links_path }
     link("Stats")                     { stats_path }
@@ -256,7 +257,7 @@ module SiteMap
     link("Uploads", policy: UploadMediaAsset)                          { upload_media_assets_path }
     link("Replacements", policy: PostReplacementMediaAsset)            { post_replacement_media_assets_path }
     link("Audio Tracks", policy: AudioTrackMediaAsset)                 { audio_track_media_assets_path }
-    link("Mascots", policy: MascotMediaAsset)                          { mascot_media_assets_path }
+    link("Mascots", policy: MascotMediaAsset, visible: mascots)        { mascot_media_assets_path }
     link("Domain Icons", policy: DomainIconMediaAsset)                 { domain_icon_media_assets_path }
     link("Site Assets", policy: SiteMediaAsset)                        { site_media_assets_path }
     link("File Statuses", policy: MediaAsset, action: :show_statuses?) { media_asset_status_path }

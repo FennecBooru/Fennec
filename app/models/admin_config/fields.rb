@@ -261,6 +261,7 @@ class AdminConfig
       add_boolean_field(:enable_takedowns, hint: "Enable the takedown system.")
       add_boolean_field(:enable_post_approvals, hint: "Enable approving posts. When disabled, every upload is approved immediately, and posts can only be deleted and undeleted")
       add_boolean_field(:enable_replacement_approvals, hint: "Enable approving replacements. When disabled, every replacement is approved immediately")
+      add_boolean_field(:enable_mascots, hint: "Show mascots on the home page. Disabling it keeps existing mascots, but hides them")
       add_boolean_field(:enable_upload_whitelist, hint: "Only allow direct URL uploads from whitelisted domains. When disabled, any URL is allowed, except ones pointing to internal addresses")
       add_boolean_field(:enable_api_keys, name: "Enable API Keys", hint: "Enable API keys. Disabling it keeps existing keys, but requests using them are rejected")
       add_boolean_field(:enable_notes, hint: "Enable notes. Disabling it keeps existing notes, but hides them")

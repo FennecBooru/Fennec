@@ -46,6 +46,7 @@ class Mascot < ApplicationRecord
   end
 
   def self.active_for_user(user)
+    return {} unless AdminConfig.enable_mascots?
     mascots = Cache.fetch("active_mascots", expires_in: 1.second) do
       query = Mascot.where(active: true).where("? = ANY(available_on)", AdminConfig.instance.app_name).with_assets
       mascots = query.map do |mascot|

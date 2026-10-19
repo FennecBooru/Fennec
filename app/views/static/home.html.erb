@@ -24,7 +24,9 @@
           <div>
             <%= text_field_tag("tags", "", "size": 30, "autofocus": "autofocus", "data-autocomplete": "tag-query") %><br>
             <input type="submit" value="Search">
-            <input type="button" value="Change Mascot" id="change-mascot">
+            <% if AdminConfig.enable_mascots? %>
+              <input type="button" value="Change Mascot" id="change-mascot">
+            <% end %>
           </div>
         <% end %>
       </div>

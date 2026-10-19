@@ -35,7 +35,9 @@ Disallow: <%= forum_post_votes_path(forum_post_id: "*") %>
 Disallow: <%= url_for(controller: "forums/posts/votes", action: "index") %>
 <% end %>
 Disallow: <%= ip_bans_path %>
+<% if AdminConfig.enable_mascots? %>
 Disallow: <%= mascots_path %>
+<% end %>
 Disallow: <%= mod_actions_path %>
 <% if AdminConfig.enable_notes? %>
 Disallow: <%= notes_path %>
@@ -111,7 +113,9 @@ Disallow: <%= qtag_path(id: "*") %>
 <% if AdminConfig.enable_rules? %>
 Disallow: <%= rules_path %>
 <% end %>
+<% if AdminConfig.enable_mascots? %>
 Disallow: <%= mascot_media_assets_path %>
+<% end %>
 Disallow: <%= site_media_assets_path %>
 Disallow: <%= domain_icon_media_assets_path %>
 Disallow: <%= site_assets_path %>

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class MascotsController < ApplicationController
+  before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_mascots? })
   respond_to(:html, :json)
 
   def index
