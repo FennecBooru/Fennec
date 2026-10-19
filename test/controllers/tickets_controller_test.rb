@@ -618,5 +618,46 @@ class TicketsControllerTest < ActionDispatch::IntegrationTest
         assert_response(:success)
       end
     end
+
+    context("when tickets are disabled") do
+      setup do
+        stub_admin_config(:enable_tickets, false)
+      end
+
+      should("not let users submit or view tickets") do
+        [tickets_path, new_ticket_path(ticket: { model_id: @bad_actor.id, model_type: "User" })].each do |path|
+          get_auth(path, @reporter)
+
+          assert_response(:not_implemented, path)
+        end
+
+        assert_no_difference("Ticket.count") do
+          post_auth(tickets_path, @reporter, params: { ticket: { model_id: @bad_actor.id, model_type: "User", reason: "test" } })
+        end
+      end
+
+      should("still let staff handle tickets") do
+        ticket = Ticket.create!(model: @bad_actor, reason: "Spam.", creator: User.system, creator_ip_addr: "127.0.0.1")
+        get_auth(tickets_path, @admin)
+
+        assert_response(:success)
+
+        get_auth(ticket_path(ticket), @admin)
+
+        assert_response(:success)
+      end
+
+      should("hide the report links") do
+        get_auth(user_path(@bad_actor), @reporter)
+
+        assert_response(:success)
+        assert_select("a", text: "Report", count: 0)
+        assert_select("a", text: "Commend", count: 0)
+
+        get_auth(site_map_path, @reporter)
+
+        assert_select("a[href='#{tickets_path}']", count: 0)
+      end
+    end
   end
 end

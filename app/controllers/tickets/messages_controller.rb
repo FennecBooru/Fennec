@@ -2,6 +2,7 @@
 
 module Tickets
   class MessagesController < ApplicationController
+    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_tickets? || CurrentUser.user.is_staff? })
     respond_to(:html, except: %i[index])
     respond_to(:json)
 

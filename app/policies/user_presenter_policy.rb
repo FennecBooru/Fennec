@@ -18,7 +18,7 @@ class UserPresenterPolicy < ApplicationPolicy
   end
 
   def show_tickets?
-    user.is_moderator? || user == record
+    user.is_moderator? || (AdminConfig.enable_tickets? && user == record)
   end
 
   def show_api_keys?

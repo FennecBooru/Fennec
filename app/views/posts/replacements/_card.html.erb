@@ -174,7 +174,7 @@
         <% end %>
 
         <span class="replacement-action-spacer"></span>
-        <%= link_to("⚑ Report", model_new_ticket_path(model: replacement), class: "replacement-report-action st-button") %>
+        <%= link_to("⚑ Report", model_new_ticket_path(model: replacement), class: "replacement-report-action st-button") if AdminConfig.enable_tickets? %>
       </div>
     <% end %>
   </div>

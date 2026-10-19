@@ -57,6 +57,8 @@ module SiteMap
   api_keys = ->(_) { AdminConfig.enable_api_keys? }
   upload_whitelist = ->(_) { AdminConfig.enable_upload_whitelist? }
   mascots = ->(_) { AdminConfig.enable_mascots? }
+  # staff keep the ticket queue for existing and automatic tickets
+  tickets = ->(user) { AdminConfig.enable_tickets? || user.is_staff? }
   # staff can still get to the wiki to edit the static and help pages
   wiki = ->(user) { AdminConfig.enable_wiki? || user.is_staff? }
 
@@ -232,7 +234,7 @@ module SiteMap
 
   section("Moderation") do
     link("Mod Dashboard", policy: :moderator_dashboard, action: :show?)           { moderator_dashboard_path }
-    link("Tickets")                                                               { tickets_path }
+    link("Tickets", visible: tickets)                                             { tickets_path }
     link("Mod Actions")                                                           { mod_actions_path }
     link("Takedowns", policy: Takedown)                                           { takedowns_path }
     link("Upload Whitelist", visible: upload_whitelist)                           { upload_whitelists_path }

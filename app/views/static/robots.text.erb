@@ -91,7 +91,9 @@ Disallow: <%= tags_path %>
 <% if AdminConfig.enable_takedowns? %>
 Disallow: <%= takedowns_path %>
 <% end %>
+<% if AdminConfig.enable_tickets? %>
 Disallow: <%= tickets_path %>
+<% end %>
 <% if AdminConfig.enable_upload_whitelist? %>
 Disallow: <%= upload_whitelists_path %>
 <% end %>
