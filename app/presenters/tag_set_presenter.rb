@@ -133,6 +133,7 @@ class TagSetPresenter < ApplicationPresenter
   # A character's plain display name, plus a small icon linking to their character page -
   # the icon is excluded from the header's click-to-collapse toggle (see posts.js).
   def character_group_name_html(name)
+    return name.tr("_", " ") unless AdminConfig.enable_character_pages?
     icon = h.tag.i(class: "fa-solid fa-arrow-up-right-from-square")
     link = link_to(icon, r.show_or_new_characters_path(name: name), class: "character-group-link", title: "View character page")
     safe_join([name.tr("_", " "), " ", link])

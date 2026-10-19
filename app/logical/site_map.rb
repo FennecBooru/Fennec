@@ -52,6 +52,7 @@ module SiteMap
   comments = ->(_) { AdminConfig.enable_comments? }
   # staff can still get to the artists to manage avoid posting entries and linked uploaders
   artists = ->(user) { AdminConfig.enable_artist_pages? || user.is_staff? }
+  characters = ->(_) { AdminConfig.enable_character_pages? }
   # staff can still get to the wiki to edit the static and help pages
   wiki = ->(user) { AdminConfig.enable_wiki? || user.is_staff? }
 
@@ -120,9 +121,9 @@ module SiteMap
   end
 
   section("Characters") do
-    link("Listing") { characters_path }
-    link("URLs")    { character_urls_path }
-    link("Changes") { character_versions_path }
+    link("Listing", visible: characters) { characters_path }
+    link("URLs", visible: characters)    { character_urls_path }
+    link("Changes", visible: characters) { character_versions_path }
   end
 
   section("Pools") do

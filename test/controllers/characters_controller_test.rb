@@ -295,5 +295,63 @@ class CharactersControllerTest < ActionDispatch::IntegrationTest
         end
       end
     end
+
+    context("the character links") do
+      setup do
+        create(:tag, name: "fluffy_(oc)", category_id: TagCategory.character)
+        @post = create(:post, tag_string: "solo")
+        @post.update_with(@admin, character_groups_attributes: [{ characters: ["fluffy_(oc)"], tags: ["blue_eyes"] }], ungrouped_tag_string: "solo")
+      end
+
+      should("highlight the nav link") do
+        [characters_path, character_versions_path, character_urls_path].each do |path|
+          get_auth(path, @user)
+
+          assert_select("#nav-characters.current", 1, path)
+          assert_select("#nav-artists.current", 0, path)
+        end
+
+        [artists_path, artist_versions_path, artist_urls_path].each do |path|
+          get_auth(path, @user)
+
+          assert_select("#nav-artists.current", 1, path)
+          assert_select("#nav-characters.current", 0, path)
+        end
+      end
+
+      should("be shown") do
+        get_auth(post_path(@post), @user)
+
+        assert_response(:success)
+        assert_select("#nav a[href='#{characters_path}']", text: "Characters")
+        assert_select(".character-group-link")
+      end
+
+      context("when character pages are disabled") do
+        setup do
+          stub_admin_config(:enable_character_pages, false)
+        end
+
+        should("not be available") do
+          [characters_path, character_path(@character), show_or_new_characters_path(name: "masao"), character_urls_path, character_versions_path].each do |path|
+            get_auth(path, @admin)
+
+            assert_response(:not_implemented, path)
+          end
+        end
+
+        should("be hidden") do
+          get_auth(post_path(@post), @user)
+
+          assert_response(:success)
+          assert_select("a[href='#{characters_path}']", count: 0)
+          assert_select(".character-group-link", count: 0)
+
+          get_auth(site_map_path, @user)
+
+          assert_select("a[href='#{character_versions_path}']", count: 0)
+        end
+      end
+    end
   end
 end

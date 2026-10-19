@@ -269,8 +269,11 @@ module ApplicationHelper
            when "posts", "uploads", "posts/versions", "popular", "favorites"
              %r{^/posts}
 
-           when "artists", "artist_versions"
-             %r{^/artist}
+           when "artists", "artists/versions", "artists/urls"
+             %r{^/artists}
+
+           when "characters", "characters/versions", "characters/urls"
+             %r{^/characters}
 
            when "tags", "meta_searches", "tags/aliases", "tags/implications", "tags/related"
              %r{^/tags}

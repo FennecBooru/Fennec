@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class CharactersController < ApplicationController
+  before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_character_pages? })
   before_action(:load_character, only: %i[edit update destroy revert])
   respond_to(:html, :json)
 

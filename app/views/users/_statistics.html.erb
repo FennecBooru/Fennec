@@ -51,8 +51,10 @@
           <span><%= presenter.artist_version_count %></span>
         <% end %>
 
-        <span>Character Changes</span>
-        <span><%= presenter.character_version_count %></span>
+        <% if AdminConfig.enable_character_pages? %>
+          <span>Character Changes</span>
+          <span><%= presenter.character_version_count %></span>
+        <% end %>
 
         <% if AdminConfig.enable_pools? %>
           <span>Pool Changes</span>
