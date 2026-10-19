@@ -96,6 +96,8 @@ module DTextHelper
           node["class"] += " dtext-artist-does-not-exist"
           node["title"] = "This artist page does not exist"
         end
+      elsif !AdminConfig.enable_wiki?
+        node["href"] = "/posts?tags=#{CGI.escape(name)}" if tag.present?
       else
         if wiki.blank?
           node["class"] += " dtext-wiki-does-not-exist"

@@ -10,7 +10,7 @@
     <%= table_for(@related_tags.tags_for_html) do |t| %>
       <% t.column(:name) do |(tag, category)| %>
         <span class="category-<%= category %>">
-          <%= link_to_wiki_or_new("?", tag) %>
+          <%= link_to_wiki_or_new("?", tag) if AdminConfig.enable_wiki? %>
           <%= link_to(tag, posts_path(tags: tag)) %>
         </span>
       <% end %>

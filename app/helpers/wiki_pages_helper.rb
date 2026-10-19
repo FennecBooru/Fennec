@@ -2,6 +2,7 @@
 
 module WikiPagesHelper
   def link_to_wiki_or_new(text, tag = text, **)
+    return link_to(text, posts_path(tags: tag), **) unless AdminConfig.enable_wiki?
     link_to(text, show_or_new_wiki_pages_path(title: tag), **)
   end
 

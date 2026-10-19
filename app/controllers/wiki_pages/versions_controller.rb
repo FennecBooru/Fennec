@@ -2,6 +2,7 @@
 
 module WikiPages
   class VersionsController < ApplicationController
+    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_wiki? || CurrentUser.user.is_staff? })
     respond_to(:html, :json)
 
     def index

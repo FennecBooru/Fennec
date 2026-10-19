@@ -121,6 +121,26 @@ class UploadsControllerTest < ActionDispatch::IntegrationTest
       end
     end
 
+    context("settings action") do
+      should("include the wiki links") do
+        get_auth(settings_uploads_path, @user, params: { format: :json })
+
+        assert_response(:success)
+        assert(response.parsed_body["wiki_enabled"])
+        assert_not_nil(response.parsed_body["tag_what_you_see_wiki_url"])
+      end
+
+      should("leave out the wiki links when the wiki is disabled") do
+        stub_admin_config(:enable_wiki, false)
+        get_auth(settings_uploads_path, @user, params: { format: :json })
+
+        assert_response(:success)
+        assert_not(response.parsed_body["wiki_enabled"])
+        assert_nil(response.parsed_body["tag_genders_howto_wiki_url"])
+        assert_nil(response.parsed_body["tag_what_you_see_wiki_url"])
+      end
+    end
+
     context("create action") do
       should("create a new upload") do
         assert_difference("Upload.count", 1) do

@@ -31,6 +31,7 @@
         this.$emit('tag-active', tag.name, !this.tagActive(tag));
       },
       tagLink: function (tag) {
+        if (Uploader.settings?.wiki_enabled === false) return '/posts?tags=' + encodeURIComponent(tag.name);
         return '/wiki/show_or_new?title=' + encodeURIComponent(tag.name);
       },
       tagActive: function (tag) {

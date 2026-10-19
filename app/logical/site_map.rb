@@ -49,6 +49,8 @@ module SiteMap
   forums = ->(_) { AdminConfig.enable_forums? }
   pools = ->(_) { AdminConfig.enable_pools? }
   sets = ->(_) { AdminConfig.enable_post_sets? }
+  # staff can still get to the wiki to edit the static and help pages
+  wiki = ->(user) { AdminConfig.enable_wiki? || user.is_staff? }
 
   section("Posts") do
     link("Listing")                                                               { posts_path }
@@ -157,10 +159,10 @@ module SiteMap
   end
 
   section("Wiki") do
-    link("Listing") { wiki_pages_path }
-    link("Search")  { search_wiki_pages_path }
-    link("Changes") { wiki_page_versions_path }
-    link("Help")    { help_page_path(id: "wiki") }
+    link("Listing", visible: wiki) { wiki_pages_path }
+    link("Search", visible: wiki)  { search_wiki_pages_path }
+    link("Changes", visible: wiki) { wiki_page_versions_path }
+    link("Help", visible: wiki)    { help_page_path(id: "wiki") }
   end
 
   section("Users") do

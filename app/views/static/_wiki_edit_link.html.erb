@@ -1,6 +1,6 @@
 <%# locals: (wiki:) -%>
 
-<% if wiki.try(:can_edit?, CurrentUser.user) %>
+<% if (AdminConfig.enable_wiki? || CurrentUser.user.is_staff?) && wiki.try(:can_edit?, CurrentUser.user) %>
   <% content_for(:secondary_links) do %>
     <% if content_for(:secondary_links) %>
       |

@@ -309,5 +309,42 @@ class WikiPagesControllerTest < ActionDispatch::IntegrationTest
         end
       end
     end
+
+    context("when the wiki is disabled") do
+      setup do
+        stub_admin_config(:enable_wiki, false)
+      end
+
+      should("not be available to users") do
+        [wiki_pages_path, wiki_page_path(@wiki_page), show_or_new_wiki_pages_path(title: "abc"), wiki_page_versions_path].each do |path|
+          get_auth(path, @user)
+
+          assert_response(:not_implemented, path)
+        end
+      end
+
+      should("still be available to staff") do
+        get_auth(wiki_page_path(@wiki_page), @mod)
+
+        assert_response(:success)
+      end
+
+      should("hide the wiki links") do
+        @tag = create(:tag, name: "fox")
+        get_auth(tag_path(@tag), @user)
+
+        assert_response(:success)
+        assert_select("a[href='#{show_or_new_wiki_pages_path(title: AdminConfig.instance.home_wiki_page)}']", count: 0)
+        assert_select("a[href='#{show_or_new_wiki_pages_path(title: 'fox')}']", count: 0)
+
+        get_auth(site_map_path, @user)
+
+        assert_select("a[href='#{wiki_page_versions_path}']", count: 0)
+
+        get_auth(site_map_path, @mod)
+
+        assert_select("a[href='#{wiki_page_versions_path}']")
+      end
+    end
   end
 end

@@ -236,8 +236,10 @@ class TagSetPresenter < ApplicationPresenter
 
     if category == TagCategory.artist
       safe_join([link_to(marker, r.show_or_new_artists_path(name: name), class: "wiki-link", rel: "nofollow"), " "])
-    else
+    elsif AdminConfig.enable_wiki?
       safe_join([link_to(marker, r.show_or_new_wiki_pages_path(title: name), class: "wiki-link", rel: "nofollow"), " "])
+    else
+      ""
     end
   end
 
@@ -251,7 +253,7 @@ class TagSetPresenter < ApplicationPresenter
   end
 
   def tag_link(tag, link_text = tag.name, link_type = :tag)
-    link = link_type == :wiki_page ? r.show_or_new_wiki_pages_path(title: tag.name) : r.posts_path(tags: tag.name)
+    link = link_type == :wiki_page && AdminConfig.enable_wiki? ? r.show_or_new_wiki_pages_path(title: tag.name) : r.posts_path(tags: tag.name)
     itemprop = tag.artist? ? { itemprop: "author" } : {}
     klass = tag.is_deprecated? ? "search-tag deprecated-tag" : "search-tag"
 

@@ -54,12 +54,14 @@
       <% xml.lastmod((Pool.maximum(:updated_at) || now).utc.iso8601) %>
     <% end %>
   <% end %>
-  <% xml.url do %>
-    <% xml.loc(wiki_pages_url) %>
-    <% xml.priority("0.7") %>
-    <% xml.changefreq("always") %>
-    <% xml.lastmod((WikiPage.maximum(:updated_at) || now).utc.iso8601) %>
-<% end %>
+  <% if AdminConfig.enable_wiki? %>
+    <% xml.url do %>
+      <% xml.loc(wiki_pages_url) %>
+      <% xml.priority("0.7") %>
+      <% xml.changefreq("always") %>
+      <% xml.lastmod((WikiPage.maximum(:updated_at) || now).utc.iso8601) %>
+    <% end %>
+  <% end %>
   <% xml.url do %>
     <% xml.loc(stats_url) %>
     <% xml.changefreq("daily") %>

@@ -30,7 +30,7 @@
                     <div class="col">
                         <label class="section-label" for="names">Artists</label>
                         <div><a href="<%= Routes.help_page_path(id: "tags") %>">How do I tag an artist?</a></div>
-                        <div>Please don't use <a href="<%= Routes.show_or_new_wiki_pages_path(title: "anonymous_artist") %>">anonymous_artist</a> or <a href="<%= Routes.show_or_new_wiki_pages_path(title: "unknown_artist") %>">unknown_artist</a> tags unless they fall under the definitions found on the wiki.</div>
+                        <div v-if="wikiEnabled">Please don't use <a href="<%= Routes.show_or_new_wiki_pages_path(title: "anonymous_artist") %>">anonymous_artist</a> or <a href="<%= Routes.show_or_new_wiki_pages_path(title: "unknown_artist") %>">unknown_artist</a> tags unless they fall under the definitions found on the wiki.</div>
                     </div>
                     <div class="col2">
                         <div class="box-section background-red" v-show="showErrors && missingArtistTag">
@@ -46,7 +46,7 @@
                     <div class="col">
                         <label class="section-label" for="post_sex_tags">Characters</label>
                         <div>
-                          Select (and write in) all that apply. See our <a :href="tagGendersHowtoWikiUrl">Gender Tagging Guidelines</a> for more information.
+                          Select (and write in) all that apply.<template v-if="tagGendersHowtoWikiUrl"> See our <a :href="tagGendersHowtoWikiUrl">Gender Tagging Guidelines</a> for more information.</template>
                         </div>
                     </div>
                     <div class="col2">
@@ -185,7 +185,7 @@
                     <div>
                         Separate tags with spaces. (<a href="<%= Routes.help_page_path(id: "tags") %>" target="_blank">help</a>)
                     </div>
-                    <div>
+                    <div v-if="tagWhatYouSeeWikiUrl">
                       Ensure you've reviewed our <a :href="tagWhatYouSeeWikiUrl">
                         Tag What You See
                       </a> policy.
@@ -429,6 +429,7 @@
         characterGroups: [],
         normalMode: !Uploader.settings.compact_mode,
         maxFileSizePerRequest: Uploader.settings.max_file_size_per_request,
+        wikiEnabled: Uploader.settings.wiki_enabled,
         tagGendersHowtoWikiUrl: Uploader.settings.tag_genders_howto_wiki_url,
         tagWhatYouSeeWikiUrl: Uploader.settings.tag_what_you_see_wiki_url,
         artistTagPlaceholder: Uploader.settings.artist_tag_placeholder,

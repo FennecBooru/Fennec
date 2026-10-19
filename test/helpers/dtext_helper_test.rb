@@ -42,6 +42,14 @@ class DtextHelperTest < ActiveSupport::TestCase
 
         assert_not_includes(html, "dtext-artist-id-link")
       end
+
+      should("link tags to their posts when the wiki is disabled") do
+        stub_admin_config(:enable_wiki, false)
+        create(:tag, name: "fox")
+        html = DTextHelper.parse("[[fox]]").fetch(:dtext)
+
+        assert_includes(html, %(href="/posts?tags=fox"))
+      end
     end
   end
 end

@@ -45,8 +45,8 @@
 
     <div class="linkinput-wrapper" v-if="!disableURLUpload">
       <div class="box-section background-red" v-if="badDirectURL">
-        The direct URL entered has the following problem: {{ directURLProblem }}<br>
-        You should review <a href="/wiki/howto:sites_and_sources">the sourcing guide</a>.
+        The direct URL entered has the following problem: {{ directURLProblem }}
+        <template v-if="wikiEnabled"><br>You should review <a href="/wiki/howto:sites_and_sources">the sourcing guide</a>.</template>
       </div>
       <label class="linkinput">
         <span class="linkinput-or">{{!disableFileUpload ? "OR" : "URL" }}</span>
@@ -90,6 +90,7 @@ export default {
       exceededFileSize: 0,
       maxFileSize: Uploader.settings.max_file_size,
       maxFileSizeMap: Uploader.settings.max_file_size_map,
+      wikiEnabled: Uploader.settings.wiki_enabled,
       disableFileUpload: false,
       disableURLUpload: false,
     }

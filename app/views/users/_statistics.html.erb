@@ -98,7 +98,7 @@
           <%= presenter.upload_limit %>
           <% if CurrentUser.user.id == user.id  %>
             <%= link_to_enclosed("help", upload_limit_users_path) %>
-          <% else %>
+          <% elsif AdminConfig.enable_wiki? %>
             <%= link_to_enclosed("help", wiki_page_path(id: "upload_limit")) %>
           <% end %>
         </span>
