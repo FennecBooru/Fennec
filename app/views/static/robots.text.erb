@@ -30,8 +30,10 @@ Disallow: <%= ip_bans_path %>
 Disallow: <%= mascots_path %>
 Disallow: <%= mod_actions_path %>
 Disallow: <%= notes_path %>
+<% if AdminConfig.enable_pools? %>
 Disallow: <%= edit_pool_order_path(pool_id: "*") %>
 Disallow: <%= pool_versions_path %>
+<% end %>
 Disallow: <%= post_sets_path %>
 Disallow: <%= post_approvals_path %>
 Disallow: <%= deleted_posts_path %>

@@ -1076,7 +1076,7 @@ class Post < ApplicationRecord
     def apply_casesensitive_metatags(tags)
       casesensitive_metatags, tags = tags.partition { |x| x =~ /\A(?:source):/i }
       # Reuse the following metatags after the post has been saved
-      casesensitive_metatags += tags.grep(/\A(?:newpool):/i)
+      casesensitive_metatags += tags.grep(/\A(?:newpool):/i) if AdminConfig.enable_pools?
       unless casesensitive_metatags.empty?
         case casesensitive_metatags[-1]
         when /^source:none$/i
@@ -1129,6 +1129,8 @@ class Post < ApplicationRecord
       return unless @post_metatags
 
       @post_metatags.each do |tag| # rubocop:disable Metrics/BlockLength
+        next if tag =~ /\A-?(?:new)?pool:/i && !AdminConfig.enable_pools?
+
         case tag
         when /^-pool:(\d+)$/i
           pool = Pool.find_by(id: $1.to_i)
@@ -1472,7 +1474,7 @@ class Post < ApplicationRecord
     end
 
     def has_active_pools?
-      pools.any?
+      AdminConfig.enable_pools? && pools.any?
     end
 
     def belongs_to_pool?(pool)

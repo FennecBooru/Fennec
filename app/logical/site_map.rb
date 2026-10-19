@@ -47,6 +47,7 @@ module SiteMap
   logged_in = ->(user) { !user.is_anonymous? }
   logged_out = ->(user) { user.is_anonymous? }
   forums = ->(_) { AdminConfig.enable_forums? }
+  pools = ->(_) { AdminConfig.enable_pools? }
 
   section("Posts") do
     link("Listing")                                                               { posts_path }
@@ -119,10 +120,10 @@ module SiteMap
   end
 
   section("Pools") do
-    link("Gallery") { gallery_pools_path }
-    link("Listing") { pools_path }
-    link("Changes") { pool_versions_path }
-    link("Help")    { help_page_path(id: "pools") }
+    link("Gallery", visible: pools) { gallery_pools_path }
+    link("Listing", visible: pools) { pools_path }
+    link("Changes", visible: pools) { pool_versions_path }
+    link("Help", visible: pools)    { help_page_path(id: "pools") }
   end
 
   section("Sets") do

@@ -922,6 +922,24 @@ class PostTest < ActiveSupport::TestCase
               end
             end
           end
+
+          context("when pools are disabled") do
+            setup do
+              stub_admin_config(:enable_pools, false)
+              @pool = create(:pool, name: "abc")
+            end
+
+            should("ignore the pool metatags") do
+              assert_no_difference("Pool.count") do
+                @post.update_with(@user, tag_string: "aaa pool:abc pool:#{@pool.id} newpool:def")
+              end
+              @post.reload
+
+              assert_equal([], @pool.reload.post_ids)
+              assert_equal([], @post.pool_ids)
+              assert_equal("aaa", @post.tag_string)
+            end
+          end
         end
 
         context("for a rating") do

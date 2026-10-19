@@ -2,6 +2,7 @@
 
 module Pools
   class VersionsController < ApplicationController
+    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_pools? })
     respond_to(:html, :json)
 
     def index

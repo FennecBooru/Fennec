@@ -318,5 +318,39 @@ class PoolsControllerTest < ActionDispatch::IntegrationTest
         end
       end
     end
+
+    context("when pools are disabled") do
+      setup do
+        stub_admin_config(:enable_pools, false)
+        @pool.add!(@post, @user)
+      end
+
+      should("not be available") do
+        [pools_path, gallery_pools_path, pool_path(@pool), new_pool_path, edit_pool_order_path(@pool), pool_versions_path].each do |path|
+          get_auth(path, @mod)
+
+          assert_response(:not_implemented, path)
+        end
+      end
+
+      should("not allow adding posts to pools") do
+        post_auth(add_to_pool_post_path(@post), @user, params: { pool_id: @pool.id, format: :json })
+
+        assert_response(:forbidden)
+      end
+
+      should("hide the pool links") do
+        get_auth(post_path(@post), @user)
+
+        assert_response(:success)
+        assert_select("a[href='#{gallery_pools_path}']", count: 0)
+        assert_select("#pool", count: 0)
+        assert_select(".pool-nav", count: 0)
+
+        get_auth(site_map_path, @user)
+
+        assert_select("a[href='#{pools_path}']", count: 0)
+      end
+    end
   end
 end

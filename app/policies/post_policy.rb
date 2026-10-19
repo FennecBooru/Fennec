@@ -74,11 +74,11 @@ class PostPolicy < ApplicationPolicy
   end
 
   def add_to_pool?
-    member? && min_level?
+    AdminConfig.enable_pools? && member? && min_level?
   end
 
   def remove_from_pool?
-    member? && min_level?
+    AdminConfig.enable_pools? && member? && min_level?
   end
 
   def favorites?

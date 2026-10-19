@@ -52,8 +52,10 @@
         <span>Character Changes</span>
         <span><%= presenter.character_version_count %></span>
 
-        <span>Pool Changes</span>
-        <span><%= presenter.pool_version_count %></span>
+        <% if AdminConfig.enable_pools? %>
+          <span>Pool Changes</span>
+          <span><%= presenter.pool_version_count %></span>
+        <% end %>
 
         <span>Comments</span>
         <span>

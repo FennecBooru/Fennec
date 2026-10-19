@@ -2,6 +2,7 @@
 
 module Pools
   class OrdersController < ApplicationController
+    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_pools? })
     respond_to(:html, :json, :js)
 
     def edit
