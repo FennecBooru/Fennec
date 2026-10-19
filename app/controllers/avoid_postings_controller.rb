@@ -2,7 +2,7 @@
 
 class AvoidPostingsController < ApplicationController
   respond_to(:html, :json)
-  before_action(:validate_enabled)
+  requires_feature(:avoid_posting)
   before_action(:load_avoid_posting, except: %i[index new create])
   helper_method(:search_params)
 
@@ -92,10 +92,6 @@ class AvoidPostingsController < ApplicationController
   end
 
   private
-
-  def validate_enabled
-    raise(FeatureUnavailable) unless AdminConfig.enable_avoid_posting?
-  end
 
   def load_avoid_posting
     id = params[:id]

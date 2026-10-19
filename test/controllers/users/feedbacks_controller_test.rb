@@ -289,11 +289,7 @@ module Users
         end
 
         should("not be available") do
-          [user_feedbacks_path, user_feedback_path(@feedback), new_user_feedback_path].each do |path|
-            get_auth(path, @mod)
-
-            assert_response(:not_implemented, path)
-          end
+          assert_feature_unavailable([user_feedbacks_path, user_feedback_path(@feedback), new_user_feedback_path], as: @mod)
         end
 
         should("not create one for bans") do

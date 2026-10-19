@@ -32,7 +32,7 @@ class TagSetPresenter < ApplicationPresenter
   end
 
   def post_show_sidebar_tag_list_html(highlighted_tags:, followed_tags:, current_query: "")
-    if @character_groups.present? && AdminConfig.enable_character_groups? && !CurrentUser.user.disable_character_tag_grouping?
+    if @character_groups.present? && Feature.enabled?(:character_groups) && !CurrentUser.user.disable_character_tag_grouping?
       return post_show_sidebar_grouped_tag_list_html(highlighted_tags: highlighted_tags, followed_tags: followed_tags, current_query: current_query)
     end
 
@@ -133,7 +133,7 @@ class TagSetPresenter < ApplicationPresenter
   # A character's plain display name, plus a small icon linking to their character page -
   # the icon is excluded from the header's click-to-collapse toggle (see posts.js).
   def character_group_name_html(name)
-    return name.tr("_", " ") unless AdminConfig.enable_character_pages?
+    return name.tr("_", " ") unless Feature.enabled?(:character_pages)
     icon = h.tag.i(class: "fa-solid fa-arrow-up-right-from-square")
     link = link_to(icon, r.show_or_new_characters_path(name: name), class: "character-group-link", title: "View character page")
     safe_join([name.tr("_", " "), " ", link])
@@ -236,9 +236,9 @@ class TagSetPresenter < ApplicationPresenter
     marker = tag.is_deprecated? ? h.deprecated_tag_icon : "?"
 
     if category == TagCategory.artist
-      return "" unless AdminConfig.enable_artist_pages?
+      return "" unless Feature.enabled?(:artist_pages)
       safe_join([link_to(marker, r.show_or_new_artists_path(name: name), class: "wiki-link", rel: "nofollow"), " "])
-    elsif AdminConfig.enable_wiki?
+    elsif Feature.enabled?(:wiki)
       safe_join([link_to(marker, r.show_or_new_wiki_pages_path(title: name), class: "wiki-link", rel: "nofollow"), " "])
     else
       ""
@@ -249,13 +249,13 @@ class TagSetPresenter < ApplicationPresenter
     parts = []
     if CurrentUser.user.is_member?
       parts << h.tag.span(link_to(h.tag.i(class: "fas fa-times"), "#", class: "blacklist-tag-toggle", title: "Blacklist Tag"), class: "tag-action-blacklist")
-      parts << h.tag.span(link_to("", "#", class: "follow-button-minor", title: "Follow Tag", data: { followed: followed }), class: "tag-action-follow") if AdminConfig.enable_tag_following?
+      parts << h.tag.span(link_to("", "#", class: "follow-button-minor", title: "Follow Tag", data: { followed: followed }), class: "tag-action-follow") if Feature.enabled?(:tag_following)
     end
     h.tag.div(safe_join(parts), class: "tag-actions", data: { tag: tag.name })
   end
 
   def tag_link(tag, link_text = tag.name, link_type = :tag)
-    link = link_type == :wiki_page && AdminConfig.enable_wiki? ? r.show_or_new_wiki_pages_path(title: tag.name) : r.posts_path(tags: tag.name)
+    link = link_type == :wiki_page && Feature.enabled?(:wiki) ? r.show_or_new_wiki_pages_path(title: tag.name) : r.posts_path(tags: tag.name)
     itemprop = tag.artist? ? { itemprop: "author" } : {}
     klass = tag.is_deprecated? ? "search-tag deprecated-tag" : "search-tag"
 

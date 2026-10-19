@@ -4,6 +4,9 @@ class StaticController < ApplicationController
   respond_to(:text, only: %i[robots])
   respond_to(:xml, only: %i[site_map])
   before_action(:ensure_lockdown_disabled, only: %i[discord])
+  requires_feature(:takedowns, hidden: true, only: %i[takedown])
+  requires_feature(:avoid_posting, hidden: true, only: %i[avoid_posting])
+  requires_feature(:discord, hidden: true, only: %i[discord])
   respond_to(:html)
 
   def privacy
@@ -19,10 +22,6 @@ class StaticController < ApplicationController
   end
 
   def takedown
-    unless AdminConfig.enable_takedowns?
-      raise(FeatureUnavailable) if CurrentUser.user.is_staff?
-      return render404
-    end
     @page = view_context.safe_wiki(AdminConfig.instance.takedown_wiki_page)
   end
 
@@ -31,10 +30,6 @@ class StaticController < ApplicationController
   end
 
   def avoid_posting
-    unless AdminConfig.enable_avoid_posting?
-      raise(FeatureUnavailable) if CurrentUser.user.is_staff?
-      return render404
-    end
     @page = view_context.safe_wiki(AdminConfig.instance.avoid_posting_notice_wiki_page)
   end
 
@@ -80,10 +75,6 @@ class StaticController < ApplicationController
   end
 
   def discord
-    unless AdminConfig.enable_discord?
-      raise(FeatureUnavailable) if CurrentUser.user.is_staff?
-      return render404
-    end
     unless CurrentUser.can_discord?
       raise(User::PrivilegeError, "You must have an account for at least one week in order to join the Discord server.")
     end

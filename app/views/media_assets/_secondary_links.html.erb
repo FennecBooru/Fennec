@@ -6,8 +6,8 @@
   <%= subnav_link_to_if(policy(PostReplacementMediaAsset).index?, "Post Replacement Media Assets", post_replacement_media_assets_path) %>
   <%= subnav_link_to_if(policy(PostReplacement).index?, "Post Replacements", post_replacements_path) %>
   <li>|</li>
-  <%= subnav_link_to_if(AdminConfig.enable_mascots? && policy(MascotMediaAsset).index?, "Mascot Media Assets", mascot_media_assets_path) %>
-  <%= subnav_link_to_if(AdminConfig.enable_mascots? && policy(Mascot).index?, "Mascots", mascots_path) %>
+  <%= subnav_link_to_if(Feature.enabled?(:mascots) && policy(MascotMediaAsset).index?, "Mascot Media Assets", mascot_media_assets_path) %>
+  <%= subnav_link_to_if(Feature.enabled?(:mascots) && policy(Mascot).index?, "Mascots", mascots_path) %>
   <li>|</li>
   <%= subnav_link_to_if(policy(SiteMediaAsset).index?, "Site Media Assets", site_media_assets_path) %>
   <%= subnav_link_to_if(policy(SiteAsset).index?, "Site Assets", site_assets_path) %>

@@ -16,7 +16,7 @@
   </div>
 
   <div>
-    <% if AdminConfig.enable_user_feedback? %>
+    <% if Feature.enabled?(:user_feedback) %>
       <div class="activity"><%= render("activity_user_feedback") %></div>
     <% end %>
     <div class="activity"><%= render("activity_mod_action") %></div>

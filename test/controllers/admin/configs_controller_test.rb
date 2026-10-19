@@ -32,12 +32,12 @@ module Admin
         end
 
         should("save a boolean field flipped from false to true") do
-          AdminConfig.instance.update_column(:db_exports_enabled, false)
+          AdminConfig.instance.update_column(:enable_db_exports, false)
 
-          put_auth(admin_config_path, @owner, params: { config: { db_exports_enabled: "true" } })
+          put_auth(admin_config_path, @owner, params: { config: { enable_db_exports: "true" } })
 
           assert_response(:redirect)
-          assert(AdminConfig.uncached.db_exports_enabled)
+          assert(AdminConfig.uncached.enable_db_exports)
         end
 
         should("not allow saving a value pinned via an env variable") do

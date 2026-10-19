@@ -633,11 +633,7 @@ module Forums
         end
 
         should("not be available") do
-          [forums_path, forum_topics_path, forum_topic_path(@forum_topic), forum_posts_path, forum_categories_path, new_forum_topic_path].each do |path|
-            get_auth(path, @admin)
-
-            assert_response(:not_implemented, path)
-          end
+          assert_feature_unavailable([forums_path, forum_topics_path, forum_topic_path(@forum_topic), forum_posts_path, forum_categories_path, new_forum_topic_path], as: @admin)
         end
 
         should("hide the forum links") do

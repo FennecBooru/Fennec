@@ -326,11 +326,7 @@ class PoolsControllerTest < ActionDispatch::IntegrationTest
       end
 
       should("not be available") do
-        [pools_path, gallery_pools_path, pool_path(@pool), new_pool_path, edit_pool_order_path(@pool), pool_versions_path].each do |path|
-          get_auth(path, @mod)
-
-          assert_response(:not_implemented, path)
-        end
+        assert_feature_unavailable([pools_path, gallery_pools_path, pool_path(@pool), new_pool_path, edit_pool_order_path(@pool), pool_versions_path], as: @mod)
       end
 
       should("not allow adding posts to pools") do

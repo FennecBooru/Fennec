@@ -1,5 +1,5 @@
 <%= table_for(bulk_update_requests) do |t| %>
-  <% if AdminConfig.enable_forums? %>
+  <% if Feature.enabled?(:forums) %>
     <% t.column("Votes") do |request| %>
       <% if request.forum_post_id.present? %>
         <%= render(partial: "forums/posts/votes/overview", locals: { votes: request.forum_post.votes, forum_post: request.forum_post }) %>
@@ -19,7 +19,7 @@
       <p><%= compact_time(request.updated_at) %></p>
     <% end %>
   <% end %>
-  <% if AdminConfig.enable_forums? %>
+  <% if Feature.enabled?(:forums) %>
     <% t.column("Forum") do |request| %>
       <% if request.forum_post_id.present? && request.forum_post.present? %>
         <%= link_to(request.forum_topic_id, forum_topic_path(request.forum_topic_id, page: request.forum_post.forum_topic_page, anchor: "forum_post_#{request.forum_post_id}")) %>

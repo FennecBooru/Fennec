@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class PoolsController < ApplicationController
-  before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_pools? })
+  requires_feature(:pools)
   before_action(:ensure_lockdown_disabled, except: %i[index show gallery])
   respond_to(:html, :json)
 

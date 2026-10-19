@@ -22,7 +22,7 @@
           <% next %>
         <% end %>
 
-        <% if flag_reason[:name] == "dnp_artist" && !AdminConfig.enable_avoid_posting? %>
+        <% if flag_reason[:name] == "dnp_artist" && !Feature.enabled?(:avoid_posting) %>
           <% next %>
         <% end %>
 

@@ -2,7 +2,7 @@
 
 <%= error_messages_for(:tag_implication) %>
 
-<p>You can request a new tag implication be created.<% if AdminConfig.enable_forums? %> This will create a corresponding forum topic for community review.<% end %></p>
+<p>You can request a new tag implication be created.<% if Feature.enabled?(:forums) %> This will create a corresponding forum topic for community review.<% end %></p>
 
 <%= render("form", tag_implication: @tag_implication) %>
 

@@ -148,11 +148,7 @@ class RulesControllerTest < ActionDispatch::IntegrationTest
       end
 
       should("not be available") do
-        [rules_path, builder_rules_path(format: :json), quick_rules_path, order_rule_categories_path, new_rule_category_path].each do |path|
-          get_auth(path, @admin)
-
-          assert_response(:not_implemented, path)
-        end
+        assert_feature_unavailable([rules_path, builder_rules_path(format: :json), quick_rules_path, order_rule_categories_path, new_rule_category_path], as: @admin)
       end
 
       should("hide the rules links") do

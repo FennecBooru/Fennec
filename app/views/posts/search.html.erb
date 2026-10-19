@@ -11,7 +11,7 @@
          data-fields="<%= PostSearch::Fields.fields.map(&:to_h).to_json %>"
          data-general-tags="<%= @search_form.general_tags %>"
          data-groups="<%= @search_form.character_groups.to_json %>"
-         data-character-groups-enabled="<%= AdminConfig.enable_character_groups? %>"
+         data-character-groups-enabled="<%= Feature.enabled?(:character_groups) %>"
          data-bool-groups="<%= @search_form.bool_groups.to_json %>"
          data-values="<%= @search_form.field_values.to_json %>"
          data-modes="<%= @search_form.field_modes.to_json %>"></div>

@@ -1,4 +1,4 @@
-<% if AdminConfig.enable_forums? && tag_change_request.forum_post&.votes&.any? %>
+<% if Feature.enabled?(:forums) && tag_change_request.forum_post&.votes&.any? %>
   <div style="margin: 1em 0;">
     <h2>Votes</h2>
     <%= render("forums/posts/votes/list", votes: tag_change_request.forum_post.votes, forum_post: tag_change_request.forum_post, votable: false) %>

@@ -33,7 +33,7 @@
         <span>Wiki Page Changes</span>
         <span><%= presenter.wiki_page_version_count %></span>
 
-        <% if AdminConfig.enable_forums? %>
+        <% if Feature.enabled?(:forums) %>
           <span>Forum Posts</span>
           <span>
             <%= presenter.forum_post_count %>
@@ -43,27 +43,27 @@
           </span>
         <% end %>
 
-        <% if AdminConfig.enable_notes? %>
+        <% if Feature.enabled?(:notes) %>
           <span>Note Changes</span>
           <span><%= presenter.note_version_count %> on <%= presenter.noted_posts_count %> posts</span>
         <% end %>
 
-        <% if AdminConfig.enable_artist_pages? %>
+        <% if Feature.enabled?(:artist_pages) %>
           <span>Artist Changes</span>
           <span><%= presenter.artist_version_count %></span>
         <% end %>
 
-        <% if AdminConfig.enable_character_pages? %>
+        <% if Feature.enabled?(:character_pages) %>
           <span>Character Changes</span>
           <span><%= presenter.character_version_count %></span>
         <% end %>
 
-        <% if AdminConfig.enable_pools? %>
+        <% if Feature.enabled?(:pools) %>
           <span>Pool Changes</span>
           <span><%= presenter.pool_version_count %></span>
         <% end %>
 
-        <% if AdminConfig.enable_comments? %>
+        <% if Feature.enabled?(:comments) %>
           <span>Comments</span>
           <span>
             <%= presenter.comment_count %> on <%= presenter.commented_posts_count %> <%= "post".pluralize(presenter.commented_on_posts_count) %>
@@ -87,7 +87,7 @@
       </div>
 
       <div class="column">
-        <% if AdminConfig.enable_user_feedback? %>
+        <% if Feature.enabled?(:user_feedback) %>
           <span>Feedback</span>
           <span>
             <%= presenter.feedbacks %>
@@ -106,7 +106,7 @@
           <%= presenter.upload_limit %>
           <% if CurrentUser.user.id == user.id  %>
             <%= link_to_enclosed("help", upload_limit_users_path) %>
-          <% elsif AdminConfig.enable_wiki? %>
+          <% elsif Feature.enabled?(:wiki) %>
             <%= link_to_enclosed("help", wiki_page_path(id: "upload_limit")) %>
           <% end %>
         </span>
@@ -165,7 +165,7 @@
             <span>Uploads</span>
             <span>
               <%= link_to(user.post_upload_count - user.post_deleted_count, posts_path(tags: "user:#{user.name}")) %>
-              <%= link_to_enclosed("comments", comments_path(group_by: "comment", search: { poster_id: user.id })) if AdminConfig.enable_comments? %>
+              <%= link_to_enclosed("comments", comments_path(group_by: "comment", search: { poster_id: user.id })) if Feature.enabled?(:comments) %>
               <%= link_to_enclosed_if(votes, "#{user.post_vote_count} votes", action: "index", controller: "posts/votes", search: { user_name: user.name }) %>
             </span>
           <% end %>

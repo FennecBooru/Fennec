@@ -4,7 +4,7 @@ module Posts
   class FlagsController < ApplicationController
     respond_to(:html, :json)
     # existing flags can still be viewed and removed
-    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_post_flags? }, only: %i[new create])
+    requires_feature(:post_flags, only: %i[new create])
 
     def index
       @search_params = search_params(PostFlag)

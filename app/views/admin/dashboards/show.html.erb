@@ -15,7 +15,7 @@
   <%= render("bulk_update_requests/listing", bulk_update_requests: @dashboard.update_requests) %>
 </div>
 
-<% if AdminConfig.enable_forums? %>
+<% if Feature.enabled?(:forums) %>
   <div class="section">
     <h2>Forum Topics</h2>
     <%= render("forums/topics/listing", forum_topics: @dashboard.forum_topics) %>

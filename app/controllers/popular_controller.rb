@@ -2,6 +2,7 @@
 
 class PopularController < ApplicationController
   respond_to(:html, :json)
+  requires_feature(:tag_following, only: %i[followed_tags])
 
   def index
   end
@@ -66,7 +67,6 @@ class PopularController < ApplicationController
   end
 
   def followed_tags
-    raise(FeatureUnavailable) unless AdminConfig.enable_tag_following?
     @tags = Tag.order(follower_count: :desc, name: :asc).where.gt(follower_count: 0).paginate(params[:page], limit: limit)
     respond_with(@tags)
   end

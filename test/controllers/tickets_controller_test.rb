@@ -625,11 +625,7 @@ class TicketsControllerTest < ActionDispatch::IntegrationTest
       end
 
       should("not let users submit or view tickets") do
-        [tickets_path, new_ticket_path(ticket: { model_id: @bad_actor.id, model_type: "User" })].each do |path|
-          get_auth(path, @reporter)
-
-          assert_response(:not_implemented, path)
-        end
+        assert_feature_unavailable([tickets_path, new_ticket_path(ticket: { model_id: @bad_actor.id, model_type: "User" })], as: @reporter)
 
         assert_no_difference("Ticket.count") do
           post_auth(tickets_path, @reporter, params: { ticket: { model_id: @bad_actor.id, model_type: "User", reason: "test" } })

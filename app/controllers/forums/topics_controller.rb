@@ -2,7 +2,7 @@
 
 module Forums
   class TopicsController < ApplicationController
-    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_forums? })
+    requires_feature(:forums)
     respond_to(:html, :json)
     before_action(:load_topic, except: %i[index new create])
     before_action(:ensure_lockdown_disabled, except: %i[index show])

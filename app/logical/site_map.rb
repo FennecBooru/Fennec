@@ -3,12 +3,13 @@
 # Every link on the site map (/static/site_map), grouped into sections in display order
 module SiteMap
   Section = Struct.new(:title, :links)
-  Link = Struct.new(:label, :path_block, :policy, :action, :visible) do
+  Link = Struct.new(:label, :path_block, :policy, :action, :visible, :feature) do
     def path(user)
       Paths.new.instance_exec(user, &path_block)
     end
 
     def visible?(user)
+      return false if feature && !Feature.available?(feature, user)
       return false if visible && !visible.call(user)
       return true if policy.nil?
       Pundit.policy!(user, policy).public_send(action)
@@ -31,9 +32,11 @@ module SiteMap
     instance_eval(&)
   end
 
-  # the block returns the path and is given the user, policy: is checked with action:, visible: is a lambda taking the user
-  def self.link(label, policy: nil, action: :index?, visible: nil, &path)
-    @sections.last.links << Link.new(label, path, policy, action, visible)
+  # the block returns the path and is given the user, policy: is checked with action:, visible: is a lambda taking the user,
+  # feature: hides it while that feature isn't available to the user
+  def self.link(label, policy: nil, action: :index?, visible: nil, feature: nil, &path)
+    Feature.find(feature) if feature
+    @sections.last.links << Link.new(label, path, policy, action, visible, feature)
   end
 
   # [{ title:, links: [{ label:, path: }] }], without empty sections
@@ -46,21 +49,6 @@ module SiteMap
 
   logged_in = ->(user) { !user.is_anonymous? }
   logged_out = ->(user) { user.is_anonymous? }
-  forums = ->(_) { AdminConfig.enable_forums? }
-  pools = ->(_) { AdminConfig.enable_pools? }
-  sets = ->(_) { AdminConfig.enable_post_sets? }
-  comments = ->(_) { AdminConfig.enable_comments? }
-  # staff can still get to the artists to manage avoid posting entries and linked uploaders
-  artists = ->(user) { AdminConfig.enable_artist_pages? || user.is_staff? }
-  characters = ->(_) { AdminConfig.enable_character_pages? }
-  notes = ->(_) { AdminConfig.enable_notes? }
-  api_keys = ->(_) { AdminConfig.enable_api_keys? }
-  upload_whitelist = ->(_) { AdminConfig.enable_upload_whitelist? }
-  mascots = ->(_) { AdminConfig.enable_mascots? }
-  # staff keep the ticket queue for existing and automatic tickets
-  tickets = ->(user) { AdminConfig.enable_tickets? || user.is_staff? }
-  # staff can still get to the wiki to edit the static and help pages
-  wiki = ->(user) { AdminConfig.enable_wiki? || user.is_staff? }
 
   section("Posts") do
     link("Listing")                                                               { posts_path }
@@ -68,13 +56,13 @@ module SiteMap
     link("Upload", policy: Upload, action: :create?)                              { new_upload_path }
     link("Random", policy: Post, action: :random?)                                { random_posts_path }
     link("Favorites", policy: Favorite)                                           { favorites_path }
-    link("Recommendations", visible: ->(_)                                        { Recommender.enabled? }) { post_recommendations_path }
-    link("Similar Images Search", visible: ->(_)                                  { ErisProxy.enabled? }) { posts_eris_path }
+    link("Recommendations", visible: ->(_) { Recommender.enabled? })              { post_recommendations_path }
+    link("Similar Images Search", visible: ->(_) { ErisProxy.enabled? })          { posts_eris_path }
     link("Deleted Index")                                                         { deleted_posts_path }
     link("Audio Tracks", policy: AudioTrack)                                      { post_audio_tracks_path }
     link("Uploaders", policy: Post, action: :uploaders?)                          { uploaders_posts_path }
     link("Upload Listing", policy: Upload)                                        { uploads_path }
-    link("Disapprovals", policy: PostDisapproval, visible: ->(_)                  { AdminConfig.enable_post_approvals? }) { post_disapprovals_path }
+    link("Disapprovals", policy: PostDisapproval, feature: :post_approvals)       { post_disapprovals_path }
     link("Deletion Reasons", policy: PostDeletionReason)                          { post_deletion_reasons_path }
     link("Replacement Rejection Reasons", policy: PostReplacementRejectionReason) { post_replacement_rejection_reasons_path }
     link("Help")                                                                  { help_page_path(id: "posts") }
@@ -82,19 +70,19 @@ module SiteMap
   end
 
   section("Post Events") do
-    link("Listing")                  { post_events_path }
-    link("Tag Changes")              { post_versions_path }
-    link("Approvals", visible: ->(_) { AdminConfig.enable_post_approvals? }) { post_approvals_path }
-    link("Flags")                    { post_flags_path }
-    link("Appeals")                  { post_appeals_path }
-    link("Replacements")             { post_replacements_path }
+    link("Listing")                             { post_events_path }
+    link("Tag Changes")                         { post_versions_path }
+    link("Approvals", feature: :post_approvals) { post_approvals_path }
+    link("Flags")                               { post_flags_path }
+    link("Appeals")                             { post_appeals_path }
+    link("Replacements")                        { post_replacements_path }
   end
 
   section("Popular") do
-    link("Uploads")                        { uploads_popular_index_path }
-    link("Views", visible: ->(_)           { Reports.enabled? }) { views_popular_index_path }
-    link("Followed Tags", visible: ->(_)   { AdminConfig.enable_tag_following? }) { followed_tags_popular_index_path }
-    link("Searches", visible: ->(_)        { Reports.enabled? }) { searches_popular_index_path }
+    link("Uploads")                                              { uploads_popular_index_path }
+    link("Views", visible: ->(_) { Reports.enabled? })           { views_popular_index_path }
+    link("Followed Tags", feature: :tag_following)               { followed_tags_popular_index_path }
+    link("Searches", visible: ->(_) { Reports.enabled? })        { searches_popular_index_path }
     link("Missed Searches", visible: ->(_) { Reports.enabled? }) { missed_searches_popular_index_path }
   end
 
@@ -117,69 +105,69 @@ module SiteMap
   end
 
   section("Artists") do
-    link("Listing", visible: artists)                                                   { artists_path }
-    link("URLs", visible: artists)                                                      { artist_urls_path }
-    link("Changes", visible: artists)                                                   { artist_versions_path }
-    link("Avoid Posting Entries", visible: ->(_) { AdminConfig.enable_avoid_posting? }) { avoid_postings_path }
-    link("Avoid Posting Changes", visible: ->(_) { AdminConfig.enable_avoid_posting? }) { avoid_posting_versions_path }
-    link("Avoid Posting List", visible: ->(_)    { AdminConfig.enable_avoid_posting? }) { avoid_posting_static_path }
-    link("Help", visible: artists)                                                      { help_page_path(id: "artists") }
+    link("Listing", feature: :artist_pages)                { artists_path }
+    link("URLs", feature: :artist_pages)                   { artist_urls_path }
+    link("Changes", feature: :artist_pages)                { artist_versions_path }
+    link("Avoid Posting Entries", feature: :avoid_posting) { avoid_postings_path }
+    link("Avoid Posting Changes", feature: :avoid_posting) { avoid_posting_versions_path }
+    link("Avoid Posting List", feature: :avoid_posting)    { avoid_posting_static_path }
+    link("Help", feature: :artist_pages)                   { help_page_path(id: "artists") }
   end
 
   section("Characters") do
-    link("Listing", visible: characters) { characters_path }
-    link("URLs", visible: characters)    { character_urls_path }
-    link("Changes", visible: characters) { character_versions_path }
+    link("Listing", feature: :character_pages) { characters_path }
+    link("URLs", feature: :character_pages)    { character_urls_path }
+    link("Changes", feature: :character_pages) { character_versions_path }
   end
 
   section("Pools") do
-    link("Gallery", visible: pools) { gallery_pools_path }
-    link("Listing", visible: pools) { pools_path }
-    link("Changes", visible: pools) { pool_versions_path }
-    link("Help", visible: pools)    { help_page_path(id: "pools") }
+    link("Gallery", feature: :pools) { gallery_pools_path }
+    link("Listing", feature: :pools) { pools_path }
+    link("Changes", feature: :pools) { pool_versions_path }
+    link("Help", feature: :pools)    { help_page_path(id: "pools") }
   end
 
   section("Sets") do
-    link("Listing", visible: sets)                                       { post_sets_path }
-    link("Changes", visible: sets)                                       { post_set_versions_path }
-    link("Maintainer Invites", policy: PostSetMaintainer, visible: sets) { post_set_maintainers_path }
-    link("Help", visible: sets)                                          { help_page_path(id: "sets") }
+    link("Listing", feature: :post_sets)                                       { post_sets_path }
+    link("Changes", feature: :post_sets)                                       { post_set_versions_path }
+    link("Maintainer Invites", policy: PostSetMaintainer, feature: :post_sets) { post_set_maintainers_path }
+    link("Help", feature: :post_sets)                                          { help_page_path(id: "sets") }
   end
 
   section("Notes") do
-    link("Listing", visible: notes) { notes_path }
-    link("Search", visible: notes)  { search_notes_path }
-    link("Changes", visible: notes) { note_versions_path }
-    link("Help", visible: notes)    { help_page_path(id: "notes") }
+    link("Listing", feature: :notes) { notes_path }
+    link("Search", feature: :notes)  { search_notes_path }
+    link("Changes", feature: :notes) { note_versions_path }
+    link("Help", feature: :notes)    { help_page_path(id: "notes") }
   end
 
   section("Comments") do
-    link("Listing", visible: comments) { comments_path }
-    link("Search", visible: comments)  { search_comments_path }
-    link("Help", visible: comments)    { help_page_path(id: "commenting") }
+    link("Listing", feature: :comments) { comments_path }
+    link("Search", feature: :comments)  { search_comments_path }
+    link("Help", feature: :comments)    { help_page_path(id: "commenting") }
   end
 
   section("Forum") do
-    link("Listing", visible: forums)                                             { forums_path }
-    link("Topics", visible: forums)                                              { forum_topics_path }
-    link("Posts", visible: forums)                                               { forum_posts_path }
-    link("Search", visible: forums)                                              { search_forums_path }
-    link("Categories", policy: ForumCategory, action: :create?, visible: forums) { forum_categories_path }
-    link("Help", visible: forums)                                                { help_page_path(id: "forums") }
+    link("Listing", feature: :forums)                                             { forums_path }
+    link("Topics", feature: :forums)                                              { forum_topics_path }
+    link("Posts", feature: :forums)                                               { forum_posts_path }
+    link("Search", feature: :forums)                                              { search_forums_path }
+    link("Categories", policy: ForumCategory, action: :create?, feature: :forums) { forum_categories_path }
+    link("Help", feature: :forums)                                                { help_page_path(id: "forums") }
   end
 
   section("Wiki") do
-    link("Listing", visible: wiki) { wiki_pages_path }
-    link("Search", visible: wiki)  { search_wiki_pages_path }
-    link("Changes", visible: wiki) { wiki_page_versions_path }
-    link("Help", visible: wiki)    { help_page_path(id: "wiki") }
+    link("Listing", feature: :wiki) { wiki_pages_path }
+    link("Search", feature: :wiki)  { search_wiki_pages_path }
+    link("Changes", feature: :wiki) { wiki_page_versions_path }
+    link("Help", feature: :wiki)    { help_page_path(id: "wiki") }
   end
 
   section("Users") do
     link("Listing")                             { users_path }
     link("Search")                              { search_users_path }
     link("Bans")                                { bans_path }
-    link("Feedback", visible: ->(_)             { AdminConfig.enable_user_feedback? }) { user_feedbacks_path }
+    link("Feedback", feature: :user_feedback)   { user_feedbacks_path }
     link("Sign Up", visible: logged_out)        { new_user_path }
     link("Sign In", visible: logged_out)        { new_session_path }
     link("Reset Password", visible: logged_out) { new_users_password_reset_path }
@@ -197,7 +185,7 @@ module SiteMap
     link("Events", policy: UserEvent)                          { user_events_path }
     link("Upload Limit", policy: User, action: :upload_limit?) { upload_limit_users_path }
     link("Blocked Users", visible: logged_in)                  { |user| user_blocks_path(user) }
-    link("API Keys", policy: ApiKey, visible: api_keys)        { |user| user_api_keys_path(user) }
+    link("API Keys", policy: ApiKey, feature: :api_keys)       { |user| user_api_keys_path(user) }
     link("Passkeys", visible: logged_in)                       { user_passkeys_path }
     link("DMail Filter", visible: logged_in)                   { users_dmail_filter_path }
     link("Email Notifications", visible: logged_in)            { users_email_notification_path }
@@ -207,59 +195,59 @@ module SiteMap
   end
 
   section("Site") do
-    link("Rules", visible: ->(_)      { AdminConfig.enable_rules? }) { rules_path }
-    link("Terms of Service")          { terms_of_service_path }
-    link("Privacy Policy")            { privacy_policy_path }
-    link("Contact")                   { contact_path }
-    link("Staff")                     { staff_path }
-    link("Takedowns", visible: ->(_)  { AdminConfig.enable_takedowns? }) { takedown_static_path }
-    link("Discord", visible: ->(user) { AdminConfig.enable_discord? && user.can_discord? }) { discord_get_path }
-    link("Themes")                    { theme_path }
-    link("Keyboard Shortcuts")        { keyboard_shortcuts_path }
-    link("Help Index")                { help_pages_path }
+    link("Rules", feature: :rules)                                              { rules_path }
+    link("Terms of Service")                                                    { terms_of_service_path }
+    link("Privacy Policy")                                                      { privacy_policy_path }
+    link("Contact")                                                             { contact_path }
+    link("Staff")                                                               { staff_path }
+    link("Takedowns", feature: :takedowns)                                      { takedown_static_path }
+    link("Discord", feature: :discord, visible: ->(user) { user.can_discord? }) { discord_get_path }
+    link("Themes")                                                              { theme_path }
+    link("Keyboard Shortcuts")                                                  { keyboard_shortcuts_path }
+    link("Help Index")                                                          { help_pages_path }
   end
 
   section("Tools") do
-    link("News Updates")              { news_updates_path }
-    link("Mascots", visible: mascots) { mascots_path }
-    link("Domain Icons")              { domain_icons_path }
-    link("DText Links")               { dtext_links_path }
-    link("Stats")                     { stats_path }
-    link("Status")                    { status_path }
-    link("DB Exports", visible: ->(_) { AdminConfig.db_exports_enabled? }) { db_exports_path }
-    link("API Documentation")         { api_documentation_path }
-    link("API Help")                  { help_page_path(id: "api") }
-    link("Source Code")               { GayFurCity.config.source_code_url }
+    link("News Updates")                     { news_updates_path }
+    link("Mascots", feature: :mascots)       { mascots_path }
+    link("Domain Icons")                     { domain_icons_path }
+    link("DText Links")                      { dtext_links_path }
+    link("Stats")                            { stats_path }
+    link("Status")                           { status_path }
+    link("DB Exports", feature: :db_exports) { db_exports_path }
+    link("API Documentation")                { api_documentation_path }
+    link("API Help")                         { help_page_path(id: "api") }
+    link("Source Code")                      { GayFurCity.config.source_code_url }
   end
 
   section("Moderation") do
-    link("Mod Dashboard", policy: :moderator_dashboard, action: :show?)           { moderator_dashboard_path }
-    link("Tickets", visible: tickets)                                             { tickets_path }
-    link("Mod Actions")                                                           { mod_actions_path }
-    link("Takedowns", policy: Takedown)                                           { takedowns_path }
-    link("Upload Whitelist", visible: upload_whitelist)                           { upload_whitelists_path }
-    link("User Approvals", policy: UserApproval)                                  { moderator_user_approvals_path }
-    link("Name Change Requests", policy: UserNameChangeRequest)                   { user_name_change_requests_path }
-    link("User Text Versions", policy: UserTextVersion)                           { moderator_user_text_versions_path }
-    link("Edit Histories", policy: EditHistory)                                   { edit_histories_path }
-    link("Staff Notes", policy: StaffNote)                                        { staff_notes_path }
-    link("Sessions", policy: UserSession)                                         { user_sessions_path }
-    link("IP Addresses", policy: Moderator::IpAddrSearch)                         { moderator_ip_addrs_path }
-    link("IP Bans", policy: IpBan)                                                { ip_bans_path }
-    link("Email Blacklist", policy: EmailBlacklist)                               { email_blacklists_path }
-    link("Alt List", policy: %i[admin user], action: :alt_list?)                  { alt_list_admin_users_path }
-    link("Quick Rules", policy: QuickRule, action: :create?, visible: ->(_)       { AdminConfig.enable_rules? }) { quick_rules_path }
-    link("Rule Categories", policy: RuleCategory, action: :order?, visible: ->(_) { AdminConfig.enable_rules? }) { order_rule_categories_path }
-    link("Stuck DNP Tags", policy: :stuck_dnp, action: :create?)                  { new_admin_stuck_dnp_path }
-    link("Post Reowner", policy: :reowner, action: :create?)                      { new_admin_reowner_path }
-    link("Destroyed Posts", policy: DestroyedPost)                                { admin_destroyed_posts_path }
+    link("Mod Dashboard", policy: :moderator_dashboard, action: :show?)             { moderator_dashboard_path }
+    link("Tickets", feature: :tickets)                                              { tickets_path }
+    link("Mod Actions")                                                             { mod_actions_path }
+    link("Takedowns", policy: Takedown)                                             { takedowns_path }
+    link("Upload Whitelist", feature: :upload_whitelist)                            { upload_whitelists_path }
+    link("User Approvals", policy: UserApproval)                                    { moderator_user_approvals_path }
+    link("Name Change Requests", policy: UserNameChangeRequest)                     { user_name_change_requests_path }
+    link("User Text Versions", policy: UserTextVersion)                             { moderator_user_text_versions_path }
+    link("Edit Histories", policy: EditHistory)                                     { edit_histories_path }
+    link("Staff Notes", policy: StaffNote)                                          { staff_notes_path }
+    link("Sessions", policy: UserSession)                                           { user_sessions_path }
+    link("IP Addresses", policy: Moderator::IpAddrSearch)                           { moderator_ip_addrs_path }
+    link("IP Bans", policy: IpBan)                                                  { ip_bans_path }
+    link("Email Blacklist", policy: EmailBlacklist)                                 { email_blacklists_path }
+    link("Alt List", policy: %i[admin user], action: :alt_list?)                    { alt_list_admin_users_path }
+    link("Quick Rules", policy: QuickRule, action: :create?, feature: :rules)       { quick_rules_path }
+    link("Rule Categories", policy: RuleCategory, action: :order?, feature: :rules) { order_rule_categories_path }
+    link("Stuck DNP Tags", policy: :stuck_dnp, action: :create?)                    { new_admin_stuck_dnp_path }
+    link("Post Reowner", policy: :reowner, action: :create?)                        { new_admin_reowner_path }
+    link("Destroyed Posts", policy: DestroyedPost)                                  { admin_destroyed_posts_path }
   end
 
   section("Media Assets") do
     link("Uploads", policy: UploadMediaAsset)                          { upload_media_assets_path }
     link("Replacements", policy: PostReplacementMediaAsset)            { post_replacement_media_assets_path }
     link("Audio Tracks", policy: AudioTrackMediaAsset)                 { audio_track_media_assets_path }
-    link("Mascots", policy: MascotMediaAsset, visible: mascots)        { mascot_media_assets_path }
+    link("Mascots", policy: MascotMediaAsset, feature: :mascots)       { mascot_media_assets_path }
     link("Domain Icons", policy: DomainIconMediaAsset)                 { domain_icon_media_assets_path }
     link("Site Assets", policy: SiteMediaAsset)                        { site_media_assets_path }
     link("File Statuses", policy: MediaAsset, action: :show_statuses?) { media_asset_status_path }

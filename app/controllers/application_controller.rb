@@ -37,6 +37,12 @@ class ApplicationController < ActionController::Base
   # here, so calling `rescue_exception` would cause a double render error.
   rescue_from(ActionController::InvalidCrossOriginRequest, with: -> {})
 
+  # raises FeatureUnavailable while the feature is off, hidden: gives non staff a 404 instead
+  def self.requires_feature(name, hidden: false, **)
+    Feature.find(name)
+    before_action(-> { feature_unavailable!(hidden: hidden) unless Feature.available?(name, CurrentUser.user) }, **)
+  end
+
   def enable_cors
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Headers"] = "Authorization"
@@ -126,6 +132,11 @@ class ApplicationController < ActionController::Base
     else
       render_error_page(500, exception)
     end
+  end
+
+  def feature_unavailable!(hidden: false)
+    raise(FeatureUnavailable) unless hidden && !CurrentUser.user.is_staff?
+    render404
   end
 
   def render404

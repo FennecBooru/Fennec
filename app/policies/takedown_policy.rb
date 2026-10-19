@@ -64,6 +64,6 @@ class TakedownPolicy < ApplicationPolicy
   end
 
   def enabled?
-    AdminConfig.enable_takedowns?
+    Feature.enabled?(:takedowns)
   end
 end

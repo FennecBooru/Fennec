@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 class WikiPagesController < ApplicationController
-  # staff keep access, the static and help pages are still wiki pages
-  before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_wiki? || CurrentUser.user.is_staff? })
+  requires_feature(:wiki)
   respond_to(:html, :json, :js)
 
   def index

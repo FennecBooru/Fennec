@@ -509,11 +509,7 @@ class PostSetsControllerTest < ActionDispatch::IntegrationTest
       end
 
       should("not be available") do
-        [post_sets_path, post_set_path(@set), new_post_set_path, post_set_versions_path, post_set_maintainers_path].each do |path|
-          get_auth(path, @admin)
-
-          assert_response(:not_implemented, path)
-        end
+        assert_feature_unavailable([post_sets_path, post_set_path(@set), new_post_set_path, post_set_versions_path, post_set_maintainers_path], as: @admin)
       end
 
       should("hide the set links") do

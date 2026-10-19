@@ -24,7 +24,7 @@
       <%= link_to_ip(user.last_ip_addr) %>
     <% end %>
   <% end %>
-  <% t.column("Notes", if: AdminConfig.enable_notes?) do |user| %>
+  <% t.column("Notes", if: Feature.enabled?(:notes)) do |user| %>
     <%= link_to(user.note_version_count, note_versions_path(search: { updater_id: user.id })) %>
   <% end %>
   <% t.column("Edits") do |user| %>

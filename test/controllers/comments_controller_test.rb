@@ -506,11 +506,7 @@ class CommentsControllerTest < ActionDispatch::IntegrationTest
       end
 
       should("not be available") do
-        [comments_path, comment_path(@comment), search_comments_path, comments_post_path(@post)].each do |path|
-          get_auth(path, @mod)
-
-          assert_response(:not_implemented, path)
-        end
+        assert_feature_unavailable([comments_path, comment_path(@comment), search_comments_path, comments_post_path(@post)], as: @mod)
 
         post_auth(comments_path, @user, params: { comment: { post_id: @post.id, body: "abc" }, format: :json })
 

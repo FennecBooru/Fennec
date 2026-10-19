@@ -3,7 +3,7 @@
 module Forums
   module Posts
     class VotesController < ApplicationController
-      before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_forums? })
+      requires_feature(:forums)
       respond_to(:html, except: %i[delete])
       respond_to(:json)
       before_action(:load_forum_post, except: %i[index delete])

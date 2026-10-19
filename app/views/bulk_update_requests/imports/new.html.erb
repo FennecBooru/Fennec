@@ -27,7 +27,7 @@
     <% end %>
   </div>
 
-  <% if AdminConfig.enable_forums? %>
+  <% if Feature.enabled?(:forums) %>
     <div class="input">
       <label for="bulk_update_request_import_forum_topic_id">
         Topic ID

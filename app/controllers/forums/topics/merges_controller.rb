@@ -3,7 +3,7 @@
 module Forums
   module Topics
     class MergesController < ApplicationController
-      before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_forums? })
+      requires_feature(:forums)
       respond_to(:html, :json)
 
       rescue_from(ForumTopic::MergeError, with: ->(err) { render_expected_error(422, err.message) })

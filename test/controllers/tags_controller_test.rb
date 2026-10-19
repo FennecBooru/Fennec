@@ -326,11 +326,7 @@ class TagsControllerTest < ActionDispatch::IntegrationTest
 
         assert_response(:not_implemented)
         assert_equal(0, @tag.reload.follower_count)
-        [followed_tags_path, followers_tag_path(@tag), followed_tags_popular_index_path].each do |path|
-          get_auth(path, @user)
-
-          assert_response(:not_implemented)
-        end
+        assert_feature_unavailable([followed_tags_path, followers_tag_path(@tag), followed_tags_popular_index_path], as: @user)
       end
 
       should("not notify followers of new posts") do

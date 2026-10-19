@@ -289,7 +289,7 @@ class AdminConfig
       add_boolean_field(:safe_mode, hint: "Enables safe mode, hiding all posts that are not safe.")
       add_boolean_field(:flag_ai_posts, hint: "If posts detected as ai generated should be automatically flagged")
       add_boolean_field(:tag_ai_posts, hint: "If posts detected as ai generated should be automatically tagged")
-      add_boolean_field(:db_exports_enabled, hint: "Whether the database exports page is enabled.")
+      add_boolean_field(:enable_db_exports, name: "Enable DB Exports", hint: "Whether the database exports page is enabled.")
     end
   end
 end

@@ -13,7 +13,7 @@
     <li><%= link_to("Wiki History", wiki_page_versions_path(search: { wiki_page_id: @wiki_page.id })) %></li>
   <% end %>
 
-  <% if AdminConfig.enable_forums? %>
+  <% if Feature.enabled?(:forums) %>
     <li><%= link_to("Discussions", forum_posts_path(search: { linked_to: @wiki_page.title })) %></li>
   <% end %>
 

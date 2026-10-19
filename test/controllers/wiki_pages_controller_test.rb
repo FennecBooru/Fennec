@@ -316,11 +316,7 @@ class WikiPagesControllerTest < ActionDispatch::IntegrationTest
       end
 
       should("not be available to users") do
-        [wiki_pages_path, wiki_page_path(@wiki_page), show_or_new_wiki_pages_path(title: "abc"), wiki_page_versions_path].each do |path|
-          get_auth(path, @user)
-
-          assert_response(:not_implemented, path)
-        end
+        assert_feature_unavailable([wiki_pages_path, wiki_page_path(@wiki_page), show_or_new_wiki_pages_path(title: "abc"), wiki_page_versions_path], as: @user)
       end
 
       should("still be available to staff") do

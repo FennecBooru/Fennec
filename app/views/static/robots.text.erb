@@ -2,21 +2,21 @@ User-agent: *
 Crawl-delay: 1
 Disallow: /admin
 Disallow: /moderator
-<% if AdminConfig.enable_artist_pages? %>
+<% if Feature.enabled?(:artist_pages) %>
 Disallow: <%= artist_urls_path %>
 Disallow: <%= artist_versions_path %>
 <% end %>
 Disallow: <%= avoid_postings_path %>
 Disallow: <%= avoid_posting_versions_path %>
-<% if AdminConfig.enable_api_keys? %>
+<% if Feature.enabled?(:api_keys) %>
 Disallow: <%= api_keys_path %>
 <% end %>
-<% if AdminConfig.enable_artist_pages? %>
+<% if Feature.enabled?(:artist_pages) %>
 Disallow: <%= show_or_new_artists_path %>
 <% end %>
 Disallow: <%= bans_path %>
 Disallow: <%= bulk_update_requests_path %>
-<% if AdminConfig.enable_comments? %>
+<% if Feature.enabled?(:comments) %>
 Disallow: <%= comment_votes_path(comment_id: "*") %>
 Disallow: <%= comment_edits_path(comment_id: "*") %>
 Disallow: <%= url_for(controller: "comments/votes", action: "index") %>
@@ -28,25 +28,25 @@ Disallow: <%= edit_histories_path %>
 Disallow: <%= email_blacklists_path %>
 Disallow: /email
 Disallow: <%= favorites_path %>
-<% if AdminConfig.enable_forums? %>
+<% if Feature.enabled?(:forums) %>
 Disallow: <%= forum_categories_path %>
 Disallow: <%= forum_post_edits_path(forum_post_id: "*") %>
 Disallow: <%= forum_post_votes_path(forum_post_id: "*") %>
 Disallow: <%= url_for(controller: "forums/posts/votes", action: "index") %>
 <% end %>
 Disallow: <%= ip_bans_path %>
-<% if AdminConfig.enable_mascots? %>
+<% if Feature.enabled?(:mascots) %>
 Disallow: <%= mascots_path %>
 <% end %>
 Disallow: <%= mod_actions_path %>
-<% if AdminConfig.enable_notes? %>
+<% if Feature.enabled?(:notes) %>
 Disallow: <%= notes_path %>
 <% end %>
-<% if AdminConfig.enable_pools? %>
+<% if Feature.enabled?(:pools) %>
 Disallow: <%= edit_pool_order_path(pool_id: "*") %>
 Disallow: <%= pool_versions_path %>
 <% end %>
-<% if AdminConfig.enable_post_sets? %>
+<% if Feature.enabled?(:post_sets) %>
 Disallow: <%= post_sets_path %>
 <% end %>
 Disallow: <%= post_approvals_path %>
@@ -76,46 +76,46 @@ Disallow: <%= post_similar_path(post_id: "*") %>
 Disallow: <%= post_votes_path(post_id: "*") %>
 Disallow: <%= post_flag_path(post_id: "*") %>
 Disallow: <%= move_favorites_post_path(id: "*") %>
-<% if AdminConfig.enable_comments? %>
+<% if Feature.enabled?(:comments) %>
 Disallow: <%= comments_post_path(id: "*") %>
 <% end %>
 <% %w[update_eris revert copy_notes show_seq mark_as_translated favorites expunge delete undelete regenerate_thumbnails regenerate_videos regenerate_audio_track add_to_pool remove_from_pool].each do |action| %>
 Disallow: <%= url_for(controller: "posts", action: action, id: "*") %>
 <% end %>
 Disallow: /popular
-<% if AdminConfig.enable_post_sets? %>
+<% if Feature.enabled?(:post_sets) %>
 Disallow: <%= post_sets_path %>
 <% end %>
 Disallow: /sessions
 Disallow: <%= tags_path %>
-<% if AdminConfig.enable_takedowns? %>
+<% if Feature.enabled?(:takedowns) %>
 Disallow: <%= takedowns_path %>
 <% end %>
-<% if AdminConfig.enable_tickets? %>
+<% if Feature.enabled?(:tickets) %>
 Disallow: <%= tickets_path %>
 <% end %>
-<% if AdminConfig.enable_upload_whitelist? %>
+<% if Feature.enabled?(:upload_whitelist) %>
 Disallow: <%= upload_whitelists_path %>
 <% end %>
 Disallow: <%= uploads_path %>
 Disallow: <%= users_path %>
-<% if AdminConfig.enable_wiki? %>
+<% if Feature.enabled?(:wiki) %>
 Disallow: <%= wiki_page_versions_path %>
 Disallow: <%= search_wiki_pages_path %>
 Disallow: <%= show_or_new_wiki_pages_path %>
 Disallow: <%= revert_wiki_page_path(id: "*") %>
 <% end %>
 Disallow: <%= keyboard_shortcuts_path %>
-<% if AdminConfig.enable_discord? %>
+<% if Feature.enabled?(:discord) %>
 Disallow: <%= discord_get_path %>
 <% end %>
 Disallow: <%= toggle_mobile_mode_path %>
 Disallow: <%= theme_path %>
 Disallow: <%= qtag_path(id: "*") %>
-<% if AdminConfig.enable_rules? %>
+<% if Feature.enabled?(:rules) %>
 Disallow: <%= rules_path %>
 <% end %>
-<% if AdminConfig.enable_mascots? %>
+<% if Feature.enabled?(:mascots) %>
 Disallow: <%= mascot_media_assets_path %>
 <% end %>
 Disallow: <%= site_media_assets_path %>

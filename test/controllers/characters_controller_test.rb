@@ -333,11 +333,7 @@ class CharactersControllerTest < ActionDispatch::IntegrationTest
         end
 
         should("not be available") do
-          [characters_path, character_path(@character), show_or_new_characters_path(name: "masao"), character_urls_path, character_versions_path].each do |path|
-            get_auth(path, @admin)
-
-            assert_response(:not_implemented, path)
-          end
+          assert_feature_unavailable([characters_path, character_path(@character), show_or_new_characters_path(name: "masao"), character_urls_path, character_versions_path], as: @admin)
         end
 
         should("be hidden") do

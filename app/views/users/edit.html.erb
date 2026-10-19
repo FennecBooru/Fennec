@@ -41,7 +41,7 @@
 
     <%= f.input(:receive_email_notifications, as: :select, include_blank: false, collection: [%w[No false], %w[Yes true]]) %>
 
-    <% if AdminConfig.enable_comments? %>
+    <% if Feature.enabled?(:comments) %>
       <%= f.input(:comment_threshold, hint: "Comments below this score will be hidden by default.") %>
     <% end %>
 
@@ -71,7 +71,7 @@
     <%= f.input(:description_collapsed_initially, as: :select, collection: [%w[No false], %w[Yes true]], include_blank: false,
     hint: "Don't expand post descriptions on page load.") %>
 
-    <% if AdminConfig.enable_comments? %>
+    <% if Feature.enabled?(:comments) %>
       <%= f.input(:hide_comments, as: :select, collection: [%w[No false], %w[Yes true]], include_blank: false,
       hint: "Do not show the comments section on post pages.") %>
     <% end %>
@@ -82,7 +82,7 @@
     <%= f.input(:show_post_uploader, as: :select, collection: [%w[No false], %w[Yes true]], include_blank: false,
     hint: "Show the uploader on posts.") %>
 
-    <% if AdminConfig.enable_character_groups? %>
+    <% if Feature.enabled?(:character_groups) %>
       <%= f.input(:disable_character_tag_grouping, label: "Group tags by character", as: :select, collection: [%w[Yes false], %w[No true]], include_blank: false,
       hint: "Group a post's tags by character in the sidebar, with each character's tags further split by category. Tags not attributed to a character are still shown split by category as usual.") %>
     <% end %>
@@ -101,7 +101,7 @@
     <%= f.input(:disable_cropped_thumbnails, as: :select, collection: [%w[No false], %w[Yes true]], include_blank: false,
     hint: "Disables displaying cropped thumbnails on the mobile layout of the site in favor of scaled thumbnails. Has no effect on the desktop site.") %>
 
-    <% if AdminConfig.enable_comments? %>
+    <% if Feature.enabled?(:comments) %>
       <%= f.input(:show_hidden_comments, label: "Show Own Hidden Comments", as: :select, collection: [%w[No false], %w[Yes true]], include_blank: false,
                   hint: "Show your own hidden comments on comment pages.") %>
     <% end %>
@@ -139,7 +139,7 @@
     <%= f.input(:hover_zoom_sticky_shift, label: "Hover Zoom: Sticky Shift", as: :select, collection: [%w[No false], %w[Yes true]], include_blank: false,
                 hint: "If enabled, shift does not need to continuously be held down while hovering over a post.") %>
 
-    <% if AdminConfig.enable_forums? %>
+    <% if Feature.enabled?(:forums) %>
       <%= f.input(:go_to_recent_forum_post, label: "Go To Recent Forum Post", as: :select, collection: [%w[No false], %w[Yes true]], include_blank: false,
                   hint: "When enabled, clicking on a forum topic will take you to the most recent post.") %>
 

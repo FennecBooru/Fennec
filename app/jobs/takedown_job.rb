@@ -6,7 +6,7 @@ class TakedownJob < ApplicationJob
   discard_on(Takedown::DisabledError)
 
   def perform(id, approver, del_reason)
-    raise(Takedown::DisabledError) unless AdminConfig.enable_takedowns?
+    raise(Takedown::DisabledError) unless Feature.enabled?(:takedowns)
     @takedown = Takedown.find(id)
     @takedown.update_with!(approver, approver: approver, status: @takedown.calculated_status)
     @takedown.log_process

@@ -11,19 +11,19 @@ module Reports
   end
 
   def enabled?
-    configured? && AdminConfig.enable_reports?
+    configured? && Feature.enabled?(:reports)
   end
 
   def view_tracking_enabled?
-    enabled? && AdminConfig.enable_view_tracking?
+    enabled? && Feature.enabled?(:view_tracking)
   end
 
   def search_tracking_enabled?
-    enabled? && AdminConfig.enable_search_tracking?
+    enabled? && Feature.enabled?(:search_tracking)
   end
 
   def api_key_usage_tracking_enabled?
-    enabled? && AdminConfig.enable_api_key_usage_tracking?
+    enabled? && Feature.enabled?(:api_key_usage_tracking)
   end
 
   def request(method, path, body = nil)

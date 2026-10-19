@@ -7,7 +7,7 @@ module Recommender
   MIN_USER_FAVS = 50
 
   def enabled?
-    GayFurCity.config.recommender_server.present? && AdminConfig.enable_recommendations?
+    GayFurCity.config.recommender_server.present? && Feature.enabled?(:recommendations)
   end
 
   def available_for_post?(post)

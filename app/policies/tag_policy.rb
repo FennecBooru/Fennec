@@ -49,6 +49,6 @@ class TagPolicy < ApplicationPolicy
   private
 
   def following_enabled?
-    AdminConfig.enable_tag_following?
+    Feature.enabled?(:tag_following)
   end
 end

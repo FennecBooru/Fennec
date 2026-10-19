@@ -19,9 +19,9 @@
     <%= format_text(@character.notes, allow_color: true) %>
   </div>
 
-  <p><%= link_to("View wiki page", @character.wiki_page) if AdminConfig.enable_wiki? %></p>
+  <p><%= link_to("View wiki page", @character.wiki_page) if Feature.enabled?(:wiki) %></p>
 <% else %>
-  <p><%= link_to_wiki_or_new("View wiki page", @character.name) if AdminConfig.enable_wiki? %></p>
+  <p><%= link_to_wiki_or_new("View wiki page", @character.name) if Feature.enabled?(:wiki) %></p>
 <% end %>
 
 <%= render("tags/alias_and_implication_list", tag: @character.tag) %>

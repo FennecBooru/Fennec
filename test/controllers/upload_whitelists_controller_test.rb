@@ -15,11 +15,7 @@ class UploadWhitelistsControllerTest < ActionDispatch::IntegrationTest
       end
 
       should("not show the whitelist") do
-        [upload_whitelists_path, new_upload_whitelist_path, edit_upload_whitelist_path(@whitelist)].each do |path|
-          get_auth(path, @admin)
-
-          assert_response(:not_implemented, path)
-        end
+        assert_feature_unavailable([upload_whitelists_path, new_upload_whitelist_path, edit_upload_whitelist_path(@whitelist)], as: @admin)
 
         get_auth(site_map_path, @admin)
 

@@ -1,7 +1,7 @@
 <%# locals: (tag_relations:) -%>
 
 <%= table_for(tag_relations) do |t| %>
-  <% if AdminConfig.enable_forums? %>
+  <% if Feature.enabled?(:forums) %>
     <% t.column("Votes") do |tag_relation| %>
       <% if tag_relation.forum_post_id.present? %>
         <%= render(partial: "forums/posts/votes/overview", locals: { votes: tag_relation.forum_post.votes, forum_post: tag_relation.forum_post }) %>
@@ -25,7 +25,7 @@
     <% end %>
     </span>
   <% end %>
-  <% if AdminConfig.enable_forums? %>
+  <% if Feature.enabled?(:forums) %>
     <% t.column("Forum") do |tag_relation| %>
       <% if tag_relation.forum_topic_id %>
         <%= link_to(tag_relation.forum_topic_id, forum_topic_path(tag_relation.forum_topic_id)) %>

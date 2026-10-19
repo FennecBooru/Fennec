@@ -3,12 +3,12 @@
 module ArtistsHelper
   # without artist pages, artist links go to the artist's posts
   def artist_page_path(name)
-    return posts_path(tags: name) unless AdminConfig.enable_artist_pages?
+    return posts_path(tags: name) unless Feature.enabled?(:artist_pages)
     show_or_new_artists_path(name: name)
   end
 
   def link_to_artist(name, hide_new_notice: false)
-    return link_to(name, posts_path(tags: name)) unless AdminConfig.enable_artist_pages?
+    return link_to(name, posts_path(tags: name)) unless Feature.enabled?(:artist_pages)
     artist = Artist.find_by(name: name)
 
     if artist

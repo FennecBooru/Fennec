@@ -18,11 +18,11 @@ class UserPresenterPolicy < ApplicationPolicy
   end
 
   def show_tickets?
-    user.is_moderator? || (AdminConfig.enable_tickets? && user == record)
+    user.is_moderator? || (Feature.enabled?(:tickets) && user == record)
   end
 
   def show_api_keys?
-    AdminConfig.enable_api_keys? && (user.is_owner? || user == record)
+    Feature.enabled?(:api_keys) && (user.is_owner? || user == record)
   end
 
   def show_email?

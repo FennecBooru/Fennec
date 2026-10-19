@@ -4,10 +4,10 @@
     <% if GayFurCity.config.server_name.present? %>
       on <i><%= GayFurCity.config.server_name %></i>
     <% end %>
-    <% if AdminConfig.enable_rules? %>
+    <% if Feature.enabled?(:rules) %>
       – <%= link_to("Rules", rules_path) %>
     <% end %>
-    <% if AdminConfig.enable_takedowns? %>
+    <% if Feature.enabled?(:takedowns) %>
       – <%= link_to("Takedowns", takedown_static_path) %>
     <% end %>
     – <%= link_to("Privacy", privacy_policy_path) %>

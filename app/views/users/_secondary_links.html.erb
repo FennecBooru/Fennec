@@ -15,7 +15,7 @@
       <%= subnav_link_to("Blocked Users", user_blocks_path(CurrentUser.user)) %>
     <% else %>
       <%= subnav_link_to("Send message", new_dmail_path(dmail: { to_id: @user.id })) %>
-      <% if AdminConfig.enable_tickets? %>
+      <% if Feature.enabled?(:tickets) %>
         <%= subnav_link_to("Report", model_new_ticket_path(model: @user, ticket: { report_type: "report" })) %>
         <%= subnav_link_to("Commend", model_new_ticket_path(model: @user, ticket: { report_type: "commendation" })) %>
       <% end %>

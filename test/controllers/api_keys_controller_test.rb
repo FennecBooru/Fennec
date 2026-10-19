@@ -161,11 +161,7 @@ class ApiKeysControllerTest < ActionDispatch::IntegrationTest
       end
 
       should("not be available") do
-        [user_api_keys_path(@user), new_user_api_key_path(@user), edit_api_key_path(@api_key), usage_api_key_path(@api_key)].each do |path|
-          get_auth(path, @user)
-
-          assert_response(:not_implemented, path)
-        end
+        assert_feature_unavailable([user_api_keys_path(@user), new_user_api_key_path(@user), edit_api_key_path(@api_key), usage_api_key_path(@api_key)], as: @user)
       end
 
       should("hide the api key links") do

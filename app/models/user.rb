@@ -894,7 +894,7 @@ class User < ApplicationRecord
     end
 
     def can_handle_takedowns?
-      AdminConfig.enable_takedowns? && is_owner?
+      Feature.enabled?(:takedowns) && is_owner?
     end
 
     def can_edit_avoid_posting_entries?

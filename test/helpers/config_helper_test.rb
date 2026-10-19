@@ -12,7 +12,7 @@ class ConfigHelperTest < ActionView::TestCase
       owner = create(:owner_user)
       config = AdminConfig.instance
 
-      html = CurrentUser.scoped(owner) { boolean_config_field(config, :db_exports_enabled) } # rubocop:disable YiffSpace/CurrentOutsideOfRequests
+      html = CurrentUser.scoped(owner) { boolean_config_field(config, :enable_db_exports) } # rubocop:disable YiffSpace/CurrentOutsideOfRequests
 
       hidden_index = html.index('type="hidden"')
       checkbox_index = html.index('type="checkbox"')
@@ -29,9 +29,9 @@ class ConfigHelperTest < ActionView::TestCase
     should("render the checkbox's value as a fixed true sentinel regardless of the field's current value") do
       owner = create(:owner_user)
       config = AdminConfig.instance
-      config.update_column(:db_exports_enabled, false)
+      config.update_column(:enable_db_exports, false)
 
-      html = CurrentUser.scoped(owner) { boolean_config_field(config, :db_exports_enabled) } # rubocop:disable YiffSpace/CurrentOutsideOfRequests
+      html = CurrentUser.scoped(owner) { boolean_config_field(config, :enable_db_exports) } # rubocop:disable YiffSpace/CurrentOutsideOfRequests
       checkbox = html[/<input type="checkbox"[^>]*>/]
 
       assert(checkbox, "expected a checkbox to be rendered")

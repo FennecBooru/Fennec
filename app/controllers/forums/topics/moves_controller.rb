@@ -3,7 +3,7 @@
 module Forums
   module Topics
     class MovesController < ApplicationController
-      before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_forums? })
+      requires_feature(:forums)
       respond_to(:html, :json)
 
       wrap_parameters(:forum_topic)

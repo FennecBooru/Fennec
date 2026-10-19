@@ -273,15 +273,7 @@ class AvoidPostingsControllerTest < ActionDispatch::IntegrationTest
       end
 
       should("not be available") do
-        get_auth(avoid_postings_path, @owner_user)
-
-        assert_response(:not_implemented)
-        get_auth(avoid_posting_path(@avoid_posting), @owner_user)
-
-        assert_response(:not_implemented)
-        get_auth(avoid_posting_versions_path, @owner_user)
-
-        assert_response(:not_implemented)
+        assert_feature_unavailable([avoid_postings_path, avoid_posting_path(@avoid_posting), avoid_posting_versions_path], as: @owner_user)
       end
 
       should("hide the list from non-staff") do

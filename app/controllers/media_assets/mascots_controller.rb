@@ -2,7 +2,7 @@
 
 module MediaAssets
   class MascotsController < BaseController
-    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_mascots? })
+    requires_feature(:mascots)
     undef_method(:append)
     undef_method(:cancel)
 

@@ -2,7 +2,7 @@
 
 module Artists
   class UrlsController < ApplicationController
-    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_artist_pages? || CurrentUser.user.is_staff? })
+    requires_feature(:artist_pages)
     respond_to(:json, :html)
 
     def index

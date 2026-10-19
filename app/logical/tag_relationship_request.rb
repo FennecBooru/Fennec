@@ -92,7 +92,7 @@ class TagRelationshipRequest
   end
 
   def skip_forum
-    @skip_forum || !AdminConfig.enable_forums?
+    @skip_forum || !Feature.enabled?(:forums)
   end
 
   def skip_forum=(value)

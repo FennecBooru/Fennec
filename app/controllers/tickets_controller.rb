@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 class TicketsController < ApplicationController
-  # staff keep access to handle existing and automatic tickets
-  before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_tickets? || CurrentUser.user.is_staff? })
+  requires_feature(:tickets)
   respond_to(:html, :json, except: %i[create new])
 
   def index

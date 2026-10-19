@@ -9,7 +9,7 @@
       <option value="vote-up">Vote up</option>
       <option value="vote-down">Vote down</option>
       <option value="remove-vote">Remove vote</option>
-      <% if AdminConfig.enable_post_sets? %>
+      <% if Feature.enabled?(:post_sets) %>
         <option value="add-to-set">Add To Set</option>
         <option value="remove-from-set">Remove From Set</option>
       <% end %>
@@ -24,12 +24,12 @@
       <% end %>
       <% if CurrentUser.user.is_staff? %>
         <option value="remove-parent">Remove Parent</option>
-        <% if AdminConfig.enable_notes? %>
+        <% if Feature.enabled?(:notes) %>
           <option value="lock-note">Lock notes</option>
         <% end %>
       <% end %>
       <% if CurrentUser.user.is_approver? %>
-        <% if AdminConfig.enable_post_approvals? %>
+        <% if Feature.enabled?(:post_approvals) %>
           <option value="approve">Approve</option>
         <% end %>
         <option value="delete">Delete</option>

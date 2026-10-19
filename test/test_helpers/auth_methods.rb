@@ -36,5 +36,14 @@ module TestHelpers
     def delete_auth(url, user, options = {})
       method_authenticated(:delete, url, user, options)
     end
+
+    # every path responds with 501, since its feature is turned off
+    def assert_feature_unavailable(paths, as:)
+      Array(paths).each do |path|
+        get_auth(path, as)
+
+        assert_response(:not_implemented, path)
+      end
+    end
   end
 end

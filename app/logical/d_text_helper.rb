@@ -89,7 +89,7 @@ module DTextHelper
         node["class"] += " tag-type-#{tag.category_id}"
       end
 
-      if tag.present? && tag.artist? && !AdminConfig.enable_artist_pages?
+      if tag.present? && tag.artist? && !Feature.enabled?(:artist_pages)
         node["href"] = "/posts?tags=#{CGI.escape(name)}"
       elsif tag.present? && tag.artist?
         node["href"] = "/artists/show_or_new?name=#{CGI.escape(name)}"
@@ -98,7 +98,7 @@ module DTextHelper
           node["class"] += " dtext-artist-does-not-exist"
           node["title"] = "This artist page does not exist"
         end
-      elsif !AdminConfig.enable_wiki?
+      elsif !Feature.enabled?(:wiki)
         node["href"] = "/posts?tags=#{CGI.escape(name)}" if tag.present?
       else
         if wiki.blank?

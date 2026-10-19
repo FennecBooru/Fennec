@@ -249,11 +249,7 @@ class NotesControllerTest < ActionDispatch::IntegrationTest
       end
 
       should("not be available") do
-        [notes_path, note_path(@note), search_notes_path, note_versions_path].each do |path|
-          get_auth(path, create(:admin_user))
-
-          assert_response(:not_implemented, path)
-        end
+        assert_feature_unavailable([notes_path, note_path(@note), search_notes_path, note_versions_path], as: create(:admin_user))
 
         post_auth(notes_path, @user, params: { note: { post_id: @post.id, x: 0, y: 0, width: 10, height: 10, body: "abc" }, format: :json })
 

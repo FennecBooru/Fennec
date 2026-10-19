@@ -11,7 +11,7 @@ class ForumUpdater
   end
 
   def update(message, title_tag = nil)
-    return if forum_topic.nil? || !AdminConfig.enable_forums?
+    return if forum_topic.nil? || !Feature.enabled?(:forums)
 
     create_response(message)
     update_title(title_tag) if title_tag

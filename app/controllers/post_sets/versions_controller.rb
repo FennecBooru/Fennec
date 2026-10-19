@@ -2,7 +2,7 @@
 
 module PostSets
   class VersionsController < ApplicationController
-    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_post_sets? })
+    requires_feature(:post_sets)
     respond_to(:html, :json)
 
     def index

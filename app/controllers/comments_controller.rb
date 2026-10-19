@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class CommentsController < ApplicationController
-  before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_comments? })
+  requires_feature(:comments)
   respond_to(:html, :json)
   before_action(:ensure_lockdown_disabled, except: %i[index search show for_post])
   skip_before_action(:api_check)

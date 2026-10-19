@@ -2,7 +2,7 @@
 
 class TakedownsController < ApplicationController
   respond_to(:html, :json)
-  before_action(:ensure_takedowns_enabled)
+  requires_feature(:takedowns, hidden: true)
   before_action(:load_takedown, except: %i[index new create count_matching_posts])
 
   def index
@@ -88,11 +88,5 @@ class TakedownsController < ApplicationController
 
   def load_takedown
     @takedown = Takedown.find(params[:id])
-  end
-
-  def ensure_takedowns_enabled
-    return if AdminConfig.enable_takedowns?
-    raise(FeatureUnavailable) if CurrentUser.user.is_staff?
-    render404
   end
 end

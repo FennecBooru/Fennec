@@ -146,7 +146,7 @@ class Ban < ApplicationRecord
   end
 
   def create_feedback
-    return unless AdminConfig.enable_user_feedback?
+    return unless Feature.enabled?(:user_feedback)
     time = expires_at.nil? ? "permanently" : "for #{humanized_duration}"
     user.feedback.create!(category: "negative", body: "Banned #{time}: #{reason}", creator: creator)
   end

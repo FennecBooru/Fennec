@@ -1,4 +1,4 @@
-<% if tag_change_request.forum_topic && AdminConfig.enable_forums? %>
+<% if tag_change_request.forum_topic && Feature.enabled?(:forums) %>
   <li><strong>Reference</strong>
     <% if tag_change_request.forum_post && !tag_change_request.forum_post.is_original_post? %>
       <%= link_to("forum ##{tag_change_request.forum_post_id}", forum_topic_path(tag_change_request.forum_topic_id, page: tag_change_request.forum_post.forum_topic_page, anchor: "forum_post_#{tag_change_request.forum_post_id}")) %>

@@ -50,7 +50,7 @@ class UploadWhitelist < ApplicationRecord
       return [false, "URLs with embedded credentials are not allowed"]
     end
 
-    unless AdminConfig.enable_upload_whitelist?
+    unless Feature.enabled?(:upload_whitelist)
       return [false, "invalid url"] if url.host.blank?
       begin
         Downloads::File.public_address!(url.host)

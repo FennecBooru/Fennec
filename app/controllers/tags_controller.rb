@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class TagsController < ApplicationController
-  before_action(:validate_following_enabled, only: %i[followed followers follow unfollow])
+  requires_feature(:tag_following, only: %i[followed followers follow unfollow])
   before_action(:load_tag, except: %i[index preview meta_search followed])
   respond_to(:html, :json)
 
@@ -98,10 +98,6 @@ class TagsController < ApplicationController
   end
 
   private
-
-  def validate_following_enabled
-    raise(FeatureUnavailable) unless AdminConfig.enable_tag_following?
-  end
 
   def load_tag
     if params[:id] =~ /\A\d+\z/

@@ -2,7 +2,7 @@
 
 class PostAppealPolicy < ApplicationPolicy
   def create?
-    AdminConfig.enable_post_appeals? && super
+    Feature.enabled?(:post_appeals) && super
   end
 
   def destroy?

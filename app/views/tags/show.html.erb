@@ -10,7 +10,7 @@
 <ul>
   <li>Count: <%= @tag.post_count %></li>
   <li>Category: <%= @tag.category_name %></li>
-  <% if AdminConfig.enable_tag_following? %>
+  <% if Feature.enabled?(:tag_following) %>
     <li>Followers: <%= link_to(@tag.follower_count, followers_tag_path(@tag)) %></li>
   <% end %>
   <% unless CurrentUser.user.is_anonymous? %>

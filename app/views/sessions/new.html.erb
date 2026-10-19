@@ -47,7 +47,7 @@
       <p>An account is <strong>free</strong> and lets you keep favorites, upload artwork, and write comments.</p>
 
       <div class="box-section background-red">
-        <% if AdminConfig.enable_rules? %>
+        <% if Feature.enabled?(:rules) %>
           <p>Make sure to read the <%= link_to("site rules", "/rules") %> before continuing.</p>
         <% end %>
         <p>You must confirm your email address, so use something you can receive email with.</p>

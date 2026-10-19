@@ -3,6 +3,14 @@
 require("test_helper")
 
 class AdminConfigTest < ActiveSupport::TestCase
+  # columns added by a test are only gone once its transaction rolls back, which happens after teardown
+  def after_teardown
+    super
+    AdminConfig.connection.clear_cache!
+    AdminConfig.reset_column_information
+    AdminConfig.delete_cache
+  end
+
   context("AdminConfig env overrides") do
     teardown do
       ENV.delete("GAYFURCITY_ADMIN_CONFIG_RECORDS_PER_PAGE")
@@ -48,11 +56,6 @@ class AdminConfigTest < ActiveSupport::TestCase
   end
 
   context("AdminConfig class readers") do
-    teardown do
-      AdminConfig.reset_column_information
-      AdminConfig.delete_cache
-    end
-
     should("read columns") do
       assert_equal(AdminConfig.instance.records_per_page, AdminConfig.records_per_page)
       assert_equal(AdminConfig.instance.enable_signups, AdminConfig.enable_signups?)

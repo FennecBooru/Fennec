@@ -23,11 +23,7 @@ class MascotsControllerTest < ActionDispatch::IntegrationTest
       end
 
       should("not be available") do
-        [mascots_path, new_mascot_path, edit_mascot_path(@mascot), mascot_media_assets_path].each do |path|
-          get_auth(path, @admin)
-
-          assert_response(:not_implemented, path)
-        end
+        assert_feature_unavailable([mascots_path, new_mascot_path, edit_mascot_path(@mascot), mascot_media_assets_path], as: @admin)
       end
 
       should("not show mascots on the home page") do

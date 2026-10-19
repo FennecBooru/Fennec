@@ -1,5 +1,5 @@
 <% content_for(:secondary_links) do %>
   <%= subnav_link_to("Listing", post_appeals_path) %>
-  <%= subnav_link_to_if(AdminConfig.enable_post_appeals?, "Help", help_page_path(id: "appealing")) %>
+  <%= subnav_link_to_if(Feature.enabled?(:post_appeals), "Help", help_page_path(id: "appealing")) %>
 <% end %>
 <%= latest_link(@post_appeals) %>

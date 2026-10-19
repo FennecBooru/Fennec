@@ -94,7 +94,7 @@ module PostsHelper
       amount = tag.span(post.fav_count, class: "post-score-faves-faves-#{post.id}")
       icon + amount
     end
-    comments = AdminConfig.enable_comments? ? tag.span("C#{post.visible_comment_count(CurrentUser)}", class: "post-score-comments") : ""
+    comments = Feature.enabled?(:comments) ? tag.span("C#{post.visible_comment_count(CurrentUser)}", class: "post-score-comments") : ""
     rating = tag.span(post.rating.upcase, class: "post-score-rating")
     views = tag.span(class: "post-score-views post-score-views-classes-#{post.id}") do
       icon = tag.i("", class: "fa-regular fa-eye")
@@ -111,7 +111,7 @@ module PostsHelper
   end
 
   def user_record_meta(user)
-    return "" unless AdminConfig.enable_user_feedback?
+    return "" unless Feature.enabled?(:user_feedback)
     positive = user.positive_feedback_count
     neutral = user.neutral_feedback_count
     negative = user.negative_feedback_count

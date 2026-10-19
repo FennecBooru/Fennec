@@ -41,7 +41,7 @@ class Post < ApplicationRecord
   has_bit_flags(Flags.map)
 
   def is_taken_down
-    return false unless AdminConfig.enable_takedowns?
+    return false unless Feature.enabled?(:takedowns)
     bit_flags.allbits?(Post.flag_value_for("is_taken_down"))
   end
   alias is_taken_down? is_taken_down
@@ -169,7 +169,7 @@ class Post < ApplicationRecord
   def ai_check!
     is_ai_generated? => { score:, reason: }
     if score > AdminConfig.ai_confidence_threshold
-      if AdminConfig.flag_ai_posts? && AdminConfig.enable_post_flags?
+      if AdminConfig.flag_ai_posts? && Feature.enabled?(:post_flags)
         flags.create!(
           creator:     User.system,
           reason_name: "uploading_guidelines",
@@ -436,11 +436,11 @@ class Post < ApplicationRecord
 
   module ApprovalMethods
     def is_approvable?(user)
-      AdminConfig.enable_post_approvals? && !is_status_locked? && (is_pending? || is_appealed?) && approver.nil? && (uploader_id != user.id || user.is_admin?)
+      Feature.enabled?(:post_approvals) && !is_status_locked? && (is_pending? || is_appealed?) && approver.nil? && (uploader_id != user.id || user.is_admin?)
     end
 
     def is_appealable?
-      AdminConfig.enable_post_appeals? && is_deleted? && !is_appealed?
+      Feature.enabled?(:post_appeals) && is_deleted? && !is_appealed?
     end
 
     def is_active?
@@ -459,7 +459,7 @@ class Post < ApplicationRecord
     def finish_in_progress!(user)
       return unless is_in_progress?
       forced = uploader_id != user.id
-      update(is_in_progress: false, is_pending: AdminConfig.enable_post_approvals?, approver: nil, updater: user)
+      update(is_in_progress: false, is_pending: Feature.enabled?(:post_approvals), approver: nil, updater: user)
       PostEvent.add!(id, user, forced ? :in_progress_forced : :in_progress_finished)
     end
 
@@ -481,7 +481,7 @@ class Post < ApplicationRecord
     end
 
     def is_unapprovable?(user)
-      return false unless AdminConfig.enable_post_approvals?
+      return false unless Feature.enabled?(:post_approvals)
       # Allow unapproval only by the approver
       return false if approver.present? && approver != user
       # Prevent unapproving self approvals by someone else
@@ -678,7 +678,7 @@ class Post < ApplicationRecord
       @pending_character_groups = []
       @character_groups_provided = false
       # with character groups disabled, submitted groups are just plain tags and existing ones are left alone
-      grouping = AdminConfig.enable_character_groups?
+      grouping = Feature.enabled?(:character_groups)
       plain_group_tags = []
 
       if parsed.groups.any?
@@ -873,7 +873,7 @@ class Post < ApplicationRecord
     end
 
     def should_update_followers?
-      return false unless AdminConfig.enable_tag_following?
+      return false unless Feature.enabled?(:tag_following)
       previously_new_record? || (saved_change_to_tag_string? && (tag_array - tag_array_was).any?)
     end
 
@@ -1088,7 +1088,7 @@ class Post < ApplicationRecord
     def apply_casesensitive_metatags(tags)
       casesensitive_metatags, tags = tags.partition { |x| x =~ /\A(?:source):/i }
       # Reuse the following metatags after the post has been saved
-      casesensitive_metatags += tags.grep(/\A(?:newpool):/i) if AdminConfig.enable_pools?
+      casesensitive_metatags += tags.grep(/\A(?:newpool):/i) if Feature.enabled?(:pools)
       unless casesensitive_metatags.empty?
         case casesensitive_metatags[-1]
         when /^source:none$/i
@@ -1141,8 +1141,8 @@ class Post < ApplicationRecord
       return unless @post_metatags
 
       @post_metatags.each do |tag| # rubocop:disable Metrics/BlockLength
-        next if tag =~ /\A-?(?:new)?pool:/i && !AdminConfig.enable_pools?
-        next if tag =~ /\A-?set:/i && !AdminConfig.enable_post_sets?
+        next if tag =~ /\A-?(?:new)?pool:/i && !Feature.enabled?(:pools)
+        next if tag =~ /\A-?set:/i && !Feature.enabled?(:post_sets)
 
         case tag
         when /^-pool:(\d+)$/i
@@ -1487,7 +1487,7 @@ class Post < ApplicationRecord
     end
 
     def has_active_pools?
-      AdminConfig.enable_pools? && pools.any?
+      Feature.enabled?(:pools) && pools.any?
     end
 
     def belongs_to_pool?(pool)
@@ -2352,7 +2352,7 @@ class Post < ApplicationRecord
       end
 
       new_artist_tags.each do |tag|
-        if tag.artist.blank? && AdminConfig.enable_artist_pages?
+        if tag.artist.blank? && Feature.enabled?(:artist_pages)
           warnings.add(:base, "Artist [[#{tag.name}]] requires an artist entry. \"Create new artist entry\":[/artists/new?artist%5Bname%5D=#{CGI.escape(tag.name)}]")
         end
       end
@@ -2525,7 +2525,7 @@ class Post < ApplicationRecord
   end
 
   def avoid_posting_artists
-    return AvoidPosting.none unless AdminConfig.enable_avoid_posting?
+    return AvoidPosting.none unless Feature.enabled?(:avoid_posting)
     AvoidPosting.active.joins(:artist).where("artists.name": artist_tag_array)
   end
 

@@ -28,7 +28,7 @@ class UploadSettings
   end
 
   def character_groups_enabled
-    AdminConfig.enable_character_groups?
+    Feature.enabled?(:character_groups)
   end
 
   def character_groups
@@ -73,7 +73,7 @@ class UploadSettings
   end
 
   def wiki_enabled
-    AdminConfig.enable_wiki?
+    Feature.enabled?(:wiki)
   end
 
   def tag_genders_howto_wiki_url

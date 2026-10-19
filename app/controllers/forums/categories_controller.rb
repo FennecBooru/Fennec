@@ -2,7 +2,7 @@
 
 module Forums
   class CategoriesController < ApplicationController
-    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_forums? })
+    requires_feature(:forums)
     before_action(:load_forum_category, only: %i[show edit update destroy move_all_topics mark_as_read])
     respond_to(:html, :json)
 

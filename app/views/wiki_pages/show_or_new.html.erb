@@ -8,7 +8,7 @@
     <p>This wiki page does not exist. <%= link_to("Create new wiki page", new_wiki_page_path(wiki_page: { title: params[:title] })) %>.</p>
   </div>
 
-  <% if @wiki_page.tag&.category_id == TagCategory.artist && AdminConfig.enable_artist_pages? %>
+  <% if @wiki_page.tag&.category_id == TagCategory.artist && Feature.enabled?(:artist_pages) %>
     <%= link_to("View artist", show_or_new_artists_path(name: @wiki_page.title)) %>
   <% end %>
 

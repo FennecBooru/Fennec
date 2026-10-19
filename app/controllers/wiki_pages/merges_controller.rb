@@ -2,7 +2,7 @@
 
 module WikiPages
   class MergesController < ApplicationController
-    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_wiki? || CurrentUser.user.is_staff? })
+    requires_feature(:wiki)
     respond_to(:html, :json)
 
     rescue_from(WikiPage::MergeError, with: ->(err) { render_expected_error(422, err.message) })

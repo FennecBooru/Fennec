@@ -29,7 +29,7 @@
     <%= f.input(:reason, as: :dtext, limit: AdminConfig.instance.forum_post_max_size) %>
   <% end %>
 
-  <% if AdminConfig.enable_forums? && can_use_attribute?(@bulk_update_request, :skip_forums) %>
+  <% if Feature.enabled?(:forums) && can_use_attribute?(@bulk_update_request, :skip_forums) %>
     <div class="input">
       <label class="checkbox optional" for="bulk_update_request_skip_forum">
         <%= check_box("bulk_update_request", "skip_forum") %>
@@ -38,7 +38,7 @@
     </div>
   <% end %>
 
-  <% if @bulk_update_request.new_record? && AdminConfig.enable_forums? %>
+  <% if @bulk_update_request.new_record? && Feature.enabled?(:forums) %>
     <%= f.input(:forum_topic_id, as: :string, hint: " (optional)") %>
   <% end %>
 

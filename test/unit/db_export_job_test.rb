@@ -12,7 +12,7 @@ class DbExportJobTest < ActiveSupport::TestCase
 
   context("#perform") do
     should("do nothing when disabled") do
-      AdminConfig.any_instance.stubs(:db_exports_enabled).returns(false)
+      AdminConfig.any_instance.stubs(:enable_db_exports).returns(false)
 
       assert_no_difference(-> { DbExport.count }) do
         DbExportJob.perform_now
@@ -21,7 +21,7 @@ class DbExportJobTest < ActiveSupport::TestCase
 
     context("when enabled") do
       setup do
-        AdminConfig.any_instance.stubs(:db_exports_enabled).returns(true)
+        AdminConfig.any_instance.stubs(:enable_db_exports).returns(true)
         GayFurCity.config.stubs(:eris_database_url).returns(nil)
       end
 

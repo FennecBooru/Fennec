@@ -2,7 +2,7 @@
 
 module Forums
   class PostsController < ApplicationController
-    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_forums? })
+    requires_feature(:forums)
     respond_to(:html, :json)
     before_action(:load_post, only: %i[edit show update destroy hide unhide warning mark_spam mark_not_spam])
     before_action(:ensure_lockdown_disabled, except: %i[index show])

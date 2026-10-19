@@ -26,11 +26,11 @@ class PostPolicy < ApplicationPolicy
   end
 
   def copy_notes?
-    AdminConfig.enable_notes? && member?
+    Feature.enabled?(:notes) && member?
   end
 
   def mark_as_translated?
-    AdminConfig.enable_notes? && member? && min_level?
+    Feature.enabled?(:notes) && member? && min_level?
   end
 
   def regenerate_thumbnails?
@@ -66,19 +66,19 @@ class PostPolicy < ApplicationPolicy
   end
 
   def approve?
-    AdminConfig.enable_post_approvals? && user.is_approver? && (!record.is_a?(Post) || record.uploader_id != user.id || user.is_admin?)
+    Feature.enabled?(:post_approvals) && user.is_approver? && (!record.is_a?(Post) || record.uploader_id != user.id || user.is_admin?)
   end
 
   def unapprove?
-    AdminConfig.enable_post_approvals? && user.is_approver?
+    Feature.enabled?(:post_approvals) && user.is_approver?
   end
 
   def add_to_pool?
-    AdminConfig.enable_pools? && member? && min_level?
+    Feature.enabled?(:pools) && member? && min_level?
   end
 
   def remove_from_pool?
-    AdminConfig.enable_pools? && member? && min_level?
+    Feature.enabled?(:pools) && member? && min_level?
   end
 
   def favorites?
@@ -122,11 +122,11 @@ class PostPolicy < ApplicationPolicy
     ]
     attr << { character_groups_attributes: [{ characters: [], tags: [] }] }
     attr += %i[is_rating_locked thumbnail_frame] if user.is_trusted?
-    attr += %i[is_note_locked] if user.is_janitor? && AdminConfig.enable_notes?
+    attr += %i[is_note_locked] if user.is_janitor? && Feature.enabled?(:notes)
     attr += %i[bg_color] if user.is_janitor?
     attr += %i[is_unlisted] if user.is_approver?
-    attr += %i[is_comment_locked] if user.is_moderator? && AdminConfig.enable_comments?
-    attr += %i[is_comment_disabled] if user.is_admin? && AdminConfig.enable_comments?
+    attr += %i[is_comment_locked] if user.is_moderator? && Feature.enabled?(:comments)
+    attr += %i[is_comment_disabled] if user.is_admin? && Feature.enabled?(:comments)
     attr += %i[is_status_locked locked_tags hide_from_anonymous hide_from_search_engines min_edit_level] if user.is_admin?
     attr
   end

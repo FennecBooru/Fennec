@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 class ArtistsController < ApplicationController
-  # staff keep access, avoid posting entries and linked uploaders are managed through artists
-  before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_artist_pages? || CurrentUser.user.is_staff? })
+  requires_feature(:artist_pages)
   before_action(:load_artist, only: %i[edit update destroy revert])
   respond_to(:html, :json)
 

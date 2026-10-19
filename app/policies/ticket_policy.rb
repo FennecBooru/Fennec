@@ -10,7 +10,7 @@ class TicketPolicy < ApplicationPolicy
   end
 
   def create?
-    return false unless AdminConfig.enable_tickets? && member?
+    return false unless Feature.enabled?(:tickets) && member?
     if record.is_a?(Ticket)
       record.can_create_for?(user)
     elsif record.is_a?(ApplicationRecord)

@@ -3,7 +3,7 @@
 class UploadWhitelistsController < ApplicationController
   respond_to(:html, :json, :js)
   # the uploader still checks urls through is_allowed
-  before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_upload_whitelist? }, except: %i[is_allowed])
+  requires_feature(:upload_whitelist, except: %i[is_allowed])
   before_action(:load_whitelist, only: %i[edit update destroy])
 
   def index

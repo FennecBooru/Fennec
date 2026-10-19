@@ -96,7 +96,7 @@
       <% end %>
       <%= li_link_to_if(policy(comment).destroy?, "Destroy", "", class: "comment-destroy-link") %>
 
-      <% if AdminConfig.enable_tickets? && !(comment.is_sticky && TicketPolicy.new(CurrentUser.user, comment).create?) %>
+      <% if Feature.enabled?(:tickets) && !(comment.is_sticky && TicketPolicy.new(CurrentUser.user, comment).create?) %>
         <li>
           <%= link_to(model_new_ticket_path(model: comment), class: "comment-report-link") do %>
             <%= tag.i(class: "far fa-flag fa-flip-horizontal") %> Report

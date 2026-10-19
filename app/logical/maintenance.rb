@@ -5,7 +5,7 @@ module Maintenance
 
   def daily
     ignoring_exceptions { PostPruner.new.prune! }
-    ignoring_exceptions { ForumTopicStatus.process_all_subscriptions! } if AdminConfig.enable_forums?
+    ignoring_exceptions { ForumTopicStatus.process_all_subscriptions! } if Feature.enabled?(:forums)
     ignoring_exceptions { Tag.clean_up_negative_post_counts! }
     ignoring_exceptions { TagAlias.fix_nonzero_post_counts! }
     ignoring_exceptions { TagAlias.update_cached_post_counts_for_all }

@@ -2,7 +2,7 @@
   <h2>Before uploading, read
     the <%= link_to("how to upload guide", help_page_path(id: "uploading")) %>.</h2>
   <p>
-    <% if AdminConfig.enable_avoid_posting? %>
+    <% if Feature.enabled?(:avoid_posting) %>
       Make sure you're not posting something on
       the <%= link_to("Avoid Posting List", avoid_posting_static_path) %><br>
     <% end %>

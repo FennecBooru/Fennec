@@ -2,7 +2,7 @@
 
 module Users
   class FeedbacksController < ApplicationController
-    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_user_feedback? })
+    requires_feature(:user_feedback)
     respond_to(:html, :json)
 
     def index

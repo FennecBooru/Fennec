@@ -7,7 +7,7 @@
   <% if @character && !@character.new_record? %>
     <li>|</li>
     <%= subnav_link_to("Posts (#{@character.tag.try(:post_count).to_i})", posts_path(tags: @character.name)) %>
-    <% if @character.tag.present? && AdminConfig.enable_tag_following? %>
+    <% if @character.tag.present? && Feature.enabled?(:tag_following) %>
       <%= subnav_link_to("Followers (#{@character.tag.follower_count})", followers_tag_path(@character.tag)) %>
     <% end %>
     <%= subnav_link_to("Show", character_path(@character)) %>

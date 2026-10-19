@@ -17,7 +17,7 @@
   <% if params[:controller] == "favorites" %>
     <%= subnav_link_to("Clear Favorites", clear_favorites_path) %>
   <% end %>
-  <% if CurrentUser.can_approve_posts? && AdminConfig.enable_post_approvals? %>
+  <% if CurrentUser.can_approve_posts? && Feature.enabled?(:post_approvals) %>
   <li>|</li>
   <li><a href="#" id="janitor-toolbar-toggle">Approvals: Off</a></li>
   <% end %>

@@ -2,7 +2,7 @@
 
 module Rules
   class CategoriesController < ApplicationController
-    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_rules? })
+    requires_feature(:rules)
     respond_to(:html, except: %i[index])
     respond_to(:json)
     respond_to(:js, only: %i[reorder])

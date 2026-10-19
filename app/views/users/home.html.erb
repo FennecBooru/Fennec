@@ -133,7 +133,7 @@
       <li>» <%= link_to("Sign out", session_path, method: :delete) %></li>
       <li>» <%= link_to("Settings", edit_users_path) %></li>
       <li>» <%= link_to("Change password", edit_user_password_path(CurrentUser.user)) %></li>
-      <% if AdminConfig.enable_api_keys? %>
+      <% if Feature.enabled?(:api_keys) %>
         <li>» <%= link_to("Manage API Access", user_api_keys_path(CurrentUser.user)) %></li>
       <% end %>
       <li>» <%= link_to("Change username", new_user_name_change_request_path) %></li>
@@ -150,23 +150,23 @@
       <% end %>
       <li>» <%= link_to("My blocked users", user_blocks_path(CurrentUser.user)) %></li>
       <li>» <%= link_to("My notifications", notifications_path) %></li>
-      <% if AdminConfig.enable_tag_following? %>
+      <% if Feature.enabled?(:tag_following) %>
         <li>» <%= link_to("My followed tags", followed_tags_path) %></li>
       <% end %>
       <br>
-      <% if AdminConfig.enable_post_sets? %>
+      <% if Feature.enabled?(:post_sets) %>
         <li>» <%= link_to("My sets", post_sets_path(search: { creator_id: CurrentUser.user.id })) %></li>
         <li>» <%= link_to("Sets I maintain", post_sets_path(search: { maintainer_id: CurrentUser.user.id })) %></li>
         <li>» <%= link_to("Set maintainer invites", post_set_maintainers_path) %></li>
         <br>
       <% end %>
-      <% if AdminConfig.enable_comments? %>
+      <% if Feature.enabled?(:comments) %>
         <li>» <%= link_to("Search for myself in comments", comments_path(group_by: :comment, search: { body_matches: CurrentUser.name })) %></li>
       <% end %>
-      <% if AdminConfig.enable_forums? %>
+      <% if Feature.enabled?(:forums) %>
         <li>» <%= link_to("Search for myself in forums", forum_posts_path(search: { body_matches: CurrentUser.pretty_name })) %></li>
       <% end %>
-      <% if AdminConfig.enable_comments? %>
+      <% if Feature.enabled?(:comments) %>
         <li>» <%= link_to("Comments on my posts", comments_path(group_by: :comment, search: { poster_id: CurrentUser.user.id })) %></li>
       <% end %>
     </ul>

@@ -5,7 +5,7 @@
   <% if Reports.enabled? %>
     <%= li_link_to("Views", views_popular_index_path) %>
   <% end %>
-  <% if AdminConfig.enable_tag_following? %>
+  <% if Feature.enabled?(:tag_following) %>
     <%= li_link_to("Followed Tags", followed_tags_popular_index_path) %>
   <% end %>
   <% if Reports.enabled? %>

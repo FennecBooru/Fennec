@@ -15,7 +15,7 @@
     <% xml.changefreq("always") %>
     <% xml.lastmod((Post.maximum(:updated_at) || now).utc.iso8601) %>
   <% end %>
-  <% if AdminConfig.enable_forums? %>
+  <% if Feature.enabled?(:forums) %>
     <% xml.url do %>
       <% xml.loc(forum_topics_url) %>
       <% xml.priority("0.8") %>
@@ -29,7 +29,7 @@
       <% xml.lastmod((ForumPost.maximum(:updated_at) || now).utc.iso8601) %>
     <% end %>
   <% end %>
-  <% if AdminConfig.enable_artist_pages? %>
+  <% if Feature.enabled?(:artist_pages) %>
     <% xml.url do %>
       <% xml.loc(artists_url) %>
       <% xml.priority("0.7") %>
@@ -48,7 +48,7 @@
     <% xml.changefreq("daily") %>
     <% xml.lastmod((NewsUpdate.maximum(:updated_at) || now).utc.iso8601) %>
   <% end %>
-  <% if AdminConfig.enable_pools? %>
+  <% if Feature.enabled?(:pools) %>
     <% xml.url do %>
       <% xml.loc(pools_url) %>
       <% xml.priority("0.7") %>
@@ -56,7 +56,7 @@
       <% xml.lastmod((Pool.maximum(:updated_at) || now).utc.iso8601) %>
     <% end %>
   <% end %>
-  <% if AdminConfig.enable_wiki? %>
+  <% if Feature.enabled?(:wiki) %>
     <% xml.url do %>
       <% xml.loc(wiki_pages_url) %>
       <% xml.priority("0.7") %>
