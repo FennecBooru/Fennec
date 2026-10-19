@@ -169,7 +169,7 @@ class Post < ApplicationRecord
   def ai_check!
     is_ai_generated? => { score:, reason: }
     if score > AdminConfig.ai_confidence_threshold
-      if AdminConfig.flag_ai_posts?
+      if AdminConfig.flag_ai_posts? && AdminConfig.enable_post_flags?
         flags.create!(
           creator:     User.system,
           reason_name: "uploading_guidelines",

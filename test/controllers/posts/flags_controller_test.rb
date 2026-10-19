@@ -88,6 +88,44 @@ module Posts
           end
         end
       end
+
+      context("when flags are disabled") do
+        setup do
+          stub_admin_config(:enable_post_flags, false)
+          @other = create(:post)
+          @approver = create(:janitor_user)
+        end
+
+        should("not allow flagging") do
+          get_auth(new_post_flag_path, @user, params: { post_flag: { post_id: @other.id } })
+
+          assert_response(:not_implemented)
+
+          assert_no_difference("PostFlag.count") do
+            post_auth(post_flags_path, @user, params: { post_flag: { post_id: @other.id, reason_name: "uploading_guidelines" }, format: :json })
+          end
+          assert_response(:not_implemented)
+
+          get_auth(post_path(@other), @user)
+
+          assert_select("#flag", count: 0)
+        end
+
+        should("still allow handling existing flags and deleting posts") do
+          get_auth(post_flags_path, @user)
+
+          assert_response(:success)
+
+          delete_auth(post_flag_path(@post), @approver, params: { format: :json })
+
+          assert_response(:success)
+          assert_not(@post.reload.is_flagged?)
+
+          @other.delete!(@approver, "test")
+
+          assert_predicate(@other.reload, :is_deleted?)
+        end
+      end
     end
   end
 end

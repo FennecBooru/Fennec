@@ -2,7 +2,7 @@
 
 class PostFlagPolicy < ApplicationPolicy
   def create?
-    member? && !user.no_flagging?
+    AdminConfig.enable_post_flags? && member? && !user.no_flagging?
   end
 
   def destroy?

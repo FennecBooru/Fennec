@@ -261,6 +261,7 @@ class AdminConfig
       add_boolean_field(:enable_takedowns, hint: "Enable the takedown system.")
       add_boolean_field(:enable_post_approvals, hint: "Enable approving posts. When disabled, every upload is approved immediately, and posts can only be deleted and undeleted")
       add_boolean_field(:enable_replacement_approvals, hint: "Enable approving replacements. When disabled, every replacement is approved immediately")
+      add_boolean_field(:enable_post_flags, hint: "Enable flagging posts. When disabled, posts can't be flagged (including by AI detection), but existing flags can still be handled, and deletions work as normal")
       add_boolean_field(:enable_tickets, hint: "Let users submit tickets (reports and commendations). When disabled, staff can still handle existing tickets and the ones created automatically, like spam reports")
       add_boolean_field(:enable_mascots, hint: "Show mascots on the home page. Disabling it keeps existing mascots, but hides them")
       add_boolean_field(:enable_upload_whitelist, hint: "Only allow direct URL uploads from whitelisted domains. When disabled, any URL is allowed, except ones pointing to internal addresses")

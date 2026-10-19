@@ -114,6 +114,18 @@ class UploadTest < ActiveSupport::TestCase
         assert_equal("AI Score: #{score}\nReason: #{reason}", @flag.note)
       end
 
+      should("not be flagged when flags are disabled") do
+        AdminConfig.any_instance.stubs(:ai_confidence_threshold).returns(50)
+        AdminConfig.any_instance.stubs(:flag_ai_posts).returns(true)
+        stub_admin_config(:enable_post_flags, false)
+        @upload = create(:ai_upload, uploader: @user)
+        perform_enqueued_jobs(only: AiCheckJob)
+        @post = @upload.post&.reload
+
+        assert_not_nil(@post)
+        assert_empty(@post.flags.flag.by_system)
+      end
+
       should("be tagged") do
         AdminConfig.any_instance.stubs(:ai_confidence_threshold).returns(50)
         AdminConfig.any_instance.stubs(:tag_ai_posts).returns(true)
