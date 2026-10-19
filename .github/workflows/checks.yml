@@ -151,7 +151,9 @@ jobs:
             tmp/shard_runtime.log
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4.0.1
+        uses: codecov/codecov-action@v7.1.1
+        # a failed upload isn't a failed test run
+        continue-on-error: true
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: GayFurCity/GayFurCity
