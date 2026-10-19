@@ -157,11 +157,33 @@ class StaffAuditLog < ApplicationRecord
       text: ->(log) { "Updated the config keys: #{log.data.keys.join(', ')}" },
       json: %i[data],
     },
+
+    ### Deploys (DeployTracker) ###
+    version_bump:               {
+      text: ->(log) do
+        new_version = link_to_commit(log.data["new_version"])
+        log.data["old_version"] ? "Updated the site from #{link_to_commit(log.data['old_version'])} to #{new_version}" : "Site version is #{new_version}"
+      end,
+      json: %i[data],
+    },
+    migration_run:              {
+      text: ->(log) { "Ran migration #{log.data['version']} #{log.data['name']} (#{log.data['direction']})" },
+      json: %i[data],
+    },
+    fix_run:                    {
+      text: ->(log) { "Ran fix #{log.data['name']}" },
+      json: %i[data],
+    },
   }.freeze
   ACTIONS = FORMATTERS.keys.freeze
 
   def self.link_to_user(id)
     "\"#{User.id_to_name(id)}\":/users/#{id}"
+  end
+
+  def self.link_to_commit(commit)
+    url = GitHelper.instance.origin&.commit_url(commit)
+    url ? "\"#{commit}\":#{url}" : commit
   end
 
   def format_unknown(log)
