@@ -152,10 +152,12 @@
         <li>» <%= link_to("My followed tags", followed_tags_path) %></li>
       <% end %>
       <br>
-      <li>» <%= link_to("My sets", post_sets_path(search: { creator_id: CurrentUser.user.id })) %></li>
-      <li>» <%= link_to("Sets I maintain", post_sets_path(search: { maintainer_id: CurrentUser.user.id })) %></li>
-      <li>» <%= link_to("Set maintainer invites", post_set_maintainers_path) %></li>
-      <br>
+      <% if AdminConfig.enable_post_sets? %>
+        <li>» <%= link_to("My sets", post_sets_path(search: { creator_id: CurrentUser.user.id })) %></li>
+        <li>» <%= link_to("Sets I maintain", post_sets_path(search: { maintainer_id: CurrentUser.user.id })) %></li>
+        <li>» <%= link_to("Set maintainer invites", post_set_maintainers_path) %></li>
+        <br>
+      <% end %>
       <li>» <%= link_to("Search for myself in comments", comments_path(group_by: :comment, search: { body_matches: CurrentUser.name })) %></li>
       <% if AdminConfig.enable_forums? %>
         <li>» <%= link_to("Search for myself in forums", forum_posts_path(search: { body_matches: CurrentUser.pretty_name })) %></li>

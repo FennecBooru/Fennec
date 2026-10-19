@@ -1130,6 +1130,7 @@ class Post < ApplicationRecord
 
       @post_metatags.each do |tag| # rubocop:disable Metrics/BlockLength
         next if tag =~ /\A-?(?:new)?pool:/i && !AdminConfig.enable_pools?
+        next if tag =~ /\A-?set:/i && !AdminConfig.enable_post_sets?
 
         case tag
         when /^-pool:(\d+)$/i

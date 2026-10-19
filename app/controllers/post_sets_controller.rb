@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class PostSetsController < ApplicationController
+  before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_post_sets? })
   before_action(:ensure_lockdown_disabled, except: %i[index show])
   respond_to(:html, :json)
 

@@ -34,7 +34,9 @@ Disallow: <%= notes_path %>
 Disallow: <%= edit_pool_order_path(pool_id: "*") %>
 Disallow: <%= pool_versions_path %>
 <% end %>
+<% if AdminConfig.enable_post_sets? %>
 Disallow: <%= post_sets_path %>
+<% end %>
 Disallow: <%= post_approvals_path %>
 Disallow: <%= deleted_posts_path %>
 Disallow: <%= post_deletion_reasons_path %>
@@ -67,7 +69,9 @@ Disallow: <%= comments_post_path(id: "*") %>
 Disallow: <%= url_for(controller: "posts", action: action, id: "*") %>
 <% end %>
 Disallow: /popular
+<% if AdminConfig.enable_post_sets? %>
 Disallow: <%= post_sets_path %>
+<% end %>
 Disallow: /sessions
 Disallow: <%= tags_path %>
 <% if AdminConfig.enable_takedowns? %>

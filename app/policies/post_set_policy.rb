@@ -45,11 +45,13 @@ class PostSetPolicy < ApplicationPolicy
   end
 
   def add_posts?
+    return false unless AdminConfig.enable_post_sets?
     return unbanned? unless record.is_a?(PostSet)
     post_edit_access?(record)
   end
 
   def remove_posts?
+    return false unless AdminConfig.enable_post_sets?
     return unbanned? unless record.is_a?(PostSet)
     post_edit_access?(record)
   end

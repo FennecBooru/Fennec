@@ -34,7 +34,9 @@
   <section id="post-related-images">
       <h1>Related</h1>
       <ul>
-        <li><%= link_to("Sets with this post", post_sets_path(search: { post_id: @post.id }), rel: "nofollow") %></li>
+        <% if AdminConfig.enable_post_sets? %>
+          <li><%= link_to("Sets with this post", post_sets_path(search: { post_id: @post.id }), rel: "nofollow") %></li>
+        <% end %>
         <% if ErisProxy.enabled? && @post.has_preview? %>
           <li><%= link_to("Visually similar", posts_eris_path(search: { post_id: @post.id }), rel: "nofollow") %></li>
         <% end %>

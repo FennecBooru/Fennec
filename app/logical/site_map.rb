@@ -48,6 +48,7 @@ module SiteMap
   logged_out = ->(user) { user.is_anonymous? }
   forums = ->(_) { AdminConfig.enable_forums? }
   pools = ->(_) { AdminConfig.enable_pools? }
+  sets = ->(_) { AdminConfig.enable_post_sets? }
 
   section("Posts") do
     link("Listing")                                                               { posts_path }
@@ -127,10 +128,10 @@ module SiteMap
   end
 
   section("Sets") do
-    link("Listing")                                       { post_sets_path }
-    link("Changes")                                       { post_set_versions_path }
-    link("Maintainer Invites", policy: PostSetMaintainer) { post_set_maintainers_path }
-    link("Help")                                          { help_page_path(id: "sets") }
+    link("Listing", visible: sets)                                       { post_sets_path }
+    link("Changes", visible: sets)                                       { post_set_versions_path }
+    link("Maintainer Invites", policy: PostSetMaintainer, visible: sets) { post_set_maintainers_path }
+    link("Help", visible: sets)                                          { help_page_path(id: "sets") }
   end
 
   section("Notes") do

@@ -940,6 +940,21 @@ class PostTest < ActiveSupport::TestCase
               assert_equal("aaa", @post.tag_string)
             end
           end
+
+          context("when sets are disabled") do
+            setup do
+              stub_admin_config(:enable_post_sets, false)
+              @set = create(:post_set, creator: @user)
+            end
+
+            should("ignore the set metatags") do
+              @post.update_with(@user, tag_string: "aaa set:#{@set.id} set:#{@set.shortname}")
+              @post.reload
+
+              assert_equal([], @set.reload.post_ids)
+              assert_equal("aaa", @post.tag_string)
+            end
+          end
         end
 
         context("for a rating") do

@@ -2,6 +2,7 @@
 
 module PostSets
   class MaintainersController < ApplicationController
+    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_post_sets? })
     respond_to(:html)
     respond_to(:js, except: %i[index])
 

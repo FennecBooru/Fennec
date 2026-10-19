@@ -209,7 +209,7 @@ class PostPresenter < Presenter
   end
 
   def has_nav_links?(template)
-    has_sequential_navigation?(template.params) || @post.has_active_pools? || @post.post_sets.owned_by(CurrentUser.user).any?
+    has_sequential_navigation?(template.params) || @post.has_active_pools? || (AdminConfig.enable_post_sets? && @post.post_sets.owned_by(CurrentUser.user).any?)
   end
 
   def has_sequential_navigation?(params)

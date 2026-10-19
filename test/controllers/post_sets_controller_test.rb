@@ -502,5 +502,36 @@ class PostSetsControllerTest < ActionDispatch::IntegrationTest
         assert_response(:success)
       end
     end
+
+    context("when sets are disabled") do
+      setup do
+        stub_admin_config(:enable_post_sets, false)
+      end
+
+      should("not be available") do
+        [post_sets_path, post_set_path(@set), new_post_set_path, post_set_versions_path, post_set_maintainers_path].each do |path|
+          get_auth(path, @admin)
+
+          assert_response(:not_implemented, path)
+        end
+      end
+
+      should("hide the set links") do
+        get_auth(post_path(@post), @user)
+
+        assert_response(:success)
+        assert_select("a[href='#{post_sets_path}']", count: 0)
+        assert_select("#set", count: 0)
+        assert_select("#add-to-set-dialog", count: 0)
+
+        get_auth(posts_path, @user)
+
+        assert_select("option[value='add-to-set']", count: 0)
+
+        get_auth(site_map_path, @user)
+
+        assert_select("a[href='#{post_set_versions_path}']", count: 0)
+      end
+    end
   end
 end
