@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class RulesController < ApplicationController
+  before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_rules? })
   before_action(:load_categories, only: %i[index new create edit update order])
   respond_to(:html, :json)
   respond_to(:js, only: %i[reorder])

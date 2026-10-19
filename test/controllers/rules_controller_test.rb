@@ -141,5 +141,33 @@ class RulesControllerTest < ActionDispatch::IntegrationTest
         end
       end
     end
+
+    context("when rules are disabled") do
+      setup do
+        stub_admin_config(:enable_rules, false)
+      end
+
+      should("not be available") do
+        [rules_path, builder_rules_path(format: :json), quick_rules_path, order_rule_categories_path, new_rule_category_path].each do |path|
+          get_auth(path, @admin)
+
+          assert_response(:not_implemented, path)
+        end
+      end
+
+      should("hide the rules links") do
+        get(new_session_path)
+
+        assert_select("footer a[href='#{rules_path}']", count: 0)
+        assert_select("a[href='/rules']", count: 0)
+      end
+
+      should("hide the record builder") do
+        get_auth(new_user_feedback_path, create(:moderator_user), params: { user_feedback: { user_id: @user.id } })
+
+        assert_response(:success)
+        assert_select(".record-wrapper", count: 0)
+      end
+    end
   end
 end

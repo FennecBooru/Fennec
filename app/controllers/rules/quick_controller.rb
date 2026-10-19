@@ -2,6 +2,7 @@
 
 module Rules
   class QuickController < ApplicationController
+    before_action(-> { raise(FeatureUnavailable) unless AdminConfig.enable_rules? })
     respond_to(:html, :json)
 
     def index

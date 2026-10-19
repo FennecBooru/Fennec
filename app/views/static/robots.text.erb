@@ -82,7 +82,9 @@ Disallow: <%= discord_get_path %>
 Disallow: <%= toggle_mobile_mode_path %>
 Disallow: <%= theme_path %>
 Disallow: <%= qtag_path(id: "*") %>
+<% if AdminConfig.enable_rules? %>
 Disallow: <%= rules_path %>
+<% end %>
 Disallow: <%= mascot_media_assets_path %>
 Disallow: <%= site_media_assets_path %>
 Disallow: <%= domain_icon_media_assets_path %>

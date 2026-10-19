@@ -192,7 +192,7 @@ module SiteMap
   end
 
   section("Site") do
-    link("Rules")                     { rules_path }
+    link("Rules", visible: ->(_)      { AdminConfig.enable_rules? }) { rules_path }
     link("Terms of Service")          { terms_of_service_path }
     link("Privacy Policy")            { privacy_policy_path }
     link("Contact")                   { contact_path }
@@ -218,26 +218,26 @@ module SiteMap
   end
 
   section("Moderation") do
-    link("Mod Dashboard", policy: :moderator_dashboard, action: :show?) { moderator_dashboard_path }
-    link("Tickets")                                                     { tickets_path }
-    link("Mod Actions")                                                 { mod_actions_path }
-    link("Takedowns", policy: Takedown)                                 { takedowns_path }
-    link("Upload Whitelist")                                            { upload_whitelists_path }
-    link("User Approvals", policy: UserApproval)                        { moderator_user_approvals_path }
-    link("Name Change Requests", policy: UserNameChangeRequest)         { user_name_change_requests_path }
-    link("User Text Versions", policy: UserTextVersion)                 { moderator_user_text_versions_path }
-    link("Edit Histories", policy: EditHistory)                         { edit_histories_path }
-    link("Staff Notes", policy: StaffNote)                              { staff_notes_path }
-    link("Sessions", policy: UserSession)                               { user_sessions_path }
-    link("IP Addresses", policy: Moderator::IpAddrSearch)               { moderator_ip_addrs_path }
-    link("IP Bans", policy: IpBan)                                      { ip_bans_path }
-    link("Email Blacklist", policy: EmailBlacklist)                     { email_blacklists_path }
-    link("Alt List", policy: %i[admin user], action: :alt_list?)        { alt_list_admin_users_path }
-    link("Quick Rules", policy: QuickRule, action: :create?)            { quick_rules_path }
-    link("Rule Categories", policy: RuleCategory, action: :order?)      { order_rule_categories_path }
-    link("Stuck DNP Tags", policy: :stuck_dnp, action: :create?)        { new_admin_stuck_dnp_path }
-    link("Post Reowner", policy: :reowner, action: :create?)            { new_admin_reowner_path }
-    link("Destroyed Posts", policy: DestroyedPost)                      { admin_destroyed_posts_path }
+    link("Mod Dashboard", policy: :moderator_dashboard, action: :show?)           { moderator_dashboard_path }
+    link("Tickets")                                                               { tickets_path }
+    link("Mod Actions")                                                           { mod_actions_path }
+    link("Takedowns", policy: Takedown)                                           { takedowns_path }
+    link("Upload Whitelist")                                                      { upload_whitelists_path }
+    link("User Approvals", policy: UserApproval)                                  { moderator_user_approvals_path }
+    link("Name Change Requests", policy: UserNameChangeRequest)                   { user_name_change_requests_path }
+    link("User Text Versions", policy: UserTextVersion)                           { moderator_user_text_versions_path }
+    link("Edit Histories", policy: EditHistory)                                   { edit_histories_path }
+    link("Staff Notes", policy: StaffNote)                                        { staff_notes_path }
+    link("Sessions", policy: UserSession)                                         { user_sessions_path }
+    link("IP Addresses", policy: Moderator::IpAddrSearch)                         { moderator_ip_addrs_path }
+    link("IP Bans", policy: IpBan)                                                { ip_bans_path }
+    link("Email Blacklist", policy: EmailBlacklist)                               { email_blacklists_path }
+    link("Alt List", policy: %i[admin user], action: :alt_list?)                  { alt_list_admin_users_path }
+    link("Quick Rules", policy: QuickRule, action: :create?, visible: ->(_)       { AdminConfig.enable_rules? }) { quick_rules_path }
+    link("Rule Categories", policy: RuleCategory, action: :order?, visible: ->(_) { AdminConfig.enable_rules? }) { order_rule_categories_path }
+    link("Stuck DNP Tags", policy: :stuck_dnp, action: :create?)                  { new_admin_stuck_dnp_path }
+    link("Post Reowner", policy: :reowner, action: :create?)                      { new_admin_reowner_path }
+    link("Destroyed Posts", policy: DestroyedPost)                                { admin_destroyed_posts_path }
   end
 
   section("Media Assets") do

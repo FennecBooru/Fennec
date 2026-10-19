@@ -1,4 +1,7 @@
-<div class="record-wrapper">
-  <button type="button" class="add-section-button">+ Section</button>
-  <%= render("record_builder/body") %>
-</div>
+<%# the builder is made from the rules and quick rules %>
+<% if AdminConfig.enable_rules? %>
+  <div class="record-wrapper">
+    <button type="button" class="add-section-button">+ Section</button>
+    <%= render("record_builder/body") %>
+  </div>
+<% end %>
