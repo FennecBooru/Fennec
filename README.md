@@ -78,6 +78,11 @@ Running a single machine install in production is possible, but is likely to be 
 Minimum RAM is 4GB. You will need to adjust values in config files to match how much RAM is available.
 If you are targeting more than a hundred thousand posts and reasonable user volumes, you probably want to procure yourself a database server. See tuning guides for postgresql and elasticsearch for help planning these requirements.
 
+### Command Line
+Users, the admin config, and features can be managed from the command line, like `docker compose run --rm fennec users:create name --level admin`.
+Run `docker compose run --rm fennec help` for every command, or `help users` for one group. Outside of docker, use `bin/fennec`.
+Each group is a Thor class in `lib/cli` that extends `CLI::Base`, adding a file there adds its commands.
+
 ### Help & Wiki Pages
 These wik/help pages are expected to exist, as they are linked to or used in various places.
 #### Wiki Pages

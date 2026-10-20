@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Manage the site from the command line, run without arguments for the list of commands. Commands live in lib/cli
+require_relative("../config/environment")
+CLI::Runner.start(ARGV)

@@ -41,4 +41,10 @@ if [ -d "$PATCHES_DIR" ]; then
   done
 fi
 
+# Site management commands, like "users:create name", go to bin/fennec
+case "$1" in
+  help) set -- bin/fennec "$@" ;;
+  *:*) command -v "$1" >/dev/null 2>&1 || set -- bin/fennec "$@" ;;
+esac
+
 exec "$@"

@@ -15,6 +15,13 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
         assert_response(:success)
       end
 
+      should("list users without an email to admins") do
+        create(:user, email: nil)
+        get_auth(users_path, create(:admin_user))
+
+        assert_response(:success)
+      end
+
       should("not redirect for /users?name=<name> if invalid") do
         get(users_path, params: { name: "some_name" })
 

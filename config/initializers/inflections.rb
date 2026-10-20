@@ -21,4 +21,5 @@ ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.acronym("MFA")
   inflect.acronym("SQL")
   inflect.acronym("DSL")
+  inflect.acronym("CLI")
 end

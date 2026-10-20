@@ -4,16 +4,19 @@ class UserDeletion
   class ValidationError < StandardError
   end
 
-  attr_reader(:user, :password, :request)
+  attr_reader(:user, :password, :request, :deleter)
 
-  def initialize(user, password, request)
+  # deleter: someone else deleting the account, like from the command line, which skips the checks for deleting your
+  # own and doesn't need a password or request
+  def initialize(user, password, request, deleter: nil)
     @user = user
     @password = password
     @request = request
+    @deleter = deleter
   end
 
   def delete!
-    validate
+    deleter ? validate_deleter : validate
     create_name_history
     rename_user
     clear_user_settings
@@ -30,10 +33,11 @@ class UserDeletion
   end
 
   def create_mod_action
-    ModAction.log!(user, :user_delete, user, user_id: user.id)
+    ModAction.log!(deleter || user, :user_delete, user, user_id: user.id)
   end
 
   def create_user_event
+    return if request.nil?
     UserEvent.create_from_request!(user, :user_deletion, request)
   end
 
@@ -71,6 +75,10 @@ class UserDeletion
 
     user.update_column(:name, name)
     user.update_cache
+  end
+
+  def validate_deleter
+    raise(ValidationError, "System users can't be deleted") if user.is_system? || user.is_anonymous?
   end
 
   def validate

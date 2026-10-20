@@ -14,6 +14,7 @@ class EmailBlacklist < ApplicationRecord
   after_destroy(:invalidate_cache)
 
   def self.is_banned?(email)
+    return false if email.blank?
     email_domain = email.split("@").last.strip.downcase
     banned_domains = Cache.fetch("banned_emails", expires_in: 1.hour) do
       all.map { |x| x.domain.strip.downcase }.flatten

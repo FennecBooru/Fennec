@@ -284,6 +284,7 @@ YiffSpace/CurrentOutsideOfRequests:
     - db/fixes/205*.rb
     - config/environments/development.rb
     - app/logical/session_loader.rb
+    - lib/cli/base.rb
     - test/unit/current_user_test.rb
 
 Rails/SquishedSQLHeredocs:
