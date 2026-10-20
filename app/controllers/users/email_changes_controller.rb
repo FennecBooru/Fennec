@@ -3,6 +3,7 @@
 module Users
   class EmailChangesController < ApplicationController
     respond_to(:html)
+    requires_email
 
     def new
     end

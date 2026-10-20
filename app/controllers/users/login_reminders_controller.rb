@@ -2,6 +2,8 @@
 
 module Users
   class LoginRemindersController < ApplicationController
+    requires_email
+
     def new
     end
 

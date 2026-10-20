@@ -10,7 +10,7 @@ class UserPasswordResetNonce < ApplicationRecord
   end
 
   def deliver_notice
-    if user.email.present?
+    if Fennec.config.enable_email? && user.email.present?
       Users::PasswordResetMailer.reset_request(user, self).deliver_now
     end
   end

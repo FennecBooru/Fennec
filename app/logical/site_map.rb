@@ -49,6 +49,8 @@ module SiteMap
 
   logged_in = ->(user) { !user.is_anonymous? }
   logged_out = ->(user) { user.is_anonymous? }
+  logged_in_with_email = ->(user) { Fennec.config.enable_email? && logged_in.call(user) }
+  logged_out_with_email = ->(user) { Fennec.config.enable_email? && logged_out.call(user) }
 
   section("Posts") do
     link("Listing")                                                               { posts_path }
@@ -164,15 +166,15 @@ module SiteMap
   end
 
   section("Users") do
-    link("Listing")                             { users_path }
-    link("Search")                              { search_users_path }
-    link("Bans")                                { bans_path }
-    link("Feedback", feature: :user_feedback)   { user_feedbacks_path }
-    link("Sign Up", visible: logged_out)        { new_user_path }
-    link("Sign In", visible: logged_out)        { new_session_path }
-    link("Reset Password", visible: logged_out) { new_users_password_reset_path }
-    link("Login Reminder", visible: logged_out) { new_users_login_reminder_path }
-    link("Help")                                { help_page_path(id: "accounts") }
+    link("Listing")                                        { users_path }
+    link("Search")                                         { search_users_path }
+    link("Bans")                                           { bans_path }
+    link("Feedback", feature: :user_feedback)              { user_feedbacks_path }
+    link("Sign Up", visible: logged_out)                   { new_user_path }
+    link("Sign In", visible: logged_out)                   { new_session_path }
+    link("Reset Password", visible: logged_out_with_email) { new_users_password_reset_path }
+    link("Login Reminder", visible: logged_out_with_email) { new_users_login_reminder_path }
+    link("Help")                                           { help_page_path(id: "accounts") }
   end
 
   section("Account") do
@@ -188,8 +190,8 @@ module SiteMap
     link("API Keys", policy: ApiKey, feature: :api_keys)       { |user| user_api_keys_path(user) }
     link("Passkeys", visible: logged_in)                       { user_passkeys_path }
     link("DMail Filter", visible: logged_in)                   { users_dmail_filter_path }
-    link("Email Notifications", visible: logged_in)            { users_email_notification_path }
-    link("Change Email", visible: logged_in)                   { new_users_email_change_path }
+    link("Email Notifications", visible: logged_in_with_email) { users_email_notification_path }
+    link("Change Email", visible: logged_in_with_email)        { new_users_email_change_path }
     link("Name Change Request", visible: logged_in)            { new_user_name_change_request_path }
     link("Refresh Counts", visible: logged_in)                 { new_users_count_fixes_path }
   end
@@ -234,7 +236,7 @@ module SiteMap
     link("Sessions", policy: UserSession)                                           { user_sessions_path }
     link("IP Addresses", policy: Moderator::IpAddrSearch)                           { moderator_ip_addrs_path }
     link("IP Bans", policy: IpBan)                                                  { ip_bans_path }
-    link("Email Blacklist", policy: EmailBlacklist)                                 { email_blacklists_path }
+    link("Email Blacklist", policy: EmailBlacklist, visible: logged_in_with_email)  { email_blacklists_path }
     link("Alt List", policy: %i[admin user], action: :alt_list?)                    { alt_list_admin_users_path }
     link("Quick Rules", policy: QuickRule, action: :create?, feature: :rules)       { quick_rules_path }
     link("Rule Categories", policy: RuleCategory, action: :order?, feature: :rules) { order_rule_categories_path }

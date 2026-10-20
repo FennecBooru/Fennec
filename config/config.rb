@@ -59,7 +59,7 @@ module Fennec
     config(:protected_file_secret) { required!(:protected_file_secret) if protect_files? }
     config(:replacement_file_secret) { required!(:replacement_file_secret) if protect_files? }
     config(:remember_key, required: true) { required!(:remember_key) }
-    config(:email_key, required: true) { required!(:email_key) }
+    config(:email_key) { required!(:email_key) if enable_email? }
     config(:discord_secret) { nil }
     config(:report_key) { nil }
     config(:rakismet_key) { nil }
@@ -237,6 +237,9 @@ module Fennec
       config(:secret_key) { nil }
     end
 
+    # When disabled nothing is emailed, and everything that needs an email (verification, password resets, login
+    # reminders, notifications, forum subscriptions, etc) is turned off
+    config(:enable_email, :boolean) { true }
     subconfig(:email) do
       config(:delivery_method, :symbol) { nil }
       config(:config, env: false) do
@@ -550,7 +553,7 @@ module Fennec
       user.go_to_recent_forum_post    = true
       user.forum_unread_bubble        = true
       user.upload_notifications       = User.upload_notifications_options
-      user.email_verified             = !::AdminConfig.instance.enable_email_verification?
+      user.email_verified             = !(enable_email? && ::AdminConfig.instance.enable_email_verification?)
       user.level                      = User::Levels::RESTRICTED if ::AdminConfig.instance.user_approvals_enabled? && user.level == User::Levels::MEMBER
     end
   end

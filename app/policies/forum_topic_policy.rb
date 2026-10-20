@@ -42,7 +42,7 @@ class ForumTopicPolicy < ApplicationPolicy
   end
 
   def subscribe?
-    unbanned? && min_level?
+    Fennec.config.enable_email? && unbanned? && min_level?
   end
 
   def unsubscribe?

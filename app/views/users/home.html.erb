@@ -11,11 +11,13 @@
         <li>Signups are disabled</li>
       <% end %>
 
-      <li>» <%= link_to("Reset password", new_users_password_reset_path) %></li>
-      <li>» <%= link_to("Login reminder", new_users_login_reminder_path) %></li>
+      <% if Fennec.config.enable_email? %>
+        <li>» <%= link_to("Reset password", new_users_password_reset_path) %></li>
+        <li>» <%= link_to("Login reminder", new_users_login_reminder_path) %></li>
 
-      <% if AdminConfig.instance.enable_email_verification %>
-        <li>» <%= link_to("Resend activation email", resend_confirmation_email_path) %></li>
+        <% if AdminConfig.instance.enable_email_verification %>
+          <li>» <%= link_to("Resend activation email", resend_confirmation_email_path) %></li>
+        <% end %>
       <% end %>
     </ul>
   </div>
@@ -137,7 +139,7 @@
         <li>» <%= link_to("Manage API Access", user_api_keys_path(CurrentUser.user)) %></li>
       <% end %>
       <li>» <%= link_to("Change username", new_user_name_change_request_path) %></li>
-      <% if AdminConfig.instance.enable_email_verification && !CurrentUser.user.is_verified? %>
+      <% if Fennec.config.enable_email? && AdminConfig.instance.enable_email_verification && !CurrentUser.user.is_verified? %>
         <li>» <%= link_to("Resend activation email", resend_confirmation_email_path) %></li>
       <% end %>
       <li>» <%= link_to("Clear favorites", clear_favorites_path) %></li>

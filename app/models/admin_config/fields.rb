@@ -247,7 +247,7 @@ class AdminConfig
     category("Features") do
       add_boolean_field(:enable_signups)
       add_boolean_field(:user_approvals_enabled, name: "Enable User Approvals")
-      add_boolean_field(:enable_email_verification)
+      add_boolean_field(:enable_email_verification, hint: "Has no effect if email is disabled in the config")
       add_boolean_field(:enable_sock_puppet_validation)
       add_boolean_field(:enable_stale_forum_topics)
       add_boolean_field(:enable_autotagging, hint: "Enables automatic tagging of things like hi_res, large_file_size, long_playtime, etc")

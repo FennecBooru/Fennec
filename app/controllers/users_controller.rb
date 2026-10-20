@@ -59,14 +59,14 @@ class UsersController < ApplicationController
     User.transaction do
       @user = User.new(permitted_attributes(User).merge({ last_ip_addr: request.remote_ip }))
       @user.validate_email_format = true
-      @user.email_verified = false if AdminConfig.instance.enable_email_verification?
+      @user.email_verified = false if Fennec.config.enable_email? && AdminConfig.instance.enable_email_verification?
       if !Fennec.config.recaptcha.enabled? || verify_recaptcha(model: @user)
         @user.save
         if @user.errors.empty?
           session[:user_id] = @user.id
           session[:ph] = @user.password_token
           PendingAccountLink.finalize!(session, @user, request: request, category: :linked_account_signup)
-          if AdminConfig.instance.enable_email_verification?
+          if Fennec.config.enable_email? && AdminConfig.instance.enable_email_verification?
             Users::EmailConfirmationMailer.confirmation(@user).deliver_now
           end
           UserEvent.create_from_request!(@user, :user_creation, request)

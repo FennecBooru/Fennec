@@ -595,7 +595,7 @@ class User < ApplicationRecord
 
   module EmailMethods
     def is_verified?
-      id.present? && email_verified?
+      id.present? && (email_verified? || !Fennec.config.enable_email?)
     end
 
     def mark_unverified!(user)
@@ -609,7 +609,7 @@ class User < ApplicationRecord
     def enable_email_verification?
       # Allow admins to edit users with blank/duplicate emails
       return false if is_admin_edit && !email_changed?
-      AdminConfig.instance.enable_email_verification? && validate_email_format
+      Fennec.config.enable_email? && AdminConfig.instance.enable_email_verification? && validate_email_format
     end
 
     def validate_email_address_allowed

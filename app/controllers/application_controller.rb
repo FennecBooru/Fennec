@@ -43,6 +43,11 @@ class ApplicationController < ActionController::Base
     before_action(-> { feature_unavailable!(hidden: hidden) unless Feature.available?(name, CurrentUser.user) }, **)
   end
 
+  # raises FeatureUnavailable while email is disabled in the config
+  def self.requires_email(**)
+    before_action(-> { raise(FeatureUnavailable) unless Fennec.config.enable_email? }, **)
+  end
+
   def enable_cors
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Headers"] = "Authorization"

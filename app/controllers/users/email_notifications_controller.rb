@@ -2,6 +2,8 @@
 
 module Users
   class EmailNotificationsController < ApplicationController
+    requires_email
+
     def show
     end
 

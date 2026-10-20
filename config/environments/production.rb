@@ -67,7 +67,7 @@ Rails.application.configure do
     config.action_mailer.delivery_method = Fennec.config.email.delivery_method
     method, settings = Fennec.config.email.config
     config.action_mailer.public_send("#{method}=", settings)
-  else
+  elsif Fennec.config.enable_email?
     TraceLogger.warn("No email delivery is configured")
   end
 

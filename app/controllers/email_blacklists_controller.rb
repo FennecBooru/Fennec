@@ -2,6 +2,7 @@
 
 class EmailBlacklistsController < ApplicationController
   respond_to(:html, :json, :js)
+  requires_email
 
   def index
     @blacklists = authorize(EmailBlacklist).html_includes(request, :creator)

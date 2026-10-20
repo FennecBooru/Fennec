@@ -179,7 +179,7 @@ class Dmail < ApplicationRecord
   end
 
   def send_email
-    if to.receive_email_notifications? && to.email =~ /@/
+    if Fennec.config.enable_email? && to.receive_email_notifications? && to.email =~ /@/
       UserMailer.dmail_notice(self).deliver_now
     end
   end

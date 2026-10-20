@@ -18,18 +18,20 @@
       <p><%= link_to("Request a name change", new_user_name_change_request_path) %></p>
     </div>
 
-    <div class="input">
-      <label>Email</label>
-      <p>
-        <% if CurrentUser.user.email.present? %>
-          <%= CurrentUser.user.email %>
-        <% else %>
-          <em>blank</em>
-        <% end %>
-        –
-        <%= link_to("Change your email", new_users_email_change_path) %>
-      </p>
-    </div>
+    <% if Fennec.config.enable_email? %>
+      <div class="input">
+        <label>Email</label>
+        <p>
+          <% if CurrentUser.user.email.present? %>
+            <%= CurrentUser.user.email %>
+          <% else %>
+            <em>blank</em>
+          <% end %>
+          –
+          <%= link_to("Change your email", new_users_email_change_path) %>
+        </p>
+      </div>
+    <% end %>
 
     <%= f.input(:avatar_id, as: :string, label: "Avatar Post ID") %>
 
@@ -39,7 +41,9 @@
 
     <%= f.input(:time_zone, include_blank: false) %>
 
-    <%= f.input(:receive_email_notifications, as: :select, include_blank: false, collection: [%w[No false], %w[Yes true]]) %>
+    <% if Fennec.config.enable_email? %>
+      <%= f.input(:receive_email_notifications, as: :select, include_blank: false, collection: [%w[No false], %w[Yes true]]) %>
+    <% end %>
 
     <% if Feature.enabled?(:comments) %>
       <%= f.input(:comment_threshold, hint: "Comments below this score will be hidden by default.") %>

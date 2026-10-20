@@ -2,6 +2,8 @@
 
 module Users
   class PasswordResetsController < ApplicationController
+    requires_email
+
     def new
       @nonce = UserPasswordResetNonce.new_with_current(:user)
     end

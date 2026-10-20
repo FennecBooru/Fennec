@@ -2,6 +2,7 @@
 
 class EmailsController < ApplicationController
   respond_to(:html)
+  requires_email
 
   def resend_confirmation
     if IpBan.is_banned?(CurrentUser.ip_addr)

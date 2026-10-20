@@ -24,10 +24,12 @@
       </div>
     <% end %>
 
-    <div class="session-secondary-links">
-      <%= link_to("Reset Password", new_users_password_reset_path) %>
-      <%= link_to("Login Reminder", new_users_login_reminder_path) %>
-    </div>
+    <% if Fennec.config.enable_email? %>
+      <div class="session-secondary-links">
+        <%= link_to("Reset Password", new_users_password_reset_path) %>
+        <%= link_to("Login Reminder", new_users_login_reminder_path) %>
+      </div>
+    <% end %>
   </div>
 
   <div class="session-modal register-modal <%= "disabled" unless AdminConfig.instance.enable_signups? %>" id="register-modal">
@@ -50,7 +52,9 @@
         <% if Feature.enabled?(:rules) %>
           <p>Make sure to read the <%= link_to("site rules", "/rules") %> before continuing.</p>
         <% end %>
-        <p>You must confirm your email address, so use something you can receive email with.</p>
+        <% if Fennec.config.enable_email? && AdminConfig.instance.enable_email_verification? %>
+          <p>You must confirm your email address, so use something you can receive email with.</p>
+        <% end %>
         <p>This site is open to web crawlers so whatever name you choose will be public!</p>
         <p>This includes favorites, uploads, and comments. Almost everything is public. So don't choose a name you don't want to be associated with.</p>
         <p>Accounts are prefilled with the same blacklist as guests have. You can access your blacklist in your account settings.</p>
@@ -63,7 +67,9 @@
 
     <%= custom_form_for(@user, html: { id: "signup-form" }) do |f| %>
       <%= f.input(:name, as: :string) %>
-      <%= f.input(:email, required: true, as: :email) %>
+      <% if Fennec.config.enable_email? %>
+        <%= f.input(:email, required: true, as: :email) %>
+      <% end %>
       <%= f.input(:password) %>
       <%= f.input(:password_confirmation) %>
       <%= f.input(:time_zone, include_blank: false) %>
