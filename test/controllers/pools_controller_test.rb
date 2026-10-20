@@ -59,6 +59,15 @@ class PoolsControllerTest < ActionDispatch::IntegrationTest
           search(:ip_addr, "127.0.0.2").records { [@pool] }.user { @admin }
           search.shared.records { [@pool] }
         end
+
+        should("ignore the artist searches when pool artists are disabled") do
+          other = create(:pool)
+          stub_admin_config(:enable_pool_artists, false)
+          get(pools_path(format: :json), params: { search: { any_artist_name_matches: "baz" } })
+
+          assert_same_elements([@pool.id, other.id], response.parsed_body.pluck("id"))
+          assert_not(response.parsed_body.first.key?("artist_names"))
+        end
       end
     end
 

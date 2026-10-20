@@ -28,6 +28,8 @@ class PoolPolicy < ApplicationPolicy
   end
 
   def api_attributes
-    super + %i[artist_names creator_name post_count]
+    attributes = super + %i[artist_names creator_name post_count]
+    attributes -= %i[artist_names] unless Feature.enabled?(:pool_artists)
+    attributes
   end
 end

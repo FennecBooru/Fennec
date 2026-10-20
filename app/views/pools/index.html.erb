@@ -8,8 +8,10 @@
       <%= link_to("page #{pool.last_page}", pool_path(pool, page: pool.last_page), class: "last-page") %>
     <% end %>
   <% end %>
-  <% t.column("Artists") do |pool| %>
-    <%= link_to_pool_artists(pool.artist_names) %>
+  <% if Feature.enabled?(:pool_artists) %>
+    <% t.column("Artists") do |pool| %>
+      <%= link_to_pool_artists(pool.artist_names) %>
+    <% end %>
   <% end %>
   <% t.column("Count") do |pool| %>
     <%= pool.post_count %>

@@ -2562,6 +2562,15 @@ class PostTest < ActiveSupport::TestCase
       assert_tag_match([post], "artverified:true")
     end
 
+    should("ignore artverified when uploader verification is disabled") do
+      artist = create(:artist, linked_user: @user)
+      post = create(:post, tag_string: artist.name, uploader: @user)
+      stub_admin_config(:enable_uploader_verification, false)
+
+      assert_empty(post.uploader_linked_artists)
+      assert_tag_match([post], "artverified:false")
+    end
+
     should("return posts for replacements") do
       assert_tag_match([], "pending_replacements:true")
       assert_tag_match([], "pending_replacements:false")

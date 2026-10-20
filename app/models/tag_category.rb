@@ -10,15 +10,50 @@ class TagCategory < ApplicationRecord
   MAX_ID = 32_767 # tags.category_id is a smallint
 
   # Names the code looks categories up by (TagCategory.artist, tag.artist?, post.artist_tags, etc), and what stops
-  # working when no category has the name. test/unit/tag_category_test.rb checks this matches the code
+  # working when no category has the name, with the features each use needs if any. test/unit/tag_category_test.rb
+  # checks this matches the code
   CODE_REFERENCES = {
-    "general"   => "the new general tag hint, the 10 general tags upload warning, deprecating tags, and alias category transfers",
-    "artist"    => "artist links, pool artists, avoid posting, the artist tag upload requirement, artist renames, uploader verification, file names, and the artist color in styles",
-    "copyright" => "post descriptions and file names",
-    "character" => "character groups, post version labels, file names, reupload links, and the character color in styles",
-    "species"   => "file names and reupload links",
-    "invalid"   => "deprecating tags, the invalid tag warning, and keeping invalid tags out of locked tags and character groups",
-    "meta"      => "keeping meta tags out of character groups and the repopulated tag warning",
+    "general"   => {
+      "the new general tag hint"           => nil,
+      "the 10 general tags upload warning" => nil,
+      "deprecating tags"                   => nil,
+      "alias category transfers"           => nil,
+    },
+    "artist"    => {
+      "artist links"                      => :artist_pages,
+      "pool artists"                      => %i[pools pool_artists],
+      "avoid posting"                     => :avoid_posting,
+      "the artist tag upload requirement" => nil,
+      "artist renames"                    => nil,
+      "uploader verification"             => :uploader_verification,
+      "file names"                        => nil,
+      "the artist color in styles"        => nil,
+    },
+    "copyright" => {
+      "post descriptions" => nil,
+      "file names"        => nil,
+    },
+    "character" => {
+      "character groups"              => :character_groups,
+      "post version labels"           => nil,
+      "file names"                    => nil,
+      "reupload links"                => nil,
+      "the character color in styles" => nil,
+    },
+    "species"   => {
+      "file names"     => nil,
+      "reupload links" => nil,
+    },
+    "invalid"   => {
+      "deprecating tags"                             => nil,
+      "the invalid tag warning"                      => nil,
+      "keeping invalid tags out of locked tags"      => nil,
+      "keeping invalid tags out of character groups" => :character_groups,
+    },
+    "meta"      => {
+      "keeping meta tags out of character groups" => :character_groups,
+      "the repopulated tag warning"               => nil,
+    },
   }.freeze
 
   belongs_to_user(:creator, ip: true, clones: :updater)
@@ -283,18 +318,25 @@ class TagCategory < ApplicationRecord
 
   # The code references this category holds, { name => what uses it }
   def code_references
-    CODE_REFERENCES.slice(*values)
+    TagCategory.enabled_code_references.slice(*values)
   end
 
   # The code references the last save took away, which no category has anymore
   def removed_code_references
     old_values = [name_before_last_save, *aliases_before_last_save].compact
-    CODE_REFERENCES.slice(*(old_values - values))
+    TagCategory.enabled_code_references.slice(*(old_values - values))
   end
 
   # The code references no category has
   def self.missing_code_references
-    CODE_REFERENCES.except(*mapping.keys)
+    enabled_code_references.except(*mapping.keys)
+  end
+
+  # CODE_REFERENCES as { name => what uses it }, leaving out uses whose feature is turned off
+  def self.enabled_code_references
+    CODE_REFERENCES.transform_values do |uses|
+      uses.filter_map { |use, features| use if Array(features).all? { |feature| Feature.enabled?(feature) } }.to_sentence
+    end.compact_blank
   end
 
   # Moves every tag into another category in the background, so this one can be deleted

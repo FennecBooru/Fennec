@@ -1,7 +1,9 @@
 <%= form_search(path: request.path) do |f| %>
   <%= f.input(:name_matches, label: "Name", autocomplete: "pool") %>
   <%= f.input(:description_matches, label: "Description") %>
-  <%= f.input(:any_artist_name_matches, label: "Artist Name", autocomplete: "artist") %>
+  <% if Feature.enabled?(:pool_artists) %>
+    <%= f.input(:any_artist_name_matches, label: "Artist Name", autocomplete: "artist") %>
+  <% end %>
   <%= f.user(:creator) %>
   <%= f.input(:is_ongoing, label: "Ongoing", collection: [%w[Yes true], %w[No false]], include_blank: true) %>
   <%= f.input(:is_indexing, label: "Indexing", collection: [%w[Yes true], %w[No false]], include_blank: true) %>

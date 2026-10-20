@@ -479,6 +479,7 @@ class PostReplacement < ApplicationRecord
   end
 
   def uploader_linked_artists
+    return [] unless Feature.enabled?(:uploader_verification)
     @uploader_linked_artists ||= post.artist_tags.filter_map(&:artist).select { |artist| artist.linked_user_id == creator_id }
   end
 

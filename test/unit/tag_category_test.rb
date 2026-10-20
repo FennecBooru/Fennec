@@ -244,6 +244,16 @@ class TagCategoryTest < ActiveSupport::TestCase
         assert_empty(TagCategory.get(:lore).code_references)
       end
 
+      should("leave out uses for features that are turned off") do
+        assert_match(/character groups/, TagCategory.get(:character).code_references["character"])
+        assert_match(/character groups/, TagCategory.get(:meta).code_references["meta"])
+
+        stub_admin_config(:enable_character_groups, false)
+
+        assert_no_match(/character groups/, TagCategory.get(:character).code_references["character"])
+        assert_equal("the repopulated tag warning", TagCategory.get(:meta).code_references["meta"])
+      end
+
       should("know when a save removes one") do
         category = TagCategory.get(:character).then { |c| TagCategory.find(c.id) }
         category.update!(name: "person", updater: @admin)

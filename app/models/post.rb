@@ -2516,6 +2516,7 @@ class Post < ApplicationRecord
   end
 
   def uploader_linked_artists
+    return [] unless Feature.enabled?(:uploader_verification)
     artist_tags.filter_map(&:artist).select { |artist| artist.linked_user_id == uploader_id }
   end
 

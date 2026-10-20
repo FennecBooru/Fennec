@@ -240,7 +240,7 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
     add_boolean_exists_relation(:inpool, :pools)
     add_boolean_relation(:pending_replacements, :has_pending_replacements)
     add_boolean_relation(:pending_audio, :has_pending_audio)
-    add_boolean_relation(:artverified, :artverified)
+    add_boolean_relation(:artverified, :artverified) if Feature.enabled?(:uploader_verification)
 
     add_tag_string_search_relation(q[:tags])
     add_character_group_search_relation(q[:tag_groups])

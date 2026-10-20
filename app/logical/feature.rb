@@ -41,6 +41,7 @@ module Feature
   define(:forums)
   define(:mascots)
   define(:notes)
+  define(:pool_artists)
   define(:pools)
   define(:post_appeals)
   define(:post_approvals)
@@ -56,6 +57,7 @@ module Feature
   # staff handle existing tickets and the ones created automatically, like spam reports
   define(:tickets, staff_access: true)
   define(:upload_whitelist)
+  define(:uploader_verification)
   define(:user_feedback)
   define(:view_tracking)
   # the static and help pages are wiki pages, staff still need to edit them

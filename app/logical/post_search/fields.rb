@@ -9,7 +9,7 @@ module PostSearch
     mattr_accessor(:static_fields, default: [])
     mattr_accessor(:categories, default: [])
 
-    Field = Struct.new(:type, :category, :metatag, :name, :hint, :negatable, :options, :input_options, keyword_init: true) do
+    Field = Struct.new(:type, :category, :metatag, :name, :hint, :negatable, :options, :input_options, :feature, keyword_init: true) do
       def field_name
         "search[#{metatag}]"
       end
@@ -34,8 +34,9 @@ module PostSearch
     end
 
     module Methods
-      def add_field(type, metatag, category:, name: metatag.to_s.titleize, hint: nil, negatable: false, options: nil, input_options: {})
-        static_fields << Field.new(type: type, category: category, metatag: metatag, name: name, hint: hint, negatable: negatable, options: options, input_options: input_options)
+      # feature: only shown while that feature is enabled
+      def add_field(type, metatag, category:, name: metatag.to_s.titleize, hint: nil, negatable: false, options: nil, input_options: {}, feature: nil)
+        static_fields << Field.new(type: type, category: category, metatag: metatag, name: name, hint: hint, negatable: negatable, options: options, input_options: input_options, feature: feature)
       end
 
       def add_text_field(metatag, **)
@@ -90,7 +91,7 @@ module PostSearch
 
       # The tag category count fields depend on which categories exist, so they're added here
       def fields
-        static_fields + TagCategory.categories.map do |category|
+        static_fields.select { |f| f.feature.nil? || Feature.enabled?(f.feature) } + TagCategory.categories.map do |category|
           short_name = category.aliases.first || category.name
           Field.new(type: :range, category: "Scores & Counts", metatag: :"#{short_name}tags", name: "#{category.title} Tag Count", negatable: true, input_options: {})
         end
@@ -191,7 +192,7 @@ module PostSearch
       add_boolean_field(:inpool, name: "In A Pool")
       add_boolean_field(:pending_replacements, name: "Has Pending Replacements")
       add_boolean_field(:pending_audio, name: "Has Pending Audio Tracks")
-      add_boolean_field(:artverified, name: "Verified Artist Upload")
+      add_boolean_field(:artverified, name: "Verified Artist Upload", feature: :uploader_verification)
     end
 
     category("Misc") do

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_20_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_20_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -83,6 +83,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_120000) do
     t.boolean "enable_image_cropping", default: true, null: false
     t.boolean "enable_mascots", default: true, null: false
     t.boolean "enable_notes", default: true, null: false
+    t.boolean "enable_pool_artists", default: true, null: false
     t.boolean "enable_pools", default: true, null: false
     t.boolean "enable_post_appeals", default: true, null: false
     t.boolean "enable_post_approvals", default: true, null: false
@@ -100,6 +101,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_120000) do
     t.boolean "enable_takedowns", default: false, null: false
     t.boolean "enable_tickets", default: true, null: false
     t.boolean "enable_upload_whitelist", default: true, null: false
+    t.boolean "enable_uploader_verification", default: true, null: false
     t.boolean "enable_user_feedback", default: true, null: false
     t.boolean "enable_view_tracking", default: true, null: false
     t.boolean "enable_wiki", default: true, null: false

@@ -283,7 +283,9 @@ CREATE TABLE public.admin_config (
     enable_mascots boolean DEFAULT true NOT NULL,
     enable_tickets boolean DEFAULT true NOT NULL,
     enable_post_flags boolean DEFAULT true NOT NULL,
-    uploader_minimum_tags integer DEFAULT 4 NOT NULL
+    uploader_minimum_tags integer DEFAULT 4 NOT NULL,
+    enable_pool_artists boolean DEFAULT true NOT NULL,
+    enable_uploader_verification boolean DEFAULT true NOT NULL
 );
 
 
@@ -10084,6 +10086,7 @@ ALTER TABLE ONLY public.help_pages
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261020130000'),
 ('20261020120000'),
 ('20261019233422'),
 ('20261019232458'),
