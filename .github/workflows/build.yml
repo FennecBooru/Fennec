@@ -147,6 +147,11 @@ jobs:
             $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
             $(printf 'ghcr.io/${{ steps.repo.outputs.name }}@sha256:%s ' *)
 
+      # ghcr can take a few seconds before a freshly pushed tag is readable
       - name: Inspect image
         run: |
-          docker buildx imagetools inspect ghcr.io/${{ steps.repo.outputs.name }}:${{ steps.metadata.outputs.version }}
+          for i in 1 2 3 4 5; do
+            docker buildx imagetools inspect ghcr.io/${{ steps.repo.outputs.name }}:${{ steps.metadata.outputs.version }} && exit 0
+            sleep $(( i * 5 ))
+          done
+          exit 1
