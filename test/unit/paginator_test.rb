@@ -12,7 +12,7 @@ class PaginatorTest < ActiveSupport::TestCase
   end
 
   def assert_invalid_page_number(model, page)
-    assert_raises(GayFurCity::Paginator::PaginationError) do
+    assert_raises(Fennec::Paginator::PaginationError) do
       model.paginate(page)
     end
   end

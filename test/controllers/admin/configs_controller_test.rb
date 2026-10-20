@@ -42,7 +42,7 @@ module Admin
 
         should("not allow saving a value pinned via an env variable") do
           AdminConfig.instance.update_column(:records_per_page, 100)
-          ENV["GAYFURCITY_ADMIN_CONFIG_RECORDS_PER_PAGE"] = "42"
+          ENV["FENNEC_ADMIN_CONFIG_RECORDS_PER_PAGE"] = "42"
 
           begin
             put_auth(admin_config_path, @owner, params: { config: { records_per_page: 5 } })
@@ -51,7 +51,7 @@ module Admin
             assert_equal(42, AdminConfig.get(:records_per_page))
             assert_equal(100, AdminConfig.uncached.attributes["records_per_page"])
           ensure
-            ENV.delete("GAYFURCITY_ADMIN_CONFIG_RECORDS_PER_PAGE")
+            ENV.delete("FENNEC_ADMIN_CONFIG_RECORDS_PER_PAGE")
           end
         end
 

@@ -110,7 +110,7 @@
       <% end %>
       <%= f.input(:is_locked, label: "Locked", as: :boolean, hint: "Prevents the creator from reopening this ticket by replying") %>
       <div class="ticket-responses">
-        <% GayFurCity.config.ticket_quick_response_buttons.each do |btn| %>
+        <% Fennec.config.ticket_quick_response_buttons.each do |btn| %>
         <%= button_tag(btn[:name], type: "button", data: { text: btn[:text] }) %>
         <% end %>
       </div>

@@ -12,7 +12,7 @@ module TestHelpers
     end
 
     def stub_env_config(name, value)
-      GayFurCity::Config.any_instance.stubs(name).returns(value)
+      Fennec::Config.any_instance.stubs(name).returns(value)
     end
 
     def stub_admin_config(option, value, user: nil)

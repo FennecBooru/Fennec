@@ -63,7 +63,7 @@ module Posts
     end
 
     def throttle(search_params)
-      return if GayFurCity.config.disable_throttles? || CurrentUser.user.is_trusted?
+      return if Fennec.config.disable_throttles? || CurrentUser.user.is_trusted?
 
       # file and url searches need the image downloaded and processed, post_id and hash searches don't
       if %i[file url].any? { |key| search_params[key].present? }

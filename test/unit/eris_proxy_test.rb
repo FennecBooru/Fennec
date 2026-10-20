@@ -4,7 +4,7 @@ require("test_helper")
 
 class ErisProxyTest < ActiveSupport::TestCase
   setup do
-    GayFurCity.config.stubs(:eris_server).returns("http://eris:5588")
+    Fennec.config.stubs(:eris_server).returns("http://eris:5588")
     clear_eris_keys
   end
 
@@ -58,7 +58,7 @@ class ErisProxyTest < ActiveSupport::TestCase
 
   context("make_request") do
     should("send the token when one is configured") do
-      GayFurCity.config.stubs(:eris_token).returns("secret")
+      Fennec.config.stubs(:eris_token).returns("secret")
       stub_request(:get, "http://eris:5588/status").with(headers: { "Authorization" => "Bearer secret" }).to_return(status: 200)
 
       assert_equal(200, ErisProxy.make_request("/status", :get).status)
@@ -67,7 +67,7 @@ class ErisProxyTest < ActiveSupport::TestCase
 
   context("circuit breaker") do
     setup do
-      GayFurCity.config.stubs(:eris_circuit_failure_threshold).returns(2)
+      Fennec.config.stubs(:eris_circuit_failure_threshold).returns(2)
     end
 
     should("open after repeated failures and lock out anonymous users") do
@@ -98,7 +98,7 @@ class ErisProxyTest < ActiveSupport::TestCase
 
   context("concurrency limit") do
     should("reject queries over the limit") do
-      GayFurCity.config.stubs(:eris_max_concurrent_queries).returns(1)
+      Fennec.config.stubs(:eris_max_concurrent_queries).returns(1)
       Cache.redis.set(ErisProxy::CONCURRENT_KEY, 1)
 
       assert_raises(ErisProxy::BusyError) { ErisProxy.query_hash("abc", nil) }

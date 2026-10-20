@@ -35,7 +35,7 @@ module PostSets
       # is_last_page? correctly - paginator_raw_records is the untruncated fetch that still has it.
       records = favorites.pagination_mode == :numbered ? favorites : favorites.paginator_raw_records
       new_opts = { pagination_mode: favorites.pagination_mode, records_per_page: favorites.records_per_page, total_count: @post_count, current_page: favorites.current_page }
-      GayFurCity::Paginator::PaginatedArray.new(records.map(&:post), new_opts)
+      Fennec::Paginator::PaginatedArray.new(records.map(&:post), new_opts)
     end
 
     def api_posts

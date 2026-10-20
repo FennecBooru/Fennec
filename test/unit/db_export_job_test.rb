@@ -22,7 +22,7 @@ class DbExportJobTest < ActiveSupport::TestCase
     context("when enabled") do
       setup do
         AdminConfig.any_instance.stubs(:enable_db_exports).returns(true)
-        GayFurCity.config.stubs(:eris_database_url).returns(nil)
+        Fennec.config.stubs(:eris_database_url).returns(nil)
       end
 
       should("record a DbExport row for each configured export") do
@@ -88,7 +88,7 @@ class DbExportJobTest < ActiveSupport::TestCase
         setup do
           # eris' database doesn't exist in tests, so point it at the test database instead
           config = ActiveRecord::Base.connection_db_config.configuration_hash
-          GayFurCity.config.stubs(:eris_database_url).returns("postgres://#{config[:username]}@#{config[:host]}/#{config[:database]}")
+          Fennec.config.stubs(:eris_database_url).returns("postgres://#{config[:username]}@#{config[:host]}/#{config[:database]}")
           DbExportJob.any_instance.stubs(:eris_exports).returns({ "eris_test" => "SELECT 1 AS one" })
         end
 
@@ -100,7 +100,7 @@ class DbExportJobTest < ActiveSupport::TestCase
         end
 
         should("skip eris exports when the eris database is unreachable") do
-          GayFurCity.config.stubs(:eris_database_url).returns("postgres://nobody@127.0.0.1:1/eris")
+          Fennec.config.stubs(:eris_database_url).returns("postgres://nobody@127.0.0.1:1/eris")
 
           assert_difference(-> { DbExport.count }, DbExportJob::EXPORTS.size) do
             DbExportJob.perform_now

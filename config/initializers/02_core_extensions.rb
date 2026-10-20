@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module GayFurCity
+module Fennec
   module Extensions
     module String
       # @return [Boolean] True if the string contains only balanced parentheses; false if the string contains unbalanced parentheses.
@@ -23,5 +23,5 @@ module GayFurCity
 end
 
 class String
-  include(GayFurCity::Extensions::String)
+  include(Fennec::Extensions::String)
 end

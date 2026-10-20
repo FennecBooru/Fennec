@@ -49,7 +49,7 @@ PostReplacementReject.init = function () {
 
 $(function () {
   if ($("div#c-posts-replacements div#a-reject-with-reason").length) {
-    Danbooru.PostReplacementRejection.init();
+    Fennec.PostReplacementRejection.init();
   }
 });
 

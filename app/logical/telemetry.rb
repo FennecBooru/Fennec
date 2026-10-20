@@ -14,15 +14,15 @@ module Telemetry
   FLUSH_DELAY = 5.seconds
 
   def enabled?
-    GayFurCity.config.telemetry.enabled?
+    Fennec.config.telemetry.enabled?
   end
 
   def conn
-    Faraday.new(GayFurCity.config.faraday_options.deep_merge(
-                  url:     GayFurCity.config.telemetry.endpoint,
+    Faraday.new(Fennec.config.faraday_options.deep_merge(
+                  url:     Fennec.config.telemetry.endpoint,
                   headers: { content_type: "application/json" },
                 )) do |c|
-      c.request(:authorization, :basic, GayFurCity.config.telemetry.username, GayFurCity.config.telemetry.password)
+      c.request(:authorization, :basic, Fennec.config.telemetry.username, Fennec.config.telemetry.password)
       c.use(Faraday::Response::RaiseError)
     end
   end
@@ -35,7 +35,7 @@ module Telemetry
     return unless enabled?
     return if data.blank?
 
-    conn.post("/api/#{GayFurCity.config.telemetry.organization}/#{GayFurCity.config.telemetry.stream}/_json", data.to_json)
+    conn.post("/api/#{Fennec.config.telemetry.organization}/#{Fennec.config.telemetry.stream}/_json", data.to_json)
   rescue Faraday::Error => e
     ExceptionLog.add!(e, source: "Telemetry#report_bulk!", report: false)
     TraceLogger.error("Telemetry#exception", "Failed to report: #{e.message}")
@@ -80,8 +80,8 @@ module Telemetry
       user_id:     user.id,
       ip:          ip.to_s,
       environment: Rails.env,
-      version:     GayFurCity.config.version,
-      server:      GayFurCity.config.server_name,
+      version:     Fennec.config.version,
+      server:      Fennec.config.server_name,
       **extra,
     }.compact
 
@@ -109,8 +109,8 @@ module Telemetry
       message:     unwrapped.message,
       backtrace:   Rails.backtrace_cleaner.clean(unwrapped.backtrace || []).join("\n"),
       environment: Rails.env,
-      version:     GayFurCity.config.version,
-      server:      GayFurCity.config.server_name,
+      version:     Fennec.config.version,
+      server:      Fennec.config.server_name,
       source:      source,
       **extra,
     }.compact

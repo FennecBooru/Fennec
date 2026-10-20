@@ -29,7 +29,7 @@
 
 <% if policy(ForumCategory).reorder? %>
   <%= javascript_tag(nonce: true) do -%>
-    Danbooru.SortableTable.init({ table: "#forum-categories-table", url: "<%= reorder_forum_categories_path(format: :json) %>" });
+    Fennec.SortableTable.init({ table: "#forum-categories-table", url: "<%= reorder_forum_categories_path(format: :json) %>" });
   <% end %>
 <% end %>
 

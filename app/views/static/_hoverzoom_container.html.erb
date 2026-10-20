@@ -11,7 +11,7 @@
   <% content_for(:html_header) do %>
     <%= javascript_tag(nonce: true) do -%>
       $(function() {
-        Danbooru.HoverZoom.init(<%= CurrentUser.hover_zoom_shift? %>, <%= CurrentUser.hover_zoom_sticky_shift? %>, <%= CurrentUser.hover_zoom_play_audio? %>);
+        Fennec.HoverZoom.init(<%= CurrentUser.hover_zoom_shift? %>, <%= CurrentUser.hover_zoom_sticky_shift? %>, <%= CurrentUser.hover_zoom_play_audio? %>);
       });
     <% end -%>
   <% end %>

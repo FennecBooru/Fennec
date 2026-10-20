@@ -1,5 +1,5 @@
 $(function () {
-  $("#maintoggle").on("click.danbooru", function (e) {
+  $("#maintoggle").on("click.fennec", function (e) {
     e.preventDefault();
     $("#nav").toggle();
     $("#maintoggle-on").toggle();

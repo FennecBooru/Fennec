@@ -11,7 +11,7 @@ export default [
       globals: {
         ...globals.browser,
         $: false,
-        Danbooru: false,
+        Fennec: false,
       },
     },
     plugins: {

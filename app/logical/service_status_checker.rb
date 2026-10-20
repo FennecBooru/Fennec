@@ -22,9 +22,9 @@ class ServiceStatusChecker
       "Memcached"     => method(:check_memcached),
       "Eris"          => (method(:check_eris) if ErisProxy.enabled?),
       "Recommender"   => (method(:check_recommender) if Recommender.enabled?),
-      "Reports"       => (method(:check_reports) if GayFurCity.config.reports.enabled?),
-      "ClickHouse"    => (method(:check_clickhouse) if GayFurCity.config.clickhouse_url.present?),
-      "Autocompleted" => (method(:check_autocompleted) if GayFurCity.config.autocompleted_server.present?),
+      "Reports"       => (method(:check_reports) if Fennec.config.reports.enabled?),
+      "ClickHouse"    => (method(:check_clickhouse) if Fennec.config.clickhouse_url.present?),
+      "Autocompleted" => (method(:check_autocompleted) if Fennec.config.autocompleted_server.present?),
     }.compact
   end
   private_class_method(:checks)
@@ -58,38 +58,38 @@ class ServiceStatusChecker
   private_class_method(:check_redis)
 
   def self.check_memcached
-    GayFurCity.config.memcached_servers.each { |server| Dalli::Client.new(server).version }
+    Fennec.config.memcached_servers.each { |server| Dalli::Client.new(server).version }
     nil
   end
   private_class_method(:check_memcached)
 
   def self.check_elasticsearch
-    http_get("http://#{GayFurCity.config.elasticsearch_host}:9200/_cluster/health?timeout=2s")
+    http_get("http://#{Fennec.config.elasticsearch_host}:9200/_cluster/health?timeout=2s")
   end
   private_class_method(:check_elasticsearch)
 
   def self.check_eris
-    http_get("#{GayFurCity.config.eris_server}/status")
+    http_get("#{Fennec.config.eris_server}/status")
   end
   private_class_method(:check_eris)
 
   def self.check_recommender
-    http_get("#{GayFurCity.config.recommender_server}/info")
+    http_get("#{Fennec.config.recommender_server}/info")
   end
   private_class_method(:check_recommender)
 
   def self.check_reports
-    http_get("#{GayFurCity.config.reports.server_internal}/up")
+    http_get("#{Fennec.config.reports.server_internal}/up")
   end
   private_class_method(:check_reports)
 
   def self.check_clickhouse
-    http_get("#{GayFurCity.config.clickhouse_url}/ping")
+    http_get("#{Fennec.config.clickhouse_url}/ping")
   end
   private_class_method(:check_clickhouse)
 
   def self.check_autocompleted
-    http_get("#{GayFurCity.config.autocompleted_server}/up")
+    http_get("#{Fennec.config.autocompleted_server}/up")
   end
   private_class_method(:check_autocompleted)
 

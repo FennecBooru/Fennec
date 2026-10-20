@@ -19,7 +19,7 @@ const addPostCache = {};
  */
 PostSet.add_post = function (set_id, post_id) {
   if (!set_id) {
-    $(window).trigger("danbooru:error", "Error: No set specified");
+    $(window).trigger("fennec:error", "Error: No set specified");
     return;
   }
 
@@ -29,7 +29,7 @@ PostSet.add_post = function (set_id, post_id) {
     addPostCache[set_id] = cache;
   }
   cache.add(post_id);
-  $(window).trigger("danbooru:notice", `Updating posts (${cache.size} pending)`);
+  $(window).trigger("fennec:notice", `Updating posts (${cache.size} pending)`);
 
   // Queue up the request
   if (addPostTimeout) window.clearTimeout(addPostTimeout);
@@ -49,7 +49,7 @@ PostSet.add_post = function (set_id, post_id) {
  */
 PostSet.add_many_posts = function (set_id, posts = []) {
   if (!set_id) {
-    $(window).trigger("danbooru:error", "Error: No set specified");
+    $(window).trigger("fennec:error", "Error: No set specified");
     return;
   }
 
@@ -61,9 +61,9 @@ PostSet.add_many_posts = function (set_id, posts = []) {
     }).fail(function (data) {
       console.log(data, data.responseJSON, data.responseJSON.error);
       var message = $.map(data.responseJSON.errors, (msg) => msg).join("; ");
-      $(window).trigger("danbooru:error", "Error: " + message);
+      $(window).trigger("fennec:error", "Error: " + message);
     }).done(function () {
-      $(window).trigger("danbooru:notice", `Added ${posts.length > 1 ? (posts.length + " posts") : "post"} to <a href="/post_sets/${set_id}">set #${set_id}</a>`);
+      $(window).trigger("fennec:notice", `Added ${posts.length > 1 ? (posts.length + " posts") : "post"} to <a href="/post_sets/${set_id}">set #${set_id}</a>`);
     });
   });
 };
@@ -81,7 +81,7 @@ const removePostCache = {};
  */
 PostSet.remove_post = function (set_id, post_id, successNotice) {
   if (!set_id) {
-    $(window).trigger("danbooru:error", "Error: No set specified");
+    $(window).trigger("fennec:error", "Error: No set specified");
     return;
   }
   let cache = removePostCache[set_id];
@@ -90,7 +90,7 @@ PostSet.remove_post = function (set_id, post_id, successNotice) {
     removePostCache[set_id] = cache;
   }
   cache.add(post_id);
-  $(window).trigger("danbooru:notice", `Updating posts (${cache.size} pending)`);
+  $(window).trigger("fennec:notice", `Updating posts (${cache.size} pending)`);
 
   // Queue up the request
   if (removePostTimeout) window.clearTimeout(removePostTimeout);
@@ -110,7 +110,7 @@ PostSet.remove_post = function (set_id, post_id, successNotice) {
  */
 PostSet.remove_many_posts = function (set_id, posts = [], successNotice = undefined) {
   if (!set_id) {
-    $(window).trigger("danbooru:error", "Error: No set specified");
+    $(window).trigger("fennec:error", "Error: No set specified");
     return;
   }
   SendQueue.add(function () {
@@ -121,20 +121,20 @@ PostSet.remove_many_posts = function (set_id, posts = [], successNotice = undefi
     }).fail(function (data) {
       console.log(data, data.responseJSON, data.responseJSON.error);
       var message = $.map(data.responseJSON.errors, (msg) => msg).join("; ");
-      $(window).trigger("danbooru:error", "Error: " + message);
+      $(window).trigger("fennec:error", "Error: " + message);
     }).done(function (data) {
       Post.notice_update("dec");
       if (typeof successNotice === "function") {
-        $(window).trigger("danbooru:notice", successNotice(data));
+        $(window).trigger("fennec:notice", successNotice(data));
       } else {
-        $(window).trigger("danbooru:notice", successNotice || `Removed ${posts.length > 1 ? (posts.length + " posts") : "post"} from <a href="/post_sets/${set_id}">set #${set_id}</a>`);
+        $(window).trigger("fennec:notice", successNotice || `Removed ${posts.length > 1 ? (posts.length + " posts") : "post"} from <a href="/post_sets/${set_id}">set #${set_id}</a>`);
       }
     });
   });
 };
 
 PostSet.initialize_add_to_set_link = function () {
-  $("#set").on("click.danbooru", function (e) {
+  $("#set").on("click.fennec", function (e) {
     if (!PostSet.dialog_setup) {
       $("#add-to-set-dialog").dialog({autoOpen: false});
       PostSet.dialog_setup = true;
@@ -162,7 +162,7 @@ PostSet.update_sets_menu = function () {
       type: "GET",
       url: "/post_sets/for_select.json",
     }).fail(function (data) {
-      $(window).trigger("danbooru:error", "Error getting sets list: " + data.message);
+      $(window).trigger("fennec:error", "Error getting sets list: " + data.message);
     }).done(function (data) {
       target.on("change", function (e) {
         LStorage.Posts.Set = e.target.value;

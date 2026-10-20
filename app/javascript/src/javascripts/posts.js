@@ -59,12 +59,12 @@ Post.initialize_all = async function () {
     }
   }
 
-  $(document).on("danbooru:open-post-edit-tab", () => Shortcuts.disabled = true);
-  $(document).on("danbooru:open-post-edit-tab", () => $("#post_tag_string").focus());
-  $(document).on("danbooru:close-post-edit-tab", () => Shortcuts.disabled = false);
+  $(document).on("fennec:open-post-edit-tab", () => Shortcuts.disabled = true);
+  $(document).on("fennec:open-post-edit-tab", () => $("#post_tag_string").focus());
+  $(document).on("fennec:close-post-edit-tab", () => Shortcuts.disabled = false);
 
   var $fields_multiple = $("[data-autocomplete=\"tag-edit\"]");
-  $fields_multiple.on("keypress.danbooru", Post.update_tag_count);
+  $fields_multiple.on("keypress.fennec", Post.update_tag_count);
   $fields_multiple.on("click", Post.update_tag_count);
 };
 
@@ -172,7 +172,7 @@ Post.initialize_collapse = function () {
 };
 
 Post.initialize_edit_dialog = function () {
-  $("#open-edit-dialog").show().on("click.danbooru", function (e) {
+  $("#open-edit-dialog").show().on("click.fennec", function (e) {
     Post.open_edit_dialog();
     e.preventDefault();
   });
@@ -183,7 +183,7 @@ Post.open_edit_dialog = function () {
     return;
   }
 
-  $(document).trigger("danbooru:open-post-edit-dialog");
+  $(document).trigger("fennec:open-post-edit-dialog");
 
   $("#edit").show();
   $("#comments").hide();
@@ -216,7 +216,7 @@ Post.open_edit_dialog = function () {
   var pin_button = $("<button/>").button({icons: {primary: "ui-icon-pin-w"}, label: "pin", text: false});
   pin_button.css({width: "20px", height: "20px", position: "absolute", right: "28.4px"});
   dialog.parent().children(".ui-dialog-titlebar").append(pin_button);
-  pin_button.on("click.danbooru", function () {
+  pin_button.on("click.fennec", function () {
     var dialog_widget = $(".ui-dialog:has(#edit-dialog)");
     var pos = dialog_widget.offset();
 
@@ -256,7 +256,7 @@ Post.close_edit_dialog = function () {
   $("div.input").has($tag_string).prevAll().show();
   $("#open-edit-dialog").show();
   $tag_string.css({"resize": "", "width": ""});
-  $(document).trigger("danbooru:close-post-edit-dialog");
+  $(document).trigger("fennec:close-post-edit-dialog");
 };
 
 Post.has_next_target = function () {
@@ -475,13 +475,13 @@ Post.initialize_links = function () {
     const target = $(e.target);
     Post.disapprove(target.data("pid"), target.data("reason"));
   });
-  $("#set-as-avatar-link").on("click.danbooru", function (e) {
+  $("#set-as-avatar-link").on("click.fennec", function (e) {
     e.preventDefault();
     if (!confirm("Set post as avatar?"))
       return;
     Post.set_as_avatar($(e.target).data("post-id"));
   });
-  $("#copy-notes").on("click.danbooru", function (e) {
+  $("#copy-notes").on("click.fennec", function (e) {
     var current_post_id = $("meta[name=post-id]").attr("content");
     var other_post_id = parseInt(prompt("Enter the ID of the post to copy all notes to:"), 10);
 
@@ -492,15 +492,15 @@ Post.initialize_links = function () {
           other_post_id: other_post_id,
         },
         success: function () {
-          $(window).trigger("danbooru:notice", "Successfully copied notes to <a href='" + other_post_id + "'>post #" + other_post_id + "</a>");
+          $(window).trigger("fennec:notice", "Successfully copied notes to <a href='" + other_post_id + "'>post #" + other_post_id + "</a>");
         },
         error: function (data) {
           if (data.status === 404) {
-            $(window).trigger("danbooru:error", "Error: Invalid destination post");
+            $(window).trigger("fennec:error", "Error: Invalid destination post");
           } else if (data.responseJSON && data.responseJSON.reason) {
-            $(window).trigger("danbooru:error", "Error: " + data.responseJSON.reason);
+            $(window).trigger("fennec:error", "Error: " + data.responseJSON.reason);
           } else {
-            $(window).trigger("danbooru:error", "There was an error copying notes to <a href='" + other_post_id + "'>post #" + other_post_id + "</a>");
+            $(window).trigger("fennec:error", "There was an error copying notes to <a href='" + other_post_id + "'>post #" + other_post_id + "</a>");
           }
         },
       });
@@ -526,12 +526,12 @@ Post.initialize_post_relationship_previews = function () {
   if (LStorage.Posts.ShowPostChildren)
     toggle();
 
-  $("#has-children-relationship-preview-link").on("click.danbooru", function (e) {
+  $("#has-children-relationship-preview-link").on("click.fennec", function (e) {
     toggle();
     flip_saved();
     e.preventDefault();
   });
-  $("#has-parent-relationship-preview-link").on("click.danbooru", function (e) {
+  $("#has-parent-relationship-preview-link").on("click.fennec", function (e) {
     toggle();
     flip_saved();
     e.preventDefault();
@@ -782,14 +782,14 @@ Post.initialize_change_resize_mode_link = function () {
 };
 
 Post.initialize_post_sections = function () {
-  $("#post-sections li a,#side-edit-link").on("click.danbooru", function (e) {
+  $("#post-sections li a,#side-edit-link").on("click.fennec", function (e) {
     if (e.target.hash === "#comments") {
       $("#comments").show();
       $("#edit").hide();
     } else if (e.target.hash === "#edit") {
       $("#edit").show();
       $("#comments").hide();
-      $(document).trigger("danbooru:open-post-edit-tab");
+      $(document).trigger("fennec:open-post-edit-tab");
       Post.update_tag_count({target: $("#post_tag_string")});
     } else {
       $("#edit").hide();
@@ -797,7 +797,7 @@ Post.initialize_post_sections = function () {
     }
 
     if (e.target.hash !== "#edit") {
-      $(document).trigger("danbooru:close-post-edit-tab");
+      $(document).trigger("fennec:close-post-edit-tab");
     }
 
     $("#post-sections li").removeClass("active");
@@ -809,14 +809,14 @@ Post.initialize_post_sections = function () {
 Post.notice_update = function (x) {
   if (x === "inc") {
     Post.pending_update_count += 1;
-    $(window).trigger("danbooru:notice", "Updating posts (" + Post.pending_update_count + " pending)...", true);
+    $(window).trigger("fennec:notice", "Updating posts (" + Post.pending_update_count + " pending)...", true);
   } else {
     Post.pending_update_count -= 1;
 
     if (Post.pending_update_count < 1) {
-      $(window).trigger("danbooru:notice", "Posts updated");
+      $(window).trigger("fennec:notice", "Posts updated");
     } else {
-      $(window).trigger("danbooru:notice", "Updating posts (" + Post.pending_update_count + " pending)...", true);
+      $(window).trigger("fennec:notice", "Updating posts (" + Post.pending_update_count + " pending)...", true);
     }
   }
 };
@@ -861,7 +861,7 @@ Post.update = function (post_id, params) {
         const message = $
           .map(data.responseJSON.errors, function (msg) { return msg; })
           .join("; ");
-        $(window).trigger("danbooru:error", `There was an error updating <a href="/posts/${post_id}">post #${post_id}</a>: ${message}`);
+        $(window).trigger("fennec:error", `There was an error updating <a href="/posts/${post_id}">post #${post_id}</a>: ${message}`);
       },
     });
   });
@@ -876,9 +876,9 @@ Post.delete_with_reason = function (post_id, reason, reload_after_delete) {
       data: {commit: "Delete", reason: reason, move_favorites: true},
     }).fail(function (data) {
       var message = $.map(data.responseJSON.errors, (msg) => msg).join("; ");
-      $(window).trigger("danbooru:error", "Error: " + message);
+      $(window).trigger("fennec:error", "Error: " + message);
     }).done(function () {
-      $(window).trigger("danbooru:notice", "Deleted post.");
+      $(window).trigger("fennec:notice", "Deleted post.");
       if (reload_after_delete) {
         location.reload();
       } else {
@@ -899,9 +899,9 @@ Post.undelete = function (post_id, callback) {
     }).fail(function (data) {
       //      var message = $.map(data.responseJSON.errors, function(msg, attr) { return msg; }).join('; ');
       const message = data.responseJSON.message;
-      $(window).trigger("danbooru:error", "Error: " + message);
+      $(window).trigger("fennec:error", "Error: " + message);
     }).done(function () {
-      $(window).trigger("danbooru:notice", "Undeleted post.");
+      $(window).trigger("fennec:notice", "Undeleted post.");
       $(`article#post_${post_id}`).attr("data-flags", "active");
       if (callback) callback();
     }).always(function () {
@@ -920,9 +920,9 @@ Post.unflag = function (post_id, approval, reload = true, callback = null) {
       data: {approval: modApproval},
     }).fail(function (data) {
       const message = data.responseJSON.message;
-      $(window).trigger("danbooru:error", "Error: " + message);
+      $(window).trigger("fennec:error", "Error: " + message);
     }).done(function () {
-      $(window).trigger("danbooru:notice", "Unflagged post");
+      $(window).trigger("fennec:notice", "Unflagged post");
       if (callback) callback();
       if (reload) location.reload();
     }).always(function () {
@@ -946,9 +946,9 @@ Post.flag = function (post_id, reason_name, parent_id = null, reload = true, cal
       },
     }).fail(function (data) {
       const message = data.responseJSON.message;
-      $(window).trigger("danbooru:error", "Error: " + message);
+      $(window).trigger("fennec:error", "Error: " + message);
     }).done(function () {
-      $(window).trigger("danbooru:notice", "Flagged post");
+      $(window).trigger("fennec:notice", "Flagged post");
       if (callback) callback();
       if (reload) location.reload();
     }).always(function () {
@@ -974,9 +974,9 @@ Post.unapprove = function (post_id) {
       url: `/posts/approvals/${post_id}.json`,
     }).fail(function (data) {
       var message = $.map(data.responseJSON.errors, function (msg) { return msg; }).join("; ");
-      $(window).trigger("danbooru:error", "Error: " + message);
+      $(window).trigger("fennec:error", "Error: " + message);
     }).done(function () {
-      $(window).trigger("danbooru:notice", "Unapproved post.");
+      $(window).trigger("fennec:notice", "Unapproved post.");
       location.reload();
     }).always(function () {
       Post.notice_update("dec");
@@ -992,7 +992,7 @@ Post.destroy = function (post_id, reason) {
   })
     .fail(data => {
       var message = $.map(data.responseJSON.errors, function (msg) { return msg; }).join("; ");
-      $(window).trigger("danbooru:error", "Error: " + message);
+      $(window).trigger("fennec:error", "Error: " + message);
     }).done(() => {
       location.href = `/admin/destroyed_posts/${post_id}`;
     });
@@ -1043,14 +1043,14 @@ Post.approve = function (post_id, callback) {
     ).fail(function (data) {
       var message = $.map(data.responseJSON.errors, (msg) => msg).join("; ") || data.responseJSON.message;
       Post.notice_update("dec");
-      Danbooru.error("Error: " + message);
+      Fennec.error("Error: " + message);
     }).done(function () {
       var $post = $("#post_" + post_id);
       if ($post.length) {
         $post.data("flags", $post.data("flags").replace(/pending/, ""));
         $post.removeClass("post-status-pending");
         Post.notice_update("dec");
-        Danbooru.notice("Approved post #" + post_id);
+        Fennec.notice("Approved post #" + post_id);
       }
       if (callback) {
         callback();
@@ -1067,7 +1067,7 @@ Post.disapprove = function (post_id, reason, message) {
       {"post_disapproval[post_id]": post_id, "post_disapproval[reason]": reason, "post_disapproval[message]": message},
     ).fail(function (data) {
       var message = $.map(data.responseJSON.errors, (msg) => msg).join("; ");
-      $(window).trigger("danbooru:error", "Error: " + message);
+      $(window).trigger("fennec:error", "Error: " + message);
     }).done(function () {
       if ($("#c-posts #a-show").length) {
         location.reload();
@@ -1133,7 +1133,7 @@ Post.vote = function (id, score, prevent_unvote) {
       },
     }).done(function (data) {
       Post.after_vote(id, data);
-      $(window).trigger("danbooru:notice", "Vote saved");
+      $(window).trigger("fennec:notice", "Vote saved");
     }).always(function () {
       Post.notice_update("dec");
     }).fail(function (data) {
@@ -1211,7 +1211,7 @@ Post.set_as_avatar = function (id) {
         accept: "*/*;q=0.5,text/javascript",
       },
     }).done(function () {
-      $(window).trigger("danbooru:notice", "Post set as avatar");
+      $(window).trigger("fennec:notice", "Post set as avatar");
     });
   });
 };
@@ -1265,8 +1265,8 @@ Post.toggle_hide_notes = function (save = true, init = false) {
 
 Post.initialize_thumbnail_frame_preview = function () {
   const $input = $("#preview-thumbnail-frame-button");
-  $input.off("click.gayfurcity");
-  $input.on("click.gayfurcity", Post.preview_thumbnail_frame);
+  $input.off("click.fennec");
+  $input.on("click.fennec", Post.preview_thumbnail_frame);
 };
 
 Post.initialize_upload_settings = async function () {

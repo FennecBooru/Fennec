@@ -9,12 +9,12 @@ class TelemetryTest < ActiveSupport::TestCase
   setup { Cache.redis.del(Telemetry::QUEUE_KEY) }
 
   def stub_config(enabled:)
-    GayFurCity.config.stubs(:telemetry_enabled).returns(enabled)
-    GayFurCity.config.stubs(:telemetry_endpoint).returns("https://telemetry.example.com")
-    GayFurCity.config.stubs(:telemetry_organization).returns("default")
-    GayFurCity.config.stubs(:telemetry_stream).returns("gayfurcity")
-    GayFurCity.config.stubs(:telemetry_username).returns("root@example.com")
-    GayFurCity.config.stubs(:telemetry_password).returns("password")
+    Fennec.config.stubs(:telemetry_enabled).returns(enabled)
+    Fennec.config.stubs(:telemetry_endpoint).returns("https://telemetry.example.com")
+    Fennec.config.stubs(:telemetry_organization).returns("default")
+    Fennec.config.stubs(:telemetry_stream).returns("fennec")
+    Fennec.config.stubs(:telemetry_username).returns("root@example.com")
+    Fennec.config.stubs(:telemetry_password).returns("password")
   end
 
   context("report!") do
@@ -30,7 +30,7 @@ class TelemetryTest < ActiveSupport::TestCase
     context("enabled") do
       should("post the data as a JSON document") do
         stub_config(enabled: true)
-        request_stub = stub_request(:post, "https://telemetry.example.com/api/default/gayfurcity/_json")
+        request_stub = stub_request(:post, "https://telemetry.example.com/api/default/fennec/_json")
                        .with { |req| JSON.parse(req.body).first["exception"] == "StandardError" }
 
         Telemetry.report!(exception: "StandardError")
@@ -40,7 +40,7 @@ class TelemetryTest < ActiveSupport::TestCase
 
       should("not raise if the request fails") do
         stub_config(enabled: true)
-        stub_request(:post, "https://telemetry.example.com/api/default/gayfurcity/_json").to_timeout
+        stub_request(:post, "https://telemetry.example.com/api/default/fennec/_json").to_timeout
 
         assert_nothing_raised do
           Telemetry.report!(exception: "StandardError")
@@ -60,7 +60,7 @@ class TelemetryTest < ActiveSupport::TestCase
 
     should("report the exception through FlushTelemetryJob") do
       stub_config(enabled: true)
-      request_stub = stub_request(:post, "https://telemetry.example.com/api/default/gayfurcity/_json")
+      request_stub = stub_request(:post, "https://telemetry.example.com/api/default/fennec/_json")
                      .with do |req|
                        body = JSON.parse(req.body).first
                        body["exception"] == "StandardError" && body["message"] == "boom" && body["source"] == "Test"
@@ -90,7 +90,7 @@ class TelemetryTest < ActiveSupport::TestCase
     should("report the internal error instead of raising for an event that isn't a known UserEvent category") do
       stub_config(enabled: true)
       user = create(:user)
-      request_stub = stub_request(:post, "https://telemetry.example.com/api/default/gayfurcity/_json")
+      request_stub = stub_request(:post, "https://telemetry.example.com/api/default/fennec/_json")
                      .with { |req| JSON.parse(req.body).first["exception"] == "ArgumentError" }
 
       with_inline_jobs { Telemetry.track(:not_a_real_event, user: user, ip: "127.0.0.1") }
@@ -104,7 +104,7 @@ class TelemetryTest < ActiveSupport::TestCase
       # (UserResolvable)` fallback doesn't silently default ip to "127.0.0.1" the way the factory's
       # normal UserResolvable wrapper would, and the "ip required" path actually gets exercised.
       user = create(:user, resolvable: false)
-      request_stub = stub_request(:post, "https://telemetry.example.com/api/default/gayfurcity/_json")
+      request_stub = stub_request(:post, "https://telemetry.example.com/api/default/fennec/_json")
                      .with { |req| JSON.parse(req.body).first["exception"] == "ArgumentError" }
 
       with_inline_jobs { Telemetry.track(:login, user: user, ip: nil) }
@@ -115,7 +115,7 @@ class TelemetryTest < ActiveSupport::TestCase
     should("report the event through FlushTelemetryJob") do
       stub_config(enabled: true)
       user = create(:user)
-      request_stub = stub_request(:post, "https://telemetry.example.com/api/default/gayfurcity/_json")
+      request_stub = stub_request(:post, "https://telemetry.example.com/api/default/fennec/_json")
                      .with do |req|
                        body = JSON.parse(req.body).first
                        body["event"] == "login" && body["user_id"] == user.id && body["ip"] == "127.0.0.1"
@@ -146,7 +146,7 @@ class TelemetryTest < ActiveSupport::TestCase
     # of one request per originally-queued event.
     should("combine every pending event into a single bulk request") do
       stub_config(enabled: true)
-      request_stub = stub_request(:post, "https://telemetry.example.com/api/default/gayfurcity/_json")
+      request_stub = stub_request(:post, "https://telemetry.example.com/api/default/fennec/_json")
                      .with { |req| JSON.parse(req.body).pluck("event") == %w[login login logout] }
 
       Telemetry.enqueue!(event: "login")

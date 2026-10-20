@@ -55,11 +55,11 @@ class UploadMediaAsset < MediaAssetWithVariants
 
   module StorageMethods
     def path_prefix
-      GayFurCity.config.post_path_prefix
+      Fennec.config.post_path_prefix
     end
 
     def protected_path_prefix
-      GayFurCity.config.protected_path_prefix
+      Fennec.config.protected_path_prefix
     end
   end
 
@@ -70,16 +70,16 @@ class UploadMediaAsset < MediaAssetWithVariants
       format = is_image? ? :image : :video
       @variants = super(Variant)
       if is_image?
-        GayFurCity.config.image.variants.each do |name, options|
+        Fennec.config.image.variants.each do |name, options|
           next if name == "large" && !supports_large?
           @variants << Variant.new(self, name, format, "webp", options) if variant_valid?(options)
         end
       elsif is_video?
-        GayFurCity.config.video.image_variants.each do |name, options|
+        Fennec.config.video.image_variants.each do |name, options|
           @variants << Variant.new(self, name, format, "webp", options) if variant_valid?(options)
         end
         @variants << Variant.new(self, :original, format, alt_file_ext, rescale)
-        GayFurCity.config.video.variants.each do |name, options|
+        Fennec.config.video.variants.each do |name, options|
           @variants += [Variant.new(self, name, format, file_ext, options), Variant.new(self, name, format, alt_file_ext, options)] if variant_valid?(options)
         end
       end
@@ -205,8 +205,8 @@ class UploadMediaAsset < MediaAssetWithVariants
       width, height = scaled_dimensions
       method = ext == "webm" ? :scale_options_webm : :scale_options_mp4
       file = Tempfile.new(%W[video-sample .#{ext}], binmode: true)
-      args = [*GayFurCity.config.video.public_send(method, width, height, file.path), "-y", "-i", original_file.path]
-      stdout, stderr, status = Open3.capture3(GayFurCity.config.ffmpeg_path, *args)
+      args = [*Fennec.config.video.public_send(method, width, height, file.path), "-y", "-i", original_file.path]
+      stdout, stderr, status = Open3.capture3(Fennec.config.ffmpeg_path, *args)
 
       unless status == 0
         logger.warn("[FFMPEG TRANSCODE STDOUT] #{stdout.chomp}")
@@ -251,7 +251,7 @@ class UploadMediaAsset < MediaAssetWithVariants
   def supports_large?
     return true if is_video?
     return false if is_gif? || is_animated_png?
-    is_image? && image_width.present? && image_width > GayFurCity.config.image.large_width
+    is_image? && image_width.present? && image_width > Fennec.config.image.large_width
   end
 
   def self.available_includes

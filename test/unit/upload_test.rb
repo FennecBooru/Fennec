@@ -13,7 +13,7 @@ class UploadTest < ActiveSupport::TestCase
     context("from a user that is limited") do
       setup do
         User.any_instance.stubs(:upload_limit).returns(0)
-        GayFurCity.config.stubs(:disable_throttles).returns(false)
+        Fennec.config.stubs(:disable_throttles).returns(false)
       end
 
       should("fail creation") do

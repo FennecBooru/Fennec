@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module GayFurCity
+module Fennec
   class Config < YiffSpace::Config::Builder
-    self.env_name = "GAYFURCITY"
+    self.env_name = "FENNEC"
 
     # `bin/rails generate`/`destroy` boot the full application, which means every `required: true`
     # config below is read during initialization - but generators don't need real infrastructure
@@ -29,7 +29,7 @@ module GayFurCity
     config(:app_url) { hostname }
     config(:canonical_app_url) { app_url }
     config(:server_name) { Socket.gethostname }
-    config(:source_code_url) { "https://github.com/GayFurCity/GayFurCity" }
+    config(:source_code_url) { "https://github.com/FennecBooru/Fennec" }
     config(:local_source_code_url) { source_code_url }
     config(:custom_html_header_content) { nil }
     config(:user_agent) { "#{::AdminConfig.instance.safe_app_name}/#{version} (#{source_code_url})" }

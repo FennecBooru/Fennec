@@ -53,7 +53,7 @@ PostDeletion.init = function () {
 
 $(function () {
   if ($("div#c-posts div#a-delete").length)
-    Danbooru.PostDeletion.init();
+    Fennec.PostDeletion.init();
 });
 
 export default PostDeletion;

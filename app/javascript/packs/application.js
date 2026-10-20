@@ -80,11 +80,11 @@ export { default as HoverZoom } from "../src/javascripts/hover_zoom.js";
 import "../controllers";
 
 function inError (msg) {
-  $(window).trigger("danbooru:error", msg);
+  $(window).trigger("fennec:error", msg);
 }
 
 function inNotice (msg) {
-  $(window).trigger("danbooru:notice", msg);
+  $(window).trigger("fennec:notice", msg);
 }
 
 export {inError as error, inNotice as notice};

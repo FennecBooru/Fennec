@@ -38,7 +38,7 @@ class UploadsControllerTest < ActionDispatch::IntegrationTest
       end
 
       context("access control") do
-        setup { GayFurCity.config.stubs(:disable_age_checks).returns(true) }
+        setup { Fennec.config.stubs(:disable_age_checks).returns(true) }
 
         asserts do
           access.gte(User::Levels::MEMBER).get(new_upload_path)
@@ -222,7 +222,7 @@ class UploadsControllerTest < ActionDispatch::IntegrationTest
       context("access control") do
         setup do
           @file = fixture_file_upload("test.jpg")
-          GayFurCity.config.stubs(:disable_age_checks).returns(true)
+          Fennec.config.stubs(:disable_age_checks).returns(true)
         end
 
         asserts do

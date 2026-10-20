@@ -285,11 +285,11 @@ class MediaAsset < ApplicationRecord
     end
 
     def storage_manager
-      GayFurCity.config.storage_manager.instance
+      Fennec.config.storage_manager.instance
     end
 
     def backup_storage_manager
-      GayFurCity.config.backup_storage_manager.instance
+      Fennec.config.backup_storage_manager.instance
     end
 
     def path_prefix
@@ -301,7 +301,7 @@ class MediaAsset < ApplicationRecord
     end
 
     def protected_secret
-      GayFurCity.config.protected_file_secret
+      Fennec.config.protected_file_secret
     end
 
     def file_path(protected: is_protected?)

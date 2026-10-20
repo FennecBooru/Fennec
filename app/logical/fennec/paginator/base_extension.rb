@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module GayFurCity
+module Fennec
   module Paginator
     module BaseExtension
       attr_reader(:current_page, :pagination_mode)
@@ -41,7 +41,7 @@ module GayFurCity
           [1, :numbered]
         elsif page =~ /\A\d+\z/
           if page.to_i > max_numbered_pages
-            raise(GayFurCity::Paginator::PaginationError, "You cannot go beyond page #{max_numbered_pages}. Please narrow your search terms.")
+            raise(Fennec::Paginator::PaginationError, "You cannot go beyond page #{max_numbered_pages}. Please narrow your search terms.")
           end
           [[page.to_i, 1].max, :numbered]
         elsif page =~ /b(\d+)/
@@ -49,7 +49,7 @@ module GayFurCity
         elsif page =~ /a(\d+)/
           [$1.to_i, :sequential_after]
         else
-          raise(GayFurCity::Paginator::PaginationError, "Invalid page number.")
+          raise(Fennec::Paginator::PaginationError, "Invalid page number.")
         end
       end
 

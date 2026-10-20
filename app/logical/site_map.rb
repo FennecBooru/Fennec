@@ -217,7 +217,7 @@ module SiteMap
     link("DB Exports", feature: :db_exports) { db_exports_path }
     link("API Documentation")                { api_documentation_path }
     link("API Help")                         { help_page_path(id: "api") }
-    link("Source Code")                      { GayFurCity.config.source_code_url }
+    link("Source Code")                      { Fennec.config.source_code_url }
   end
 
   section("Moderation") do

@@ -146,7 +146,7 @@
             self.preview.loading = false;
             self.preview.tags = [];
             self.preview.show = false;
-            Danbooru.error('Error loading tag preview ' + result);
+            Fennec.error('Error loading tag preview ' + result);
           }
         })
       },

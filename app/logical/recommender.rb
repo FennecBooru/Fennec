@@ -7,7 +7,7 @@ module Recommender
   MIN_USER_FAVS = 50
 
   def enabled?
-    GayFurCity.config.recommender_server.present? && Feature.enabled?(:recommendations)
+    Fennec.config.recommender_server.present? && Feature.enabled?(:recommendations)
   end
 
   def available_for_post?(post)
@@ -19,14 +19,14 @@ module Recommender
   end
 
   def recommend_for_user(ruser, user:, tags: nil, limit: 50)
-    response = Faraday.new(GayFurCity.config.faraday_options).get("#{GayFurCity.config.recommender_server}/recommend/#{ruser.id}?limit=#{limit}")
+    response = Faraday.new(Fennec.config.faraday_options).get("#{Fennec.config.recommender_server}/recommend/#{ruser.id}?limit=#{limit}")
     return [] unless response.success?
 
     process_recs(JSON.parse(response.body), tags: tags, uploader: ruser, favoriter: ruser, user: user)
   end
 
   def recommend_for_post(post, user:, tags: nil, limit: 50)
-    response = Faraday.new(GayFurCity.config.faraday_options).get("#{GayFurCity.config.recommender_server}/similar/#{post.id}?limit=#{limit}")
+    response = Faraday.new(Fennec.config.faraday_options).get("#{Fennec.config.recommender_server}/similar/#{post.id}?limit=#{limit}")
     return [] unless response.success?
 
     process_recs(JSON.parse(response.body), ogpost: post, tags: tags, user: user)
@@ -39,13 +39,13 @@ module Recommender
   # training_time: string (00:00:00)
   # user_count: int
   def metrics
-    response = Faraday.new(GayFurCity.config.faraday_options).get("#{GayFurCity.config.recommender_server}/metrics")
+    response = Faraday.new(Fennec.config.faraday_options).get("#{Fennec.config.recommender_server}/metrics")
     JSON.parse(response.body)
   end
 
   def train!
     return if Rails.env.test? || !enabled?
-    Faraday.new(GayFurCity.config.faraday_options).put("#{GayFurCity.config.recommender_server}/train")
+    Faraday.new(Fennec.config.faraday_options).put("#{Fennec.config.recommender_server}/train")
   end
 
   def process_recs(recs, user:, ogpost: nil, uploader: nil, favoriter: nil, tags: nil)

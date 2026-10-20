@@ -12,7 +12,7 @@ module DeployTracker
   end
 
   def version!
-    version = GayFurCity.config.version
+    version = Fennec.config.version
     return if version.blank?
     previous = StaffAuditLog.where(action: "version_bump").order(id: :desc).first&.data&.dig("new_version")
     return if previous == version

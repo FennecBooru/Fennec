@@ -27,7 +27,7 @@ jobs:
   build:
     # needs.checks.result is 'skipped' (not 'success') when skip_checks was used above - both
     # count as "go ahead", only an actual check failure should block publishing.
-    if: always() && github.repository_owner == 'gayfurcity' && (needs.checks.result == 'success' || needs.checks.result == 'skipped')
+    if: always() && github.repository_owner == 'fennecbooru' && (needs.checks.result == 'success' || needs.checks.result == 'skipped')
     needs: [checks]
     strategy:
       fail-fast: false
@@ -52,7 +52,7 @@ jobs:
           password: ${{ github.token }}
 
       # ghcr.io (like all Docker registries) requires lowercase repository paths; github.repository
-      # preserves the org/repo's actual casing (GayFurCity/GayFurCity), which fails at push time.
+      # preserves the org/repo's actual casing (FennecBooru/Fennec), which fails at push time.
       - name: Compute lowercase image repository
         id: repo
         run: echo "name=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
@@ -100,7 +100,7 @@ jobs:
     # explicit always() + needs.build.result check, same as the build job above - a plain `if:`
     # here would implicitly AND in success(), which is poisoned by a skipped `checks` job further
     # up the chain (e.g. workflow_dispatch with skip_checks) even though build itself succeeded.
-    if: always() && github.repository_owner == 'gayfurcity' && needs.build.result == 'success'
+    if: always() && github.repository_owner == 'fennecbooru' && needs.build.result == 'success'
     runs-on: ubuntu-latest
     needs: [build]
     steps:
@@ -122,7 +122,7 @@ jobs:
           password: ${{ github.token }}
 
       # ghcr.io (like all Docker registries) requires lowercase repository paths; github.repository
-      # preserves the org/repo's actual casing (GayFurCity/GayFurCity), which fails at push time.
+      # preserves the org/repo's actual casing (FennecBooru/Fennec), which fails at push time.
       - name: Compute lowercase image repository
         id: repo
         run: echo "name=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"

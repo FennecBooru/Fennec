@@ -563,7 +563,7 @@
       afterSuccess(data) {
         this.submitting = false;
         this.allowNavigate = true;
-        Danbooru.notice("Post uploaded successfully.");
+        Fennec.notice("Post uploaded successfully.");
         location.assign(data.location);
       },
       afterError(data) {
@@ -793,7 +793,7 @@
             self.tagPreview.loading = false;
             self.tagPreview.tags = [];
             self.tagPreview.show = false;
-            Danbooru.error("Error loading tag preview " + result);
+            Fennec.error("Error loading tag preview " + result);
           }
         })
       },

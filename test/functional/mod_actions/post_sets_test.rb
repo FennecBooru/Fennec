@@ -15,7 +15,7 @@ module ModActions
       end
 
       should("format set_change_visibility correctly") do
-        GayFurCity.config.stubs(:disable_age_checks).returns(true)
+        Fennec.config.stubs(:disable_age_checks).returns(true)
         @set.update_with!(@admin, is_public: true)
 
         assert_matches(

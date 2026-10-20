@@ -10,7 +10,7 @@ module Migrations
           self.table_name = table
 
           def self.config_id
-            GayFurCity.config.config_id
+            Fennec.config.config_id
           end
 
           def self.get

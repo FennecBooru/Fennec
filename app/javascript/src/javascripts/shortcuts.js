@@ -12,7 +12,7 @@ Shortcuts.initialize = function () {
 // Bind keyboard shortcuts to links that have a `data-shortcut="..."` attribute. If multiple links have the
 // same shortcut, then only the first link will be triggered by the shortcut.
 Shortcuts.initialize_data_shortcuts = function () {
-  $(document).off("keydown.danbooru.shortcut");
+  $(document).off("keydown.fennec.shortcut");
 
   $("[data-shortcut]").each((_i, element) => {
     const $e = $(element);
@@ -41,8 +41,8 @@ Shortcuts.initialize_data_shortcuts = function () {
 
 Shortcuts.keydown = function (keys, namespace, handler) {
   if (Utility.meta("enable-js-navigation") === "true") {
-    $(document).off("keydown.danbooru." + namespace);
-    $(document).on("keydown.danbooru." + namespace, null, keys, e => {
+    $(document).off("keydown.fennec." + namespace);
+    $(document).on("keydown.fennec." + namespace, null, keys, e => {
       if (Shortcuts.disabled) {
         return;
       }

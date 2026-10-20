@@ -152,7 +152,7 @@ class ArtistsControllerTest < ActionDispatch::IntegrationTest
 
       should("work (with url string)") do
         attributes = attributes_for(:artist)
-        attributes[:url_string] ||= GayFurCity.config.hostname
+        attributes[:url_string] ||= Fennec.config.hostname
         assert_difference(%w[Artist.count ArtistUrl.count], 1) do
           attributes.delete(:is_active)
           post_auth(artists_path, @user, params: { artist: attributes })

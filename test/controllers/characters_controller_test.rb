@@ -149,7 +149,7 @@ class CharactersControllerTest < ActionDispatch::IntegrationTest
 
       should("work (with url string)") do
         attributes = attributes_for(:character)
-        attributes[:url_string] ||= GayFurCity.config.hostname
+        attributes[:url_string] ||= Fennec.config.hostname
         assert_difference(%w[Character.count CharacterUrl.count], 1) do
           post_auth(characters_path, @user, params: { character: attributes })
         end

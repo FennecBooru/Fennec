@@ -1,6 +1,6 @@
 openapi: "3.1.0"
 info:
-  title: "GayFurCity"
+  title: "Fennec"
   version: "1"
   termsOfService: "https://gayfur.city/static/terms_of_service"
   license:

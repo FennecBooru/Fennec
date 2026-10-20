@@ -10,6 +10,8 @@ class AdminConfig < ApplicationRecord
 
   # changing any of these runs AdminConfigUpdateJob with the new value
   UPDATE_JOB_OPTIONS = %i[enable_post_approvals enable_replacement_approvals enable_post_appeals].freeze
+  # Globally force disabled, usually because the option just doesn't work/do anything
+  DISABLED_OPTIONS = %w[blacklisted_preview_url]
 
   def enqueue_update_jobs
     saved_changes.slice(*UPDATE_JOB_OPTIONS.map(&:to_s)).each do |name, (_old, value)|
@@ -44,15 +46,15 @@ class AdminConfig < ApplicationRecord
   end
 
   # Admin config options are normally edited through the admin UI and stored in the `admin_config`
-  # table, but any of them can be pinned to a fixed value via GAYFURCITY_ADMIN_CONFIG_<NAME>
-  # (e.g. GAYFURCITY_ADMIN_CONFIG_ENABLE_SIGNUPS=false). A pinned option always wins over the
+  # table, but any of them can be pinned to a fixed value via FENNEC_ADMIN_CONFIG_<NAME>
+  # (e.g. FENNEC_ADMIN_CONFIG_ENABLE_SIGNUPS=false). A pinned option always wins over the
   # stored value and can no longer be edited in the UI - see settable_columns.
   def self.env_override_name(column)
-    "#{GayFurCity::Config.env_name}_ADMIN_CONFIG_#{column.to_s.upcase}"
+    "#{Fennec::Config.env_name}_ADMIN_CONFIG_#{column.to_s.upcase}"
   end
 
   def self.env_override?(column)
-    return false if %w[id updated_at].include?(column.to_s)
+    return false if (%w[id updated_at] + DISABLED_OPTIONS).include?(column.to_s)
     ENV.key?(env_override_name(column))
   end
 
@@ -132,16 +134,16 @@ class AdminConfig < ApplicationRecord
   end
 
   def self.config_id
-    GayFurCity.config.config_id
+    Fennec.config.config_id
   end
 
   def self.settable_columns(_user)
-    excluded = %w[id updated_at] + disabled_config_options + env_overridden_columns
+    excluded = %w[id updated_at] + disabled_config_options + env_overridden_columns + DISABLED_OPTIONS
     columns.reject { |c| excluded.include?(c.name) }
   end
 
   def self.disabled_config_options
-    list = GayFurCity.config.disabled_config_options
+    list = Fennec.config.disabled_config_options
     list.each do |name|
       list << "#{name}_bypass" if column_names.include?("#{name}_bypass")
     end

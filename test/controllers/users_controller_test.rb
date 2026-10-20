@@ -113,7 +113,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
     context("new action") do
       setup do
-        GayFurCity.config.stubs(:recaptcha_enabled).returns(false)
+        Fennec.config.stubs(:recaptcha_enabled).returns(false)
       end
 
       should("redirect to the sign in page") do

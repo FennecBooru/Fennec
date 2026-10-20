@@ -371,7 +371,7 @@ class CharacterTest < ActiveSupport::TestCase
 
         assert_equal("https://gayfur.city", @character.url_string)
 
-        GayFurCity.config.stubs(:disable_throttles).returns(false)
+        Fennec.config.stubs(:disable_throttles).returns(false)
         AdminConfig.any_instance.stubs(:character_edit_limit).returns(0)
 
         assert_no_difference("CharacterVersion.count") do

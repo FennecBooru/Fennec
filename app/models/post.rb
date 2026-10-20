@@ -236,7 +236,7 @@ class Post < ApplicationRecord
       preview_file_url(CurrentUser.user)
     end
 
-    GayFurCity.config.image.variants.keys.map(&:to_s).each do |name|
+    Fennec.config.image.variants.keys.map(&:to_s).each do |name|
       define_method("#{name}_file_path") do
         variant_path(name)
       end
@@ -254,7 +254,7 @@ class Post < ApplicationRecord
       alias_method("file_#{name}", "#{name}_file")
     end
 
-    GayFurCity.config.video.variants.keys.map(&:to_s).each do |name|
+    Fennec.config.video.variants.keys.map(&:to_s).each do |name|
       define_method("#{name}_webm_file_path") do
         variant_path(name, "webm")
       end
@@ -369,7 +369,7 @@ class Post < ApplicationRecord
       end
     end
 
-    [*GayFurCity.config.image.variants.keys, *GayFurCity.config.video.variants.keys].map(&:to_s).uniq.each do |name|
+    [*Fennec.config.image.variants.keys, *Fennec.config.video.variants.keys].map(&:to_s).uniq.each do |name|
       define_method("has_#{name}?") do
         has_variant_size?(name)
       end
@@ -414,14 +414,14 @@ class Post < ApplicationRecord
 
     def large_image_width
       if has_large?
-        [GayFurCity.config.image.large_width, image_width].min
+        [Fennec.config.image.large_width, image_width].min
       else
         image_width
       end
     end
 
     def large_image_height
-      ratio = GayFurCity.config.image.large_width.to_f / image_width.to_f
+      ratio = Fennec.config.image.large_width.to_f / image_width.to_f
       if has_large? && ratio < 1
         (image_height * ratio).to_i
       else
@@ -2445,11 +2445,11 @@ class Post < ApplicationRecord
   end
 
   def deleteblocked?(user)
-    !GayFurCity.config.can_user_see_post?(user, self)
+    !Fennec.config.can_user_see_post?(user, self)
   end
 
   def loginblocked?(user)
-    user.is_anonymous? && (hide_from_anonymous? || GayFurCity.config.user_needs_login_for_post?(self))
+    user.is_anonymous? && (hide_from_anonymous? || Fennec.config.user_needs_login_for_post?(self))
   end
 
   def visible?(user)

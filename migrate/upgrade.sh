@@ -10,8 +10,8 @@ fi
 OLD_VERSION="$1"
 NEW_VERSION="$2"
 
-OLD_VOLUME="gayfurcity_pg${OLD_VERSION}"
-NEW_VOLUME="gayfurcity_pg${NEW_VERSION}"
+OLD_VOLUME="fennec_pg${OLD_VERSION}"
+NEW_VOLUME="fennec_pg${NEW_VERSION}"
 OLD_IMAGE="postgres:${OLD_VERSION}-alpine"
 NEW_IMAGE="postgres:${NEW_VERSION}-alpine"
 DUMP_FILE="./pg${OLD_VERSION}_dump.sql"
@@ -85,7 +85,7 @@ dump_size() {
 
 postgres_activity() {
   local container="$1"
-  local user="${2:-gayfurcity}"
+  local user="${2:-fennec}"
   docker exec "$container" psql -At -U "$user" -d postgres -c \
     "select coalesce(wait_event_type || ':' || wait_event, state, 'unknown') from pg_stat_activity where pid <> pg_backend_pid() and usename = '$user' order by query_start nulls last limit 1" \
     2>/dev/null || true
@@ -109,7 +109,7 @@ print_container_failure() {
 
 wait_for_postgres() {
   local container="$1"
-  local user="${2:-gayfurcity}"
+  local user="${2:-fennec}"
   local waited=0
   until docker exec "$container" pg_isready -U "$user" >/dev/null 2>&1; do
     if ! container_running "$container"; then
@@ -149,7 +149,7 @@ copy_volume() {
 }
 
 dump_old_data() {
-  docker exec "$OLD_VOLUME" pg_dumpall -U gayfurcity --verbose > "$DUMP_FILE" &
+  docker exec "$OLD_VOLUME" pg_dumpall -U fennec --verbose > "$DUMP_FILE" &
   local dump_pid=$!
   while kill -0 "$dump_pid" 2>/dev/null; do
     sleep "$PROGRESS_INTERVAL"
@@ -215,11 +215,11 @@ done
 
 step "Backup Old Data"
 docker volume create "$OLD_VOLUME" >/dev/null
-copy_volume "gayfurcity_db_data" "$OLD_VOLUME" "backup"
+copy_volume "fennec_db_data" "$OLD_VOLUME" "backup"
 
 step "Dump Old Data"
-progress "starting $OLD_IMAGE with gayfurcity_db_data mounted at $OLD_PGDATA_MOUNT"
-docker run -v "gayfurcity_db_data:$OLD_PGDATA_MOUNT" -e POSTGRES_USER=gayfurcity -e POSTGRES_DB=gayfurcity_development -e POSTGRES_HOST_AUTH_METHOD=trust -d --name "$OLD_VOLUME" "$OLD_IMAGE" >/dev/null
+progress "starting $OLD_IMAGE with fennec_db_data mounted at $OLD_PGDATA_MOUNT"
+docker run -v "fennec_db_data:$OLD_PGDATA_MOUNT" -e POSTGRES_USER=fennec -e POSTGRES_DB=fennec_development -e POSTGRES_HOST_AUTH_METHOD=trust -d --name "$OLD_VOLUME" "$OLD_IMAGE" >/dev/null
 wait_for_postgres "$OLD_VOLUME"
 echo "    streaming dump progress below (one line per database/object):"
 dump_old_data
@@ -239,15 +239,15 @@ if (( "$(postgres_major_version "$NEW_VERSION")" >= 18 )); then
   echo "Before starting the upgraded database normally, update the postgres service volume mount to:"
   echo "  db_data:/var/lib/postgresql"
 fi
-read -rp "About to replace gayfurcity_db_data with the upgraded data. Continue? [y/N] " confirm
+read -rp "About to replace fennec_db_data with the upgraded data. Continue? [y/N] " confirm
 if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
   echo "Aborted before replacing data. Intermediate volumes $OLD_VOLUME and $NEW_VOLUME were left in place."
   exit 1
 fi
 
 step "Replace Old Data"
-docker run --rm -v gayfurcity_db_data:/old busybox sh -c "rm -rf /old/*"
-copy_volume "$NEW_VOLUME" "gayfurcity_db_data" "replacement"
+docker run --rm -v fennec_db_data:/old busybox sh -c "rm -rf /old/*"
+copy_volume "$NEW_VOLUME" "fennec_db_data" "replacement"
 
 step "Remove Intermediate Volume"
 docker volume rm "$NEW_VOLUME" >/dev/null

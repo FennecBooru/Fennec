@@ -54,15 +54,15 @@ module Admin
     end
 
     def ensure_application_logs_enabled
-      access_denied("This feature is disabled") unless GayFurCity.config.enable_application_logs?
+      access_denied("This feature is disabled") unless Fennec.config.enable_application_logs?
     end
 
     def ensure_request_logs_enabled
-      access_denied("This feature is disabled") unless GayFurCity.config.enable_request_logs?
+      access_denied("This feature is disabled") unless Fennec.config.enable_request_logs?
     end
 
     def ensure_performance_logs_enabled
-      access_denied("This feature is disabled") unless GayFurCity.config.enable_performance_logs?
+      access_denied("This feature is disabled") unless Fennec.config.enable_performance_logs?
     end
   end
 end

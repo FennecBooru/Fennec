@@ -15,7 +15,7 @@ Pool.initialize_all = function () {
 };
 
 Pool.initialize_add_to_pool_link = function () {
-  $("#pool").on("click.danbooru", function (e) {
+  $("#pool").on("click.fennec", function (e) {
     if (!Pool.dialog_setup) {
       $("#add-to-pool-dialog").dialog({autoOpen: false});
       Pool.dialog_setup = true;
@@ -24,7 +24,7 @@ Pool.initialize_add_to_pool_link = function () {
     $("#add-to-pool-dialog").dialog("open");
   });
 
-  $("#recent-pools li").on("click.danbooru", function (e) {
+  $("#recent-pools li").on("click.fennec", function (e) {
     e.preventDefault();
     $("#pool_name").val($(this).attr("data-value"));
   });

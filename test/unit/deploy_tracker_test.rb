@@ -17,7 +17,7 @@ class DeployTrackerTest < ActiveSupport::TestCase
     end
 
     should("log the version once per version") do
-      GayFurCity.config.stubs(:version).returns("aaaaaaaa")
+      Fennec.config.stubs(:version).returns("aaaaaaaa")
       DeployTracker.version!
       DeployTracker.version!
 
@@ -27,7 +27,7 @@ class DeployTrackerTest < ActiveSupport::TestCase
       assert_equal(User.system.id, log.user_id)
       assert_equal({ "old_version" => nil, "new_version" => "aaaaaaaa" }, log.data)
 
-      GayFurCity.config.stubs(:version).returns("bbbbbbbb")
+      Fennec.config.stubs(:version).returns("bbbbbbbb")
       DeployTracker.version!
 
       assert_equal({ "old_version" => "aaaaaaaa", "new_version" => "bbbbbbbb" }, last_log("version_bump").data)

@@ -3,11 +3,11 @@ set -euo pipefail
 
 CONTAINER=$(docker run \
   --rm \
-  -e POSTGRES_USER=femboyfans \
-  -e POSTGRES_DB=femboyfans_development \
+  -e POSTGRES_USER=gayfurcity \
+  -e POSTGRES_DB=gayfurcity_development \
   -e POSTGRES_HOST_AUTH_METHOD=trust \
-  -v gayfurcity_db_data:/var/lib/postgresql/data \
-  -d postgres:17.5-alpine3.20)
+  -v fennec_db_data:/var/lib/postgresql \
+  -d postgres:18.6-alpine3.24)
 
 if [[ -z "$CONTAINER" ]]; then
   echo "[ERROR] Failed to start container" >&2
@@ -24,7 +24,7 @@ trap cleanup EXIT
 
 echo "[INFO] Waiting for PostgreSQL to be ready..."
 for i in $(seq 1 30); do
-  if docker exec "$CONTAINER" pg_isready -U femboyfans -q 2>/dev/null; then
+  if docker exec "$CONTAINER" pg_isready -U gayfurcity -q 2>/dev/null; then
     echo "[OK] PostgreSQL is ready"
     break
   fi
@@ -42,15 +42,15 @@ run_sql() {
 }
 
 echo "[INFO] Renaming database and creating temp superuser..."
-run_sql "femboyfans" "
-  ALTER DATABASE femboyfans_development RENAME TO gayfurcity_development;
+run_sql "gayfurcity" "
+  ALTER DATABASE gayfurcity_development RENAME TO fennec_development;
   CREATE ROLE temp_rename_admin WITH LOGIN SUPERUSER;
 "
 
-echo "[INFO] Renaming role femboyfans -> gayfurcity..."
-run_sql "temp_rename_admin" "ALTER ROLE femboyfans RENAME TO gayfurcity;"
+echo "[INFO] Renaming role gayfurcity -> fennec..."
+run_sql "temp_rename_admin" "ALTER ROLE gayfurcity RENAME TO fennec;"
 
 echo "[INFO] Dropping temporary superuser..."
-run_sql "gayfurcity" "DROP ROLE temp_rename_admin;"
+run_sql "fennec" "DROP ROLE temp_rename_admin;"
 
 echo "[OK] Done. Database and role renamed successfully."

@@ -59,7 +59,7 @@ module Users
         render(template: "sessions/confirm_mfa")
       else
         UserEvent.create_from_request!(user, :linked_account_login, request, metadata: { "provider" => PROVIDER })
-        GayFurCity::Logger.add_attributes("user.login" => "success")
+        Fennec::Logger.add_attributes("user.login" => "success")
         redirect_to(posts_path, notice: "You are now logged in")
       end
     end

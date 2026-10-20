@@ -39,7 +39,7 @@ module Downloads
       # default arguments are evaluated when the method is defined
       max_size ||= AdminConfig.instance.max_file_size * 1.megabyte
       file = Tempfile.new(binmode: true)
-      conn = Faraday.new(GayFurCity.config.faraday_options) do |f|
+      conn = Faraday.new(Fennec.config.faraday_options) do |f|
         f.response(:follow_redirects, callback: ->(_old_env, new_env) { validate_uri_allowed!(new_env.url) })
         f.request(:retry, max: retries, retry_block: ->(*) { file = Tempfile.new(binmode: true) })
         # connect to the address that was checked, so the host can't resolve somewhere else in between

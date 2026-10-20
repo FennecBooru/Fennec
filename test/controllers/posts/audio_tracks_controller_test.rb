@@ -56,7 +56,7 @@ module Posts
         end
 
         context("access control") do
-          setup { GayFurCity.config.stubs(:disable_age_checks).returns(true) }
+          setup { Fennec.config.stubs(:disable_age_checks).returns(true) }
 
           asserts do
             access.gte(User::Levels::MEMBER).json.post(post_audio_tracks_path).params { { audio_track: { file: fixture_file_upload("test-300x300-with-audio.mp4"), label: "Dub", reason: "test audio track" }, post_id: @post.id } }

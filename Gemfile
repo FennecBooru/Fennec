@@ -14,7 +14,7 @@ gem("bcrypt", require: "bcrypt")
 gem("draper")
 gem("streamio-ffmpeg")
 gem("responders")
-# gem "dtext_rb", git: "https://github.com/GayFurCity/dtext_rb.git", branch: "master", require: "dtext"
+# gem "dtext_rb", git: "https://github.com/FennecBooru/dtext_rb.git", branch: "master", require: "dtext"
 gem("dtext_rb", require: "dtext")
 gem("bootsnap")
 gem("addressable")

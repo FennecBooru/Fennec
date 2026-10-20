@@ -2,25 +2,24 @@
 set -euo pipefail
 
 # Docker volume "rename" script
-# Copies data from femboyfans_* volumes into gayfurcity_* volumes.
+# Copies data from gayfurcity_* volumes into fennec_* volumes.
 #
 # Prerequisites: run `docker compose up --no-start` first so Compose
 # has already created the destination volumes. This avoids them being
 # treated as external by Compose.
 
 VOLUMES=(
-  "redis_data"
-  "elasticsearch_data"
-  "recommender_data"
-  "node_modules"
   "post_data"
-  "clickhouse_data"
+  "elasticsearch_data"
   "db_data"
-  "iqdb_data"
+  "redis_data"
+  "node_modules"
+  "recommender_data"
+  "clickhouse_data"
 )
 
-OLD_PREFIX="femboyfans"
-NEW_PREFIX="gayfurcity"
+OLD_PREFIX="gayfurcity"
+NEW_PREFIX="fennec"
 
 echo "==> Starting volume migration: '${OLD_PREFIX}' -> '${NEW_PREFIX}'"
 echo "    (destination volumes must already exist via 'docker compose up --no-start')"

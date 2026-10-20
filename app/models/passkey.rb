@@ -13,9 +13,9 @@ class Passkey < ApplicationRecord
     # port in dev, e.g. "localhost:4000", which browsers reject as an RP ID) - so this derives it
     # from the origin's host rather than using config.domain directly.
     ::WebAuthn::RelyingParty.new(
-      id:              URI.parse(GayFurCity.config.hostname).host,
+      id:              URI.parse(Fennec.config.hostname).host,
       name:            AdminConfig.instance.canonical_app_name,
-      allowed_origins: [GayFurCity.config.hostname],
+      allowed_origins: [Fennec.config.hostname],
     )
   end
 
@@ -75,11 +75,11 @@ class Passkey < ApplicationRecord
   end
 
   def self.sign_challenge(challenge, user)
-    GayFurCity::MessageVerifier.new(CHALLENGE_PURPOSE).generate({ challenge: challenge, user_id: user.id }, expires_in: 5.minutes)
+    Fennec::MessageVerifier.new(CHALLENGE_PURPOSE).generate({ challenge: challenge, user_id: user.id }, expires_in: 5.minutes)
   end
 
   def self.verify_challenge!(signed_challenge, user)
-    payload = GayFurCity::MessageVerifier.new(CHALLENGE_PURPOSE).verify(signed_challenge)
+    payload = Fennec::MessageVerifier.new(CHALLENGE_PURPOSE).verify(signed_challenge)
     raise(ActiveSupport::MessageVerifier::InvalidSignature) unless payload["user_id"] == user.id
     payload["challenge"]
   end

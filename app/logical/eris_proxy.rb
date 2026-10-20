@@ -29,7 +29,7 @@ module ErisProxy
   module_function
 
   def endpoint
-    GayFurCity.config.eris_server
+    Fennec.config.eris_server
   end
 
   def enabled?
@@ -37,9 +37,9 @@ module ErisProxy
   end
 
   def make_request(path, request_type, body = nil)
-    conn = Faraday.new(GayFurCity.config.faraday_options.deep_merge(request: { timeout: GayFurCity.config.eris_read_timeout }))
+    conn = Faraday.new(Fennec.config.faraday_options.deep_merge(request: { timeout: Fennec.config.eris_read_timeout }))
     headers = { content_type: "application/json" }
-    headers[:authorization] = "Bearer #{GayFurCity.config.eris_token}" if GayFurCity.config.eris_token.present?
+    headers[:authorization] = "Bearer #{Fennec.config.eris_token}" if Fennec.config.eris_token.present?
     conn.send(request_type, endpoint + path, body&.to_json, headers)
   rescue Faraday::Error
     raise(Error, "This service is temporarily unavailable. Please try again later.")
@@ -150,23 +150,23 @@ module ErisProxy
   end
 
   def record_circuit_failure
-    count = Cache.redis.eval(INCR_WITH_EXPIRY, keys: [CIRCUIT_FAILURES_KEY], argv: [GayFurCity.config.eris_circuit_failure_window])
-    open_circuit! if count >= GayFurCity.config.eris_circuit_failure_threshold
+    count = Cache.redis.eval(INCR_WITH_EXPIRY, keys: [CIRCUIT_FAILURES_KEY], argv: [Fennec.config.eris_circuit_failure_window])
+    open_circuit! if count >= Fennec.config.eris_circuit_failure_threshold
   end
 
   def open_circuit!
-    cooldown = GayFurCity.config.eris_circuit_cooldown
+    cooldown = Fennec.config.eris_circuit_cooldown
     return unless Cache.redis.set(CIRCUIT_OPEN_KEY, Time.now.to_i, ex: cooldown, nx: true)
 
     Cache.redis.del(CIRCUIT_FAILURES_KEY)
-    Cache.redis.set(ANON_LOCKDOWN_KEY, Time.now.to_i, ex: GayFurCity.config.eris_anon_lockdown_duration)
-    Rails.logger.warn("ErisProxy: circuit opened, cooling down for #{cooldown}s and locking out anonymous users for #{GayFurCity.config.eris_anon_lockdown_duration}s")
+    Cache.redis.set(ANON_LOCKDOWN_KEY, Time.now.to_i, ex: Fennec.config.eris_anon_lockdown_duration)
+    Rails.logger.warn("ErisProxy: circuit opened, cooling down for #{cooldown}s and locking out anonymous users for #{Fennec.config.eris_anon_lockdown_duration}s")
   end
 
   def with_query_semaphore
     # The expiry clears out counts leaked by processes that died mid-query
-    count = Cache.redis.eval(INCR_WITH_EXPIRY, keys: [CONCURRENT_KEY], argv: [GayFurCity.config.eris_read_timeout * 10])
-    if count > GayFurCity.config.eris_max_concurrent_queries
+    count = Cache.redis.eval(INCR_WITH_EXPIRY, keys: [CONCURRENT_KEY], argv: [Fennec.config.eris_read_timeout * 10])
+    if count > Fennec.config.eris_max_concurrent_queries
       Cache.redis.eval(DECR_FLOOR_ZERO, keys: [CONCURRENT_KEY])
       raise(BusyError, "Similar image search is busy. Please try again later.")
     end

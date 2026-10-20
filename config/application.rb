@@ -26,7 +26,7 @@ require_relative("local_config")
   Dir["#{__dir__}/../lib/#{name}/**/*.rb"].each { |f| require(f) }
 end
 
-module GayFurCity
+module Fennec
   # AdminConfig.ensure_required_set!
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
@@ -60,8 +60,8 @@ module GayFurCity
       },
     }
 
-    if Rails.env.production? && GayFurCity.config.ssl_options.present?
-      config.ssl_options = GayFurCity.config.ssl_options
+    if Rails.env.production? && Fennec.config.ssl_options.present?
+      config.ssl_options = Fennec.config.ssl_options
     else
       config.ssl_options = {
         hsts:           false,
@@ -72,7 +72,7 @@ module GayFurCity
 
     config.after_initialize do
       Rails.application.routes.default_url_options = {
-        host: GayFurCity.config.hostname,
+        host: Fennec.config.hostname,
       }
     end
 

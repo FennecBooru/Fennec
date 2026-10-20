@@ -16,11 +16,11 @@ class AudioTrackMediaAsset < MediaAsset
 
   module StorageMethods
     def path_prefix
-      GayFurCity.config.audio_track_path_prefix
+      Fennec.config.audio_track_path_prefix
     end
 
     def protected_path_prefix
-      GayFurCity.config.protected_path_prefix
+      Fennec.config.protected_path_prefix
     end
 
     def is_protected?

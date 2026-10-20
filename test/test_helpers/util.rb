@@ -18,10 +18,10 @@ module TestHelpers
 
     # searches with sql instead of opensearch for the block
     def with_sql_search
-      GayFurCity.config.stubs(:sql_search?).returns(true)
+      Fennec.config.stubs(:sql_search?).returns(true)
       yield
     ensure
-      GayFurCity.config.unstub(:sql_search?)
+      Fennec.config.unstub(:sql_search?)
     end
 
     # perform_enqueued_jobs(&block) runs each job the instant it's enqueued - including mid-callback,
@@ -88,7 +88,7 @@ module TestHelpers
     # credentials it creates, so registering and then authenticating in the same test need to
     # share one instance.
     def fake_webauthn_client
-      @fake_webauthn_client ||= WebAuthn::FakeClient.new(GayFurCity.config.hostname)
+      @fake_webauthn_client ||= WebAuthn::FakeClient.new(Fennec.config.hostname)
     end
 
     def register_fake_passkey_for(user, label: "Test device")

@@ -2,7 +2,7 @@
 
 # Configure the thread pool used by promises (Concurrent::Promise) in the concurrent-ruby gem.
 #
-# We set the maximum number of threads to `GayFurCity.config.max_concurrency`, and we disable queueing
+# We set the maximum number of threads to `Fennec.config.max_concurrency`, and we disable queueing
 # so that if we try to schedule more tasks than there are available threads, then the tasks are
 # worked by the current thread instead of being queued up, which can potentially cause deadlocks.
 #
@@ -10,7 +10,7 @@
 module Concurrent
   # This is the default executor used by promises.
   def self.new_io_executor(*)
-    if GayFurCity.config.max_concurrency.to_i <= 0
+    if Fennec.config.max_concurrency.to_i <= 0
       return ImmediateExecutor.new
     end
 
@@ -18,7 +18,7 @@ module Concurrent
     ThreadPoolExecutor.new(
       name:            "io",
       min_threads:     0,
-      max_threads:     GayFurCity.config.max_concurrency.to_i,
+      max_threads:     Fennec.config.max_concurrency.to_i,
       max_queue:       0,
       idletime:        60,
       synchronous:     true,
@@ -27,14 +27,14 @@ module Concurrent
   end
 
   def self.new_fast_executor(*)
-    if GayFurCity.config.max_concurrency.to_i <= 0
+    if Fennec.config.max_concurrency.to_i <= 0
       return ImmediateExecutor.new
     end
 
     ThreadPoolExecutor.new(
       name:            "fast",
       min_threads:     0,
-      max_threads:     GayFurCity.config.max_concurrency.to_i,
+      max_threads:     Fennec.config.max_concurrency.to_i,
       max_queue:       0,
       idletime:        60,
       synchronous:     true,

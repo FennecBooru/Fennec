@@ -115,7 +115,7 @@ module Posts
 
         context("throttling") do
           setup do
-            GayFurCity.config.stubs(:disable_throttles).returns(false)
+            Fennec.config.stubs(:disable_throttles).returns(false)
             ErisProxy.stubs(:query_post).returns([])
             ErisProxy.stubs(:query_url).returns([])
             create(:upload_whitelist, pattern: "*google.com")

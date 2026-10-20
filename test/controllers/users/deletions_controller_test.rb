@@ -32,7 +32,7 @@ module Users
         end
 
         context("access control") do
-          setup { GayFurCity.config.stubs(:disable_age_checks).returns(true) }
+          setup { Fennec.config.stubs(:disable_age_checks).returns(true) }
           asserts do
             access.between(User::Levels::REJECTED, User::Levels::SYSTEM).delete(users_deletion_path).params({ password: "password" }).success(:redirect).fail(:bad_request).anonymous(:redirect)
           end

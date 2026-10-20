@@ -42,7 +42,7 @@ Shoulda::Matchers.configure do |config|
 end
 
 WebMock.disable_net_connect!(allow: [
-  GayFurCity.config.elasticsearch_host,
+  Fennec.config.elasticsearch_host,
 ])
 
 FactoryBot::SyntaxRunner.class_eval do
@@ -57,7 +57,7 @@ BCrypt::Engine.send(:remove_const, :DEFAULT_COST)
 BCrypt::Engine::DEFAULT_COST = BCrypt::Engine::MIN_COST
 
 # Cache.redis (app/logical/cache.rb) is a single connection shared by every process pointed at the
-# same GAYFURCITY_REDIS_URL - Security::Lockdown, UserThrottle, etc. store real keys through it with
+# same FENNEC_REDIS_URL - Security::Lockdown, UserThrottle, etc. store real keys through it with
 # no isolation of their own. Without namespacing, a `parallelize` worker toggling e.g. lockdown state
 # in one test races against a completely unrelated test's assertions in another worker. Reopen
 # Cache.redis (test env only - app/logical/cache.rb is untouched) so every process gets its own
@@ -65,7 +65,7 @@ BCrypt::Engine::DEFAULT_COST = BCrypt::Engine::MIN_COST
 # memoized ivar wouldn't update on its own (same hazard as User.system/.owner).
 class Cache
   def self.redis
-    @redis ||= Redis::Namespace.new("test-p#{Process.pid}", redis: Redis.new(url: GayFurCity.config.redis_url))
+    @redis ||= Redis::Namespace.new("test-p#{Process.pid}", redis: Redis.new(url: Fennec.config.redis_url))
   end
 end
 
@@ -73,7 +73,7 @@ end
 # worker, or a parent killed before it can wait for/clean up its workers. As a safety net, sweep
 # away any *_test-pNNN[-nN] index/keys whose embedded pid no longer belongs to a live process,
 # mirroring IsolatedDatabase.reap_orphaned!.
-raw_redis_for_reaping = Redis.new(url: GayFurCity.config.redis_url)
+raw_redis_for_reaping = Redis.new(url: Fennec.config.redis_url)
 reap_cursor = "0"
 loop do
   reap_cursor, keys = raw_redis_for_reaping.scan(reap_cursor, match: "test-p*:*", count: 1000)
@@ -146,13 +146,13 @@ class ActiveSupport::TestCase # rubocop:disable Style/ClassAndModuleChildren
     host = "example.com"
     Socket.stubs(:gethostname).returns(host)
     AdminConfig.any_instance.stubs(:enable_sock_puppet_validation).returns(false)
-    GayFurCity.config.stubs(:disable_throttles).returns(true)
-    GayFurCity.config.stubs(:reports_enabled).returns(false)
-    GayFurCity.config.stubs(:telemetry_enabled).returns(false)
-    GayFurCity.config.stubs(:cdn_domain).returns(host)
-    GayFurCity.config.stubs(:domain).returns(host)
-    GayFurCity.config.stubs(:hostname).returns("https://#{host}")
-    GayFurCity.config.stubs(:cdn_hostname).returns("https://#{host}")
+    Fennec.config.stubs(:disable_throttles).returns(true)
+    Fennec.config.stubs(:reports_enabled).returns(false)
+    Fennec.config.stubs(:telemetry_enabled).returns(false)
+    Fennec.config.stubs(:cdn_domain).returns(host)
+    Fennec.config.stubs(:domain).returns(host)
+    Fennec.config.stubs(:hostname).returns("https://#{host}")
+    Fennec.config.stubs(:cdn_hostname).returns("https://#{host}")
     Rails.application.routes.default_url_options = {
       host: host,
     }
@@ -162,8 +162,8 @@ class ActiveSupport::TestCase # rubocop:disable Style/ClassAndModuleChildren
       FileUtils.mkdir_p(File.join(self.class.storage_root, dir))
     end
     storage_manager = StorageManager::Local.new(base_dir: self.class.storage_root)
-    GayFurCity.config.stubs(:storage_manager_instance).returns(storage_manager)
-    GayFurCity.config.stubs(:backup_storage_manager_instance).returns(StorageManager::Null.new)
+    Fennec.config.stubs(:storage_manager_instance).returns(storage_manager)
+    Fennec.config.stubs(:backup_storage_manager_instance).returns(StorageManager::Null.new)
     AdminConfig.any_instance.stubs(:flag_ai_posts).returns(false)
     AdminConfig.any_instance.stubs(:tag_ai_posts).returns(false)
     AdminConfig.any_instance.stubs(:enable_email_verification).returns(false)

@@ -8,7 +8,7 @@ class DomainIconMediaAsset < MediaAsset
 
   module StorageMethods
     def path_prefix
-      GayFurCity.config.domain_icon_path_prefix
+      Fennec.config.domain_icon_path_prefix
     end
 
     def is_protected?

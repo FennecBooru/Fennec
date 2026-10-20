@@ -22,7 +22,7 @@
 
 <%= javascript_tag(nonce: true) do %>
   $(function() {
-    Danbooru.MFA.init_backup_codes("<%= j(@user.backup_codes.join("\n")) %>");
+    Fennec.MFA.init_backup_codes("<%= j(@user.backup_codes.join("\n")) %>");
   })
 <% end %>
 

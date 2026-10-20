@@ -68,7 +68,7 @@
       <%= f.input(:password_confirmation) %>
       <%= f.input(:time_zone, include_blank: false) %>
 
-      <% if GayFurCity.config.recaptcha.enabled? %>
+      <% if Fennec.config.recaptcha.enabled? %>
         <%= recaptcha_tags(theme: "dark", nonce: content_security_policy_nonce) %>
       <% elsif !Rails.env.production? %>
         <div class="recaptcha-mock">

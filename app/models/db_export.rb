@@ -25,7 +25,7 @@ class DbExport < ApplicationRecord
     # Every export for a given date expires together (day-of-month is a property of the date
     # itself, not the individual row), so once its rows are gone the date directory is empty -
     # delete_db_export_dir is a no-op if anything else still lives there.
-    dates.each { |date| GayFurCity.config.storage_manager.instance.delete_db_export_dir(date.iso8601) }
+    dates.each { |date| Fennec.config.storage_manager.instance.delete_db_export_dir(date.iso8601) }
   end
 
   def file_name
@@ -41,6 +41,6 @@ class DbExport < ApplicationRecord
   end
 
   def storage_manager
-    GayFurCity.config.storage_manager.instance
+    Fennec.config.storage_manager.instance
   end
 end

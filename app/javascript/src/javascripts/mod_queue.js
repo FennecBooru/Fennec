@@ -10,8 +10,8 @@ ModQueue.detailed_rejection_dialog = function () {
   $("#detailed-rejection-dialog").find("form")[0].reset();
 
   $("#new_post_disapproval")
-    .off("submit.danbooru")
-    .on("submit.danbooru", () => {
+    .off("submit.fennec")
+    .on("submit.fennec", () => {
       Post.disapprove(postID, $("#post_disapproval_reason").val(), $("#post_disapproval_message").val());
       return false;
     });
@@ -42,7 +42,7 @@ $(function () {
     .text(toolbarVisible ? "Approvals: On" : "Approvals: Off");
 
   // Toolbar buttons
-  $(document).on("click.danbooru", ".quick-mod .detailed-rejection-link", ModQueue.detailed_rejection_dialog);
+  $(document).on("click.fennec", ".quick-mod .detailed-rejection-link", ModQueue.detailed_rejection_dialog);
   $(".delete-with-reason-link").on("click", function (e) {
     e.preventDefault();
     const post_id = $(e.target).attr("data-post-id");

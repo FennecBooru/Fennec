@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module GayFurCity
+module Fennec
   class Config < YiffSpace::Config::Builder
     # config(:name) { "value" }
   end

@@ -38,7 +38,7 @@ class ApplicationJob < ActiveJob::Base
       block.call
     rescue StandardError => e
       Yabeda.jobs.failures.increment(tags) if metrics
-      GayFurCity::Logger.log(e, source: "Job: #{job.class.name}")
+      Fennec::Logger.log(e, source: "Job: #{job.class.name}")
       raise
     end
 

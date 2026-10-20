@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module GayFurCity
+module Fennec
   module Paginator
     module ActiveRecordExtension
       include(BaseExtension)

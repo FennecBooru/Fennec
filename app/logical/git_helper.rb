@@ -37,21 +37,21 @@ class GitHelper
     if Rails.env.production?
       fallback_commit = self.class.revision_file_commit || @local.commit
       begin
-        @origin = Ref.new("internal", "master", GayFurCity.config.local_source_code_url)
+        @origin = Ref.new("internal", "master", Fennec.config.local_source_code_url)
       rescue StandardError => e
         Rails.logger.warn("git: #{e.message}, falling back to revision file for origin")
-        @origin = RevisionRef.new(fallback_commit, GayFurCity.config.local_source_code_url)
+        @origin = RevisionRef.new(fallback_commit, Fennec.config.local_source_code_url)
       end
       begin
-        @upstream = Ref.new("upstream", "master", GayFurCity.config.source_code_url)
+        @upstream = Ref.new("upstream", "master", Fennec.config.source_code_url)
       rescue StandardError => e
         Rails.logger.warn("git: #{e.message}, using remote comparison for upstream")
-        @upstream = RevisionRef.new(nil, GayFurCity.config.source_code_url, branch: "master")
+        @upstream = RevisionRef.new(nil, Fennec.config.source_code_url, branch: "master")
       end
     else
       branch = `git rev-parse --abbrev-ref HEAD`.strip
       remote = `git config branch.#{branch}.remote`.strip
-      @origin = Ref.new(remote, branch, GayFurCity.config.source_code_url)
+      @origin = Ref.new(remote, branch, Fennec.config.source_code_url)
       @upstream = nil
     end
   end
@@ -291,7 +291,7 @@ class GitHelper
       response = Net::HTTP.start(uri.host, uri.port, use_ssl: true, open_timeout: 5, read_timeout: 5) do |http|
         req = Net::HTTP::Get.new(uri)
         req["Accept"]     = "application/vnd.github+json"
-        req["User-Agent"] = GayFurCity.config.user_agent
+        req["User-Agent"] = Fennec.config.user_agent
         http.request(req)
       end
 
@@ -337,7 +337,7 @@ class GitHelper
     return unless commit
     @enabled = true
     @local    = RevisionRef.new(commit, nil)
-    @origin   = RevisionRef.new(commit, GayFurCity.config.source_code_url)
-    @upstream = RevisionRef.new(nil, GayFurCity.config.source_code_url, branch: "master")
+    @origin   = RevisionRef.new(commit, Fennec.config.source_code_url)
+    @upstream = RevisionRef.new(nil, Fennec.config.source_code_url, branch: "master")
   end
 end

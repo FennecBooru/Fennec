@@ -18,7 +18,7 @@ const customConfig = {
     ],
   },
   output: {
-    library: ["Danbooru"],
+    library: ["Fennec"],
   },
   optimization: {
     runtimeChunk: false,

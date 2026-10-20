@@ -38,31 +38,31 @@ Rules.initialize_listeners = function () {
   const $saveOrderLink = $(".save-order-link");
   const $sortableRules = $("#sortable-rules");
 
-  $editOrderLink.on("click.gayfurcity.sorting", function (event) {
+  $editOrderLink.on("click.fennec.sorting", function (event) {
     event.preventDefault();
     Rules.toggle_buttons();
     Rules.mode = "rules";
     Rules.sortable();
-    Danbooru.notice("Drag and drop to reorder.");
+    Fennec.notice("Drag and drop to reorder.");
   });
 
-  $editCategoryOrderLink.on("click.gayfurcity.sorting", function (event) {
+  $editCategoryOrderLink.on("click.fennec.sorting", function (event) {
     event.preventDefault();
     Rules.toggle_buttons();
     Rules.mode = "categories";
     Rules.sortable();
-    Danbooru.notice("Drag and drop to reorder.");
+    Fennec.notice("Drag and drop to reorder.");
   });
 
-  $editQuickOrderLink.on("click.gayfurcity.sorting", function (event) {
+  $editQuickOrderLink.on("click.fennec.sorting", function (event) {
     event.preventDefault();
     Rules.toggle_buttons();
     Rules.mode = "quick";
     Rules.sortable();
-    Danbooru.notice("Drag and drop to reorder.");
+    Fennec.notice("Drag and drop to reorder.");
   });
 
-  $saveOrderLink.on("click.gayfurcity.sorting", function (event) {
+  $saveOrderLink.on("click.fennec.sorting", function (event) {
     event.preventDefault();
     $saveOrderLink.hide();
     $sortableRules.sortable("disable");
@@ -81,18 +81,18 @@ Rules.initialize_listeners = function () {
       dataType: "json",
       success (data) {
         $("#sortable-rules-container").html(data.html);
-        Danbooru.notice("Order updated.");
+        Fennec.notice("Order updated.");
         Rules.toggle_buttons(false);
         Rules.reinitialize_listeners();
       },
       error (data) {
         $saveOrderLink.show();
         if (data.responseJSON.message) {
-          Danbooru.error(`Failed to update order: ${data.responseJSON.message}`);
+          Fennec.error(`Failed to update order: ${data.responseJSON.message}`);
         } else if (data.responseJSON.errors) {
-          Danbooru.error(`Failed to update order:<br>${data.responseJSON.errors.map(e => `${e.name}: ${e.message}`).join("<br>")}`);
+          Fennec.error(`Failed to update order:<br>${data.responseJSON.errors.map(e => `${e.name}: ${e.message}`).join("<br>")}`);
         } else {
-          Danbooru.error("Failed to update order.");
+          Fennec.error("Failed to update order.");
         }
 
         Rules.sortable();
@@ -128,10 +128,10 @@ Rules.sortable = function () {
 };
 
 Rules.reinitialize_listeners = function () {
-  $(".edit-order-link").off("click.gayfurcity.sorting");
-  $(".edit-category-order-link").off("click.gayfurcity.sorting");
-  $(".edit-quick-order-link").off("click.gayfurcity.sorting");
-  $(".save-order-link").off("click.gayfurcity.sorting");
+  $(".edit-order-link").off("click.fennec.sorting");
+  $(".edit-category-order-link").off("click.fennec.sorting");
+  $(".edit-quick-order-link").off("click.fennec.sorting");
+  $(".save-order-link").off("click.fennec.sorting");
   Rules.initialize_listeners();
 };
 

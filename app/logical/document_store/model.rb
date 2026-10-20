@@ -58,11 +58,11 @@ module DocumentStore
   # override), so distinct timeout values - one per config tier that's actually in use - each get
   # their own memoized client/connection instead of building one from scratch per search.
   def self.sql_search?
-    GayFurCity.config.sql_search?
+    Fennec.config.sql_search?
   end
 
   def self.client(request_timeout: 120)
     @clients ||= {}
-    @clients[request_timeout] ||= Elasticsearch::Client.new(host: GayFurCity.config.elasticsearch_host, request_timeout: request_timeout)
+    @clients[request_timeout] ||= Elasticsearch::Client.new(host: Fennec.config.elasticsearch_host, request_timeout: request_timeout)
   end
 end

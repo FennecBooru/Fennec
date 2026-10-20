@@ -65,11 +65,11 @@
   <%= tag.meta(name: "description", content: AdminConfig.instance.app_description) %>
   <%= tag.meta(property: "og:site", content: AdminConfig.instance.app_name) %>
   <%= tag.meta(property: "og:title", content: AdminConfig.instance.app_name) %>
-  <%= tag.meta(property: "og:url", content: root_url(host: GayFurCity.config.hostname, protocol: "https")) %>
-  <%= tag.meta(name: "canonical", content: root_url(host: GayFurCity.config.hostname, protocol: "https")) %>
+  <%= tag.meta(property: "og:url", content: root_url(host: Fennec.config.hostname, protocol: "https")) %>
+  <%= tag.meta(name: "canonical", content: root_url(host: Fennec.config.hostname, protocol: "https")) %>
 
   <meta property="og:type" content="website">
-  <%= tag.meta(property: "og:image", content: URI.join(GayFurCity.config.hostname, site_logo_url).to_s) %>
+  <%= tag.meta(property: "og:image", content: URI.join(Fennec.config.hostname, site_logo_url).to_s) %>
   <%= tag.meta(property: "og:image:height", content: site_logo_size) %>
   <%= tag.meta(property: "og:image:width", content: site_logo_size) %>
 
@@ -77,5 +77,5 @@
   <meta name="twitter:card" content="summary">
   <%= tag.meta(name: "twitter:title", content: AdminConfig.instance.app_name) %>
   <%= tag.meta(name: "twitter:description", content: AdminConfig.instance.app_description) %>
-  <%= tag.meta(property: "twitter:image", content: URI.join(GayFurCity.config.hostname, site_logo_url).to_s) %>
+  <%= tag.meta(property: "twitter:image", content: URI.join(Fennec.config.hostname, site_logo_url).to_s) %>
 <% end %>

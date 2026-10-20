@@ -93,7 +93,7 @@ module Pools
         end
 
         context("access control") do
-          setup { GayFurCity.config.stubs(:disable_age_checks).returns(true) }
+          setup { Fennec.config.stubs(:disable_age_checks).returns(true) }
 
           asserts do
             access.gte(User::Levels::MEMBER).put { undo_pool_version_path(@pool.versions.second) }.success(:redirect)

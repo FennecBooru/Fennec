@@ -64,7 +64,7 @@ module PostEvents
         should("format flag_created correctly") do
           @flag = @post.flags.create!(reason_name: "uploading_guidelines", creator: @admin, note: "abc")
 
-          reason = GayFurCity.config.flag_reasons.find { |r| r[:name] == "uploading_guidelines" }[:reason]
+          reason = Fennec.config.flag_reasons.find { |r| r[:name] == "uploading_guidelines" }[:reason]
 
           assert_matches(
             post_id:      @post.id,

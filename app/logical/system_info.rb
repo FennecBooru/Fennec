@@ -81,7 +81,7 @@ class SystemInfo
 
   def memcached
     @memcached ||= begin
-      client = Dalli::Client.new(GayFurCity.config.memcached_servers)
+      client = Dalli::Client.new(Fennec.config.memcached_servers)
       all_stats = client.stats
       all_stats.keys.to_h do |server|
         stats = all_stats[server]
@@ -115,7 +115,7 @@ class SystemInfo
   end
 
   def main
-    @main ||= OpenHash.from(ruby_version: RUBY_VERSION, rails_version: Rails.version, node_version: `node --version`.strip, alpine_version: File.read("/etc/alpine-release").strip, environment: Rails.env, hostname: GayFurCity.config.hostname, name: AdminConfig.instance.app_name, url: GayFurCity.config.app_url, description: AdminConfig.instance.app_description, safe_mode: AdminConfig.instance.safe_mode?, version: GayFurCity.config.version, date: Time.now.utc.iso8601, timezone: Time.zone.name, timezone_sys: `date +%Z`[..-1])
+    @main ||= OpenHash.from(ruby_version: RUBY_VERSION, rails_version: Rails.version, node_version: `node --version`.strip, alpine_version: File.read("/etc/alpine-release").strip, environment: Rails.env, hostname: Fennec.config.hostname, name: AdminConfig.instance.app_name, url: Fennec.config.app_url, description: AdminConfig.instance.app_description, safe_mode: AdminConfig.instance.safe_mode?, version: Fennec.config.version, date: Time.now.utc.iso8601, timezone: Time.zone.name, timezone_sys: `date +%Z`[..-1])
   end
 
   def gems
@@ -128,7 +128,7 @@ class SystemInfo
   def eris
     return OpenHash.from(enabled: false) unless ErisProxy.enabled?
     @eris ||= begin
-      conn = Faraday.new(GayFurCity.config.faraday_options)
+      conn = Faraday.new(Fennec.config.faraday_options)
       status = nil
       latency = time { status = conn.get("#{ErisProxy.endpoint}/status") }
       raise(ErisProxy::Error, "status returned #{status.status}") unless status.success?

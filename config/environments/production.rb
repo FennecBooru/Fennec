@@ -53,19 +53,19 @@ Rails.application.configure do
   # "info" includes generic and useful information about system operation, but avoids logging too much
   # information to avoid inadvertent exposure of personally identifiable information (PII). If you
   # want to log everything, set the level to "debug".
-  config.log_level = GayFurCity.config.log_level
+  config.log_level = Fennec.config.log_level
 
   # Use a real queuing backend for Active Job (and separate queues per environment).
   # config.active_job.queue_adapter = :resque
-  # config.active_job.queue_name_prefix = "gayfurcity_production"
+  # config.active_job.queue_name_prefix = "fennec_production"
 
   # Disable caching for Action Mailer templates even if Action Controller
   # caching is enabled.
   config.action_mailer.perform_caching = false
 
-  if GayFurCity.config.email.delivery_method
-    config.action_mailer.delivery_method = GayFurCity.config.email.delivery_method
-    method, settings = GayFurCity.config.email.config
+  if Fennec.config.email.delivery_method
+    config.action_mailer.delivery_method = Fennec.config.email.delivery_method
+    method, settings = Fennec.config.email.config
     config.action_mailer.public_send("#{method}=", settings)
   else
     TraceLogger.warn("No email delivery is configured")
@@ -73,7 +73,7 @@ Rails.application.configure do
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
-  config.action_mailer.raise_delivery_errors = GayFurCity.config.email.delivery_errors
+  config.action_mailer.raise_delivery_errors = Fennec.config.email.delivery_errors
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

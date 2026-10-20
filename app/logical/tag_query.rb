@@ -233,7 +233,7 @@ class TagQuery
         next
       end
 
-      @tag_count += 1 unless GayFurCity.config.is_unlimited_tag?(token)
+      @tag_count += 1 unless Fennec.config.is_unlimited_tag?(token)
       metatag_name, g2 = token.split(":", 2)
 
       # Short-circuit when there is no metatag or the metatag has no value
@@ -495,7 +495,7 @@ class TagQuery
     names = names.uniq
     return if names.empty?
 
-    @tag_count += names.count { |n| !GayFurCity.config.is_unlimited_tag?(n) }
+    @tag_count += names.count { |n| !Fennec.config.is_unlimited_tag?(n) }
     q[:tag_groups][type] << names
   end
 

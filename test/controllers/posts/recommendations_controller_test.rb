@@ -6,7 +6,7 @@ module Posts
   class RecommendationsControllerTest < ActionDispatch::IntegrationTest
     context("The recommendations controller") do
       setup do
-        GayFurCity.config.stubs(:recommender_server).returns("http://recommender:5000")
+        Fennec.config.stubs(:recommender_server).returns("http://recommender:5000")
         @user = create(:user)
         @post = create(:post)
       end
@@ -28,7 +28,7 @@ module Posts
         end
 
         should("not be available without a recommender server") do
-          GayFurCity.config.stubs(:recommender_server).returns(nil)
+          Fennec.config.stubs(:recommender_server).returns(nil)
           get_auth(post_recommendations_path, @user)
 
           assert_response(:not_implemented)

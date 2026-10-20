@@ -97,7 +97,7 @@ module Sources
       # Subclasses should merge in any required headers needed to access resources
       # on the site.
       def headers
-        GayFurCity.config.http_headers
+        Fennec.config.http_headers
       end
 
       def file_url

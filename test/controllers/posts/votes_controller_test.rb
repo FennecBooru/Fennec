@@ -29,7 +29,7 @@ module Posts
           end
 
           should("only list own votes") do
-            GayFurCity.config.stubs(:disable_age_checks).returns(true)
+            Fennec.config.stubs(:disable_age_checks).returns(true)
             create(:post_vote, post: @post, user: @user2, score: -1)
             create(:post_vote, post: @post, user: @admin, score: 1)
 

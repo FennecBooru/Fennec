@@ -54,7 +54,7 @@ let Note = {
 
     bind_events: function ($note_box) {
       $note_box.on(
-        "dragstart.danbooru resizestart.danbooru",
+        "dragstart.fennec resizestart.fennec",
         function (e) {
           var $note_box_inner = $(e.currentTarget);
           $note_box_inner.find(".note-box-inner-border").addClass("unsaved");
@@ -65,7 +65,7 @@ let Note = {
         },
       );
 
-      $note_box.on("resize.danbooru",
+      $note_box.on("resize.fennec",
         function (e) {
           var $note_box_inner = $(e.currentTarget);
           Note.Box.resize_inner_border($note_box_inner);
@@ -74,7 +74,7 @@ let Note = {
       );
 
       $note_box.on(
-        "dragstop.danbooru resizestop.danbooru",
+        "dragstop.fennec resizestop.fennec",
         function (e) {
           Note.dragging = false;
           e.stopPropagation();
@@ -82,7 +82,7 @@ let Note = {
       );
 
       $note_box.on(
-        "mouseover.danbooru mouseout.danbooru",
+        "mouseover.fennec mouseout.fennec",
         function (e) {
           if (Note.dragging) {
             return;
@@ -110,7 +110,7 @@ let Note = {
       );
 
       if (Utility.meta("current-user-name") !== "Anonymous") {
-        $note_box.on("dblclick.danbooru", function (e) {
+        $note_box.on("dblclick.fennec", function (e) {
           if (e.target.tagName !== "A") {
             var note_id = $note_box.data("id");
             var note_body = Note.Body.find(note_id);
@@ -119,7 +119,7 @@ let Note = {
           e.stopPropagation();
         });
       } else {
-        $note_box.on("dblclick.danbooru", function (e) {
+        $note_box.on("dblclick.fennec", function (e) {
           var note_id = $note_box.data("id");
           var note_body = Note.Body.find(note_id);
           if (note_body.tagName !== "A") {
@@ -313,20 +313,20 @@ let Note = {
     },
 
     bind_events: function ($note_body) {
-      $note_body.on("mouseover.danbooru", function (e) {
+      $note_body.on("mouseover.fennec", function (e) {
         var $note_body_inner = $(e.currentTarget);
         Note.Body.show($note_body_inner.data("id"));
         e.stopPropagation();
       });
 
-      $note_body.on("mouseout.danbooru", function (e) {
+      $note_body.on("mouseout.fennec", function (e) {
         var $note_body_inner = $(e.currentTarget);
         Note.Body.hide($note_body_inner.data("id"));
         e.stopPropagation();
       });
 
       if (Utility.meta("current-user-name") !== "Anonymous") {
-        $note_body.on("click.danbooru", function (e) {
+        $note_body.on("click.fennec", function (e) {
           if (e.target.tagName !== "A") {
             var $note_body_inner = $(e.currentTarget);
             Note.Edit.show($note_body_inner);
@@ -334,7 +334,7 @@ let Note = {
           e.stopPropagation();
         });
       } else {
-        $note_body.on("click.danbooru", function (e) {
+        $note_body.on("click.fennec", function (e) {
           if (e.target.tagName !== "A") {
             Utility.error("You must be logged in to edit notes");
           }
@@ -394,7 +394,7 @@ let Note = {
       };
       $dialog.dialog("option", "title", "Edit note #" + id + " (<a href=\"/help/notes\">view help</a>)");
 
-      $dialog.on("dialogclose.danbooru", function () {
+      $dialog.on("dialogclose.fennec", function () {
         Note.editing = false;
         $(".note-box").resizable("enable");
         $(".note-box").draggable("enable");
@@ -559,12 +559,12 @@ let Note = {
       $(document.body).addClass("mode-translation");
       $("#original-file-link").click();
       $("#image").off("click", Note.Box.toggle_all);
-      $("#image").on("mousedown.danbooru.note", Note.TranslationMode.Drag.start);
-      $(document).on("mouseup.danbooru.note", Note.TranslationMode.Drag.stop);
+      $("#image").on("mousedown.fennec.note", Note.TranslationMode.Drag.start);
+      $(document).on("mouseup.fennec.note", Note.TranslationMode.Drag.stop);
       $("#mark-as-translated-section").show();
 
       Utility.notice("Translation mode is on. Drag on the image to create notes. <a href=\"#\">Turn translation mode off</a> (shortcut is <span class=\"key\">n</span>).");
-      $("#notice a:contains(Turn translation mode off)").on("click.danbooru", Note.TranslationMode.stop);
+      $("#notice a:contains(Turn translation mode off)").on("click.fennec", Note.TranslationMode.stop);
     },
 
     stop: function (e) {
@@ -572,7 +572,7 @@ let Note = {
 
       Note.TranslationMode.active = false;
       $("#image").css("cursor", "auto");
-      $("#image").on("click.danbooru", Note.Box.toggle_all);
+      $("#image").on("click.fennec", Note.Box.toggle_all);
       $("#image").off("mousedown", Note.TranslationMode.Drag.start);
       $(document).off("mouseup", Note.TranslationMode.Drag.stop);
       $(document.body).removeClass("mode-translation");
@@ -613,7 +613,7 @@ let Note = {
           return;
         }
         e.preventDefault(); /* don't drag the image */
-        $(document).on("mousemove.danbooru", Note.TranslationMode.Drag.drag);
+        $(document).on("mousemove.fennec", Note.TranslationMode.Drag.drag);
         Note.TranslationMode.Drag.dragStartX = e.pageX;
         Note.TranslationMode.Drag.dragStartY = e.pageY;
       },
@@ -767,12 +767,12 @@ let Note = {
 
     this.initialize_shortcuts();
     this.initialize_highlight();
-    $(document).on("hashchange.danbooru.note", this.initialize_highlight);
+    $(document).on("hashchange.fennec.note", this.initialize_highlight);
   },
 
   initialize_shortcuts: function () {
-    $("#translate").on("click.danbooru", Note.TranslationMode.toggle);
-    $("#image").on("click.danbooru", Note.Box.toggle_all);
+    $("#translate").on("click.fennec", Note.TranslationMode.toggle);
+    $("#image").on("click.fennec", Note.Box.toggle_all);
   },
 
   initialize_highlight: function () {

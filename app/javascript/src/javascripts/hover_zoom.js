@@ -15,21 +15,21 @@ HoverZoom.init = function (shiftRequired, stickyShift, playAudio) {
 
 HoverZoom.init_listeners = function () {
   $(document)
-    .off("scroll.gayfurcity.zoom")
-    .off("keydown.gayfurcity.zoom")
-    .off("keyup.gayfurcity.zoom")
-    .off("mousemove.gayfurcity.zoom");
+    .off("scroll.fennec.zoom")
+    .off("keydown.fennec.zoom")
+    .off("keyup.fennec.zoom")
+    .off("mousemove.fennec.zoom");
 
   $(window)
-    .off("blur.gayfurcity.zoom")
-    .off("contextmenu.gayfurcity.zoom");
+    .off("blur.fennec.zoom")
+    .off("contextmenu.fennec.zoom");
 
   $("#page")
-    .off("mouseenter.gayfurcity.zoom", ".post-preview, div.post-thumbnail")
-    .off("mouseleave.gayfurcity.zoom", ".post-preview, div.post-thumbnail");
+    .off("mouseenter.fennec.zoom", ".post-preview, div.post-thumbnail")
+    .off("mouseleave.fennec.zoom", ".post-preview, div.post-thumbnail");
 
   let throttle = false;
-  $(document).on("mousemove.gayfurcity.zoom", (event) => {
+  $(document).on("mousemove.fennec.zoom", (event) => {
     if (throttle) return;
     throttle = true;
     setTimeout(() => { throttle = false; }, 25);
@@ -41,7 +41,7 @@ HoverZoom.init_listeners = function () {
 
   let scrolling = false;
   $("#page")
-    .on("mouseenter.gayfurcity.zoom", ".post-preview, div.post-thumbnail", (event) => {
+    .on("mouseenter.fennec.zoom", ".post-preview, div.post-thumbnail", (event) => {
       if (scrolling) return;
 
       const ref = $(event.currentTarget);
@@ -53,7 +53,7 @@ HoverZoom.init_listeners = function () {
         HoverZoom.emit("zoom.start", { post: post.id, pageX: this.pageX, pageY: this.pageY });
       }, 0);
     })
-    .on("mouseleave.gayfurcity.zoom", ".post-preview, div.post-thumbnail", (event) => {
+    .on("mouseleave.fennec.zoom", ".post-preview, div.post-thumbnail", (event) => {
       const ref = $(event.currentTarget);
       ref.removeAttr("data-hovering");
 
@@ -63,7 +63,7 @@ HoverZoom.init_listeners = function () {
     });
 
   let scrollTimer = 0;
-  $(document).on("scroll.gayfurcity.zoom", () => {
+  $(document).on("scroll.fennec.zoom", () => {
     if (scrollTimer) {
       clearTimeout(scrollTimer);
     }
@@ -74,26 +74,26 @@ HoverZoom.init_listeners = function () {
 
   if (!HoverZoom.shiftRequired) return;
   $(document)
-    .on("keydown.gayfurcity.zoom", (event) => {
+    .on("keydown.fennec.zoom", (event) => {
       if (HoverZoom.shiftPressed || event.originalEvent.key !== "Shift") return;
       HoverZoom.shiftPressed = true;
       for (const element of $("[data-hovering=true]")) {
         const ref = $(element);
-        ref.find("img").trigger("mouseenter.gayfurcity.zoom");
+        ref.find("img").trigger("mouseenter.fennec.zoom");
       }
     })
-    .on("keyup.gayfurcity.zoom", (event) => {
+    .on("keyup.fennec.zoom", (event) => {
       if (!HoverZoom.shiftPressed || event.originalEvent.key !== "Shift") return;
       HoverZoom.shiftPressed = false;
       if (!HoverZoom.stickyShift) resetOnUnshift();
     });
 
   $(window)
-    .on("blur.gayfurcity.zoom", () => {
+    .on("blur.fennec.zoom", () => {
       HoverZoom.shiftPressed = false;
       if (!HoverZoom.stickyShift) resetOnUnshift();
     })
-    .on("contextmenu.gayfurcity.zoom", () => {
+    .on("contextmenu.fennec.zoom", () => {
       HoverZoom.shiftPressed = false;
       if (!HoverZoom.stickyShift) resetOnUnshift();
     });

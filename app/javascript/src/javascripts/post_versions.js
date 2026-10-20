@@ -16,18 +16,18 @@ PostVersion.init_undo_selected = function () {
   if (!$("body").data("userIsPrivileged")) return;
 
   // "Select All" and "Undo Selected" buttons
-  $("#subnav-select-all-link").on("click.danbooru", (event) => {
+  $("#subnav-select-all-link").on("click.fennec", (event) => {
     event.preventDefault();
     $(".post-version-select:not(:disabled)").prop("checked", true).trigger("change");
   });
-  $("#subnav-undo-selected-link").on("click.danbooru", PostVersion.undo_selected);
+  $("#subnav-undo-selected-link").on("click.fennec", PostVersion.undo_selected);
 
   // Expand the clickable area of the checkbox to the entire table cell
-  $(".post-version-row-select").on("click.danbooru", (event) => {
+  $(".post-version-row-select").on("click.fennec", (event) => {
     $(event.target).find(".post-version-select:not(:disabled)").prop("checked", (_, checked) => !checked).trigger("change");
   });
 
-  $(".post-version-select").on("change.danbooru", () => {
+  $(".post-version-select").on("change.fennec", () => {
     let checked = $(".post-version-select:checked");
     $("#subnav-undo-selected-link").text(`Undo selected (${checked.length})`).toggle(checked.length > 0);
   });

@@ -276,7 +276,7 @@ Autocomplete.render_item = function(list, item) {
   var $link = $("<a/>");
   $link.text(item.label);
   $link.attr("href", Autocomplete.get_href(item));
-  $link.on("click.danbooru", function(e) {
+  $link.on("click.fennec", function(e) {
     e.preventDefault();
   });
 

@@ -79,7 +79,7 @@ class PasskeyTest < ActiveSupport::TestCase
       should("reject an assertion for a credential the user doesn't have") do
         # A credential known only to this other authenticator, never stored as one of the user's
         # Passkey rows.
-        stranger_client = WebAuthn::FakeClient.new(GayFurCity.config.hostname)
+        stranger_client = WebAuthn::FakeClient.new(Fennec.config.hostname)
         stranger_client.create(challenge: Passkey.options_for_registration(@user).first.challenge)
 
         options, signed_challenge = Passkey.options_for_authentication(@user)

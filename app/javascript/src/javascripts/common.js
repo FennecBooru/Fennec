@@ -23,7 +23,7 @@ function initSearch () {
 }
 
 function initMarkAllAsRead () {
-  $("#subnav-mark-all-as-read-link").on("click.gayfurcity", (event) => {
+  $("#subnav-mark-all-as-read-link").on("click.fennec", (event) => {
     const link = $(event.currentTarget);
     return confirm(`Are you sure that you want to mark all ${link.attr("data-item")} as read?`);
   });
@@ -43,7 +43,7 @@ $(function () {
   }
 
   // Account notices
-  $("#hide-dmail-notice").on("click.danbooru", function (e) {
+  $("#hide-dmail-notice").on("click.fennec", function (e) {
     e.preventDefault();
     const $notice = $("#dmail-notice");
     $notice.hide();
@@ -51,7 +51,7 @@ $(function () {
     Cookie.put("hide_dmail_notice", id);
   });
 
-  $("#hide-notification-notice").on("click.danbooru", function (e) {
+  $("#hide-notification-notice").on("click.fennec", function (e) {
     e.preventDefault();
     const $notice = $("#notification-notice");
     $notice.hide();
@@ -59,7 +59,7 @@ $(function () {
     Cookie.put("hide_notification_notice", id);
   });
 
-  $("#close-notice-link").on("click.danbooru", function (e) {
+  $("#close-notice-link").on("click.fennec", function (e) {
     $("#notice").fadeOut("fast");
     e.preventDefault();
   });

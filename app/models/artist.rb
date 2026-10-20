@@ -63,8 +63,8 @@ class Artist < ApplicationRecord
       # Subdomains are automatically included. e.g., "twitter.com" matches "www.twitter.com",
       # "mobile.twitter.com" and any other subdomain of "twitter.com".
       SITE_BLACKLIST = [
-        GayFurCity.config.domain,
-        GayFurCity.config.cdn_domain,
+        Fennec.config.domain,
+        Fennec.config.cdn_domain,
         "artstation.com/artist", # http://www.artstation.com/artist/serafleur/
         "www.artstation.com", # http://www.artstation.com/serafleur/
         %r{cdn[ab]?\.artstation\.com/p/assets/images/images}i, # https://cdna.artstation.com/p/assets/images/images/001/658/068/large/yang-waterkuma-b402.jpg?1450269769

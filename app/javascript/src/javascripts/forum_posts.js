@@ -4,14 +4,14 @@ let ForumPost = {};
 
 ForumPost.initialize_all = function () {
   if ($("#c-forums-topics #a-show,#c-forums-posts #a-show").length) {
-    $(".edit_forum_post_link").on("click.danbooru", function (e) {
+    $(".edit_forum_post_link").on("click.fennec", function (e) {
       var link_id = $(this).attr("id");
       var forum_post_id = link_id.match(/^edit_forum_post_link_(\d+)$/)[1];
       $("#edit_forum_post_" + forum_post_id).fadeToggle("fast");
       e.preventDefault();
     });
 
-    $(".edit_forum_topic_link").on("click.danbooru", function (e) {
+    $(".edit_forum_topic_link").on("click.fennec", function (e) {
       var link_id = $(this).attr("id");
       var forum_topic_id = link_id.match(/^edit_forum_topic_link_(\d+)$/)[1];
       $("#edit_forum_topic_" + forum_topic_id).fadeToggle("fast");
@@ -27,8 +27,8 @@ ForumPost.initialize_all = function () {
 
 ForumPost.reinitialize_all = function () {
   if ($("#c-forums-topics #a-show,#c-forums-posts #a-show").length) {
-    $(".edit_forum_post_link").off("click.danbooru");
-    $(".edit_forum_topic_link").off("click.danbooru");
+    $(".edit_forum_post_link").off("click.fennec");
+    $(".edit_forum_topic_link").off("click.fennec");
     $(".forum-post-reply-link").off("click");
     $(".forum-post-hide-link").off("click");
     $(".forum-post-unhide-link").off("click");

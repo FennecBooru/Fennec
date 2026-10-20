@@ -16,7 +16,7 @@ $(function () {
   }
 
   fit();
-  $(window).on("resize.danbooru", fit);
+  $(window).on("resize.fennec", fit);
   // Some pages toggle secondary-link visibility/text after load (e.g. the janitor approvals
   // toggle) without a resize - childList/subtree covers content changes, deliberately excluding
   // `attributes` so fit()'s own `el.style.fontSize` writes don't trigger themselves in a loop.

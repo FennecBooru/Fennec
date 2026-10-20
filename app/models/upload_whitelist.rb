@@ -64,7 +64,7 @@ class UploadWhitelist < ApplicationRecord
       all
     end
 
-    if GayFurCity.config.bypass_upload_whitelist?(user)
+    if Fennec.config.bypass_upload_whitelist?(user)
       return [true, "bypassed"]
     end
 

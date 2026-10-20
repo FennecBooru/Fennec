@@ -6,7 +6,7 @@ class ExceptionLog < ApplicationRecord
   def self.add!(exception, user_id: nil, request: nil, source: nil, report: true, **extra)
     source ||= request.present? ? request.filtered_parameters.slice(:controller, :action).values.join("#") : "Unknown"
     extra_params = {
-      host:       GayFurCity.config.server_name,
+      host:       Fennec.config.server_name,
       params:     request.try(:filtered_parameters),
       user_id:    user_id,
       referrer:   request.try(:referrer),

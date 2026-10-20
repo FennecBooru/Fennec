@@ -89,7 +89,7 @@ export default {
     afterSuccess(data) {
       this.submitting = false;
       this.allowNavigate = true;
-      Danbooru.notice("Replacement uploaded successfully.");
+      Fennec.notice("Replacement uploaded successfully.");
       location.assign(data.location);
     },
     afterError(data) {

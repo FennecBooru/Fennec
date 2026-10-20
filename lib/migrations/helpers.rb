@@ -208,7 +208,7 @@ module Migrations
 
       connection.select_value(<<~SQL.squish)
         INSERT INTO users (name, password_hash, level, email, created_at)
-        VALUES (#{connection.quote('System')}, '', #{User::Levels::SYSTEM}, #{connection.quote("system@#{GayFurCity.config.domain}")}, NOW())
+        VALUES (#{connection.quote('System')}, '', #{User::Levels::SYSTEM}, #{connection.quote("system@#{Fennec.config.domain}")}, NOW())
         RETURNING id
       SQL
     end

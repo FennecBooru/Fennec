@@ -80,11 +80,11 @@ class StaticController < ApplicationController
     end
     if request.post?
       time = (Time.now + 5.minutes).to_i
-      secret = GayFurCity.config.discord_secret
+      secret = Fennec.config.discord_secret
       hashed_values = Digest::SHA256.hexdigest("#{CurrentUser.user.id};#{CurrentUser.user.name};#{time};#{secret};index")
       user_hash = "?user_id=#{CurrentUser.user.id}&user_name=#{CurrentUser.user.name}&time=#{time}&hash=#{hashed_values}"
 
-      redirect_to(GayFurCity.config.discord_site + user_hash, allow_other_host: true)
+      redirect_to(Fennec.config.discord_site + user_hash, allow_other_host: true)
     else
       @page = view_context.safe_wiki(AdminConfig.instance.discord_notice_wiki_page)
     end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_19_232458) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_19_233422) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -21,8 +21,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_232458) do
     t.integer "alias_category_change_cutoff", default: 10000, null: false
     t.integer "anonymous_hard_tag_limit", default: 40, null: false
     t.string "anonymous_user_name", default: "Anonymous", null: false
-    t.string "app_description", default: "Your one-stop shop for gay furries.", null: false
-    t.string "app_name", default: "GayFur City", null: false
+    t.string "app_description", default: "Furry image booru.", null: false
+    t.string "app_name", default: "Fennec", null: false
     t.string "appeal_notice_wiki_page", default: "internal:appeal_notice", null: false
     t.integer "artist_edit_limit", default: 25, null: false
     t.integer "artist_edit_limit_bypass", default: 15, null: false
@@ -37,7 +37,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_232458) do
     t.integer "blacklisted_tags_max_size", default: 150000, null: false
     t.jsonb "bur_entry_limit", default: {"10" => 50, "40" => -1}, null: false
     t.integer "bur_nuke", default: 40, null: false
-    t.string "canonical_app_name", default: "GayFur City", null: false
+    t.string "canonical_app_name", default: "Fennec", null: false
     t.integer "character_edit_limit", default: 25, null: false
     t.integer "character_edit_limit_bypass", default: 15, null: false
     t.string "character_tag_placeholder", default: "character_name solo_focus 1_male 2_females etc.", null: false
@@ -48,7 +48,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_232458) do
     t.integer "comment_vote_limit", default: 25, null: false
     t.integer "comment_vote_limit_bypass", default: 15, null: false
     t.integer "compact_uploader_minimum_posts", default: 10, null: false
-    t.string "contact_email", default: "admin@gayfur.city", null: false
+    t.string "contact_email", default: "admin@localhost", null: false
     t.string "contact_wiki_page", default: "help:contact", null: false
     t.string "content_tag_placeholder", default: "cub scatplay watersports diaper my_little_pony vore rape hyper etc.", null: false
     t.integer "custom_style_max_size", default: 500000, null: false
@@ -198,7 +198,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_232458) do
     t.jsonb "tag_type_edit_implicit_limit", default: {"10" => 100, "15" => 1000}, null: false
     t.jsonb "tag_type_edit_limit", default: {"10" => 100, "15" => 1000, "20" => 10000, "40" => -1}, null: false
     t.string "tag_what_you_see_wiki_page", default: "tag_what_you_see", null: false
-    t.string "takedown_email", default: "admin@gayfur.city", null: false
+    t.string "takedown_email", default: "admin@localhost", null: false
     t.string "takedown_verification_wiki_page", default: "help:takedown_verification", null: false
     t.string "takedown_wiki_page", default: "help:takedown", null: false
     t.string "terms_of_service_wiki_page", default: "help:terms_of_service", null: false

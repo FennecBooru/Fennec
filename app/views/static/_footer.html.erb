@@ -1,8 +1,8 @@
 <footer id="page-footer">
   <span class="left">
     Running <%= AdminConfig.instance.app_name %> (<%= link_to(GitHelper.instance.public_ref.short_commit, GitHelper.instance.public_commit_url) %>)
-    <% if GayFurCity.config.server_name.present? %>
-      on <i><%= GayFurCity.config.server_name %></i>
+    <% if Fennec.config.server_name.present? %>
+      on <i><%= Fennec.config.server_name %></i>
     <% end %>
     <% if Feature.enabled?(:rules) %>
       – <%= link_to("Rules", rules_path) %>

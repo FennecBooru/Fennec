@@ -60,7 +60,7 @@ class UsersController < ApplicationController
       @user = User.new(permitted_attributes(User).merge({ last_ip_addr: request.remote_ip }))
       @user.validate_email_format = true
       @user.email_verified = false if AdminConfig.instance.enable_email_verification?
-      if !GayFurCity.config.recaptcha.enabled? || verify_recaptcha(model: @user)
+      if !Fennec.config.recaptcha.enabled? || verify_recaptcha(model: @user)
         @user.save
         if @user.errors.empty?
           session[:user_id] = @user.id

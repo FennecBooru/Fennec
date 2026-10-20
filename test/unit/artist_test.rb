@@ -346,7 +346,7 @@ class ArtistTest < ActiveSupport::TestCase
 
         assert_equal("https://gayfur.city", @artist.url_string)
 
-        GayFurCity.config.stubs(:disable_throttles).returns(false)
+        Fennec.config.stubs(:disable_throttles).returns(false)
         AdminConfig.any_instance.stubs(:artist_edit_limit).returns(0)
 
         assert_no_difference("ArtistVersion.count") do

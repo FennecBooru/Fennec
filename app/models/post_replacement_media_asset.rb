@@ -48,11 +48,11 @@ class PostReplacementMediaAsset < MediaAssetWithVariants
 
   module StorageMethods
     def path_prefix
-      GayFurCity.config.replacement_path_prefix
+      Fennec.config.replacement_path_prefix
     end
 
     def protected_secret
-      GayFurCity.config.replacement_file_secret
+      Fennec.config.replacement_file_secret
     end
 
     def is_protected?
@@ -62,7 +62,7 @@ class PostReplacementMediaAsset < MediaAssetWithVariants
 
   module VariantMethods
     def variants
-      super(Variant) + [Variant.new(self, :thumb, :image, "webp", MediaAsset::Rescale.new(width: GayFurCity.config.replacement_thumbnail_width, height: nil, method: :scaled))]
+      super(Variant) + [Variant.new(self, :thumb, :image, "webp", MediaAsset::Rescale.new(width: Fennec.config.replacement_thumbnail_width, height: nil, method: :scaled))]
     end
 
     def regenerate_variants!(file = self.file)

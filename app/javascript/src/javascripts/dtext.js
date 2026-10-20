@@ -23,11 +23,11 @@ DText.initialze_input = function ($element) {
 
   // Character count limit
   const limit = $charcount.attr("data-limit") || 0;
-  $textarea.on("input.danbooru.formatter", () => {
+  $textarea.on("input.fennec.formatter", () => {
     const length = ($textarea.val() + "").length;
     $charcount.toggleClass("overfill", length >= limit).attr("data-count", length);
   });
-  $textarea.trigger("input.danbooru.formatter");
+  $textarea.trigger("input.fennec.formatter");
 
   DText.initialize_formatting_buttons($element);
   $element.attr("data-initialized", "true");

@@ -22,7 +22,7 @@ class SpamDetector
                  content:      :content,
                  permalink:    :permalink)
   def self.enabled?
-    GayFurCity.config.rakismet_key.present? && GayFurCity.config.rakismet_url.present? && !Rails.env.test?
+    Fennec.config.rakismet_key.present? && Fennec.config.rakismet_url.present? && !Rails.env.test?
   end
 
   def self.working?
@@ -93,7 +93,7 @@ class SpamDetector
 
     is_spam
   rescue StandardError => e
-    GayFurCity::Logger.log(e)
+    Fennec::Logger.log(e)
     false
   end
 

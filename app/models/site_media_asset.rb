@@ -12,7 +12,7 @@ class SiteMediaAsset < MediaAssetWithVariants
 
   module StorageMethods
     def path_prefix
-      GayFurCity.config.site_asset_path_prefix
+      Fennec.config.site_asset_path_prefix
     end
 
     def is_protected?

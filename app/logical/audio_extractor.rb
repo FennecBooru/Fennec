@@ -9,8 +9,8 @@ module AudioExtractor
 
   def extract(file_path)
     output_file = Tempfile.new(%w[audio-track .m4a], binmode: true)
-    args = [*GayFurCity.config.audio.scale_options_aac(output_file.path), "-y", "-i", file_path]
-    stdout, stderr, status = Open3.capture3(GayFurCity.config.ffmpeg_path, *args)
+    args = [*Fennec.config.audio.scale_options_aac(output_file.path), "-y", "-i", file_path]
+    stdout, stderr, status = Open3.capture3(Fennec.config.ffmpeg_path, *args)
 
     unless status == 0
       Rails.logger.warn("[FFMPEG AUDIO EXTRACT STDOUT] #{stdout.chomp!}")

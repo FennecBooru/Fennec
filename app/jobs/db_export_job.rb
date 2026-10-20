@@ -27,9 +27,9 @@ class DbExportJob < ApplicationJob
   private
 
   def generate_eris_exports(date)
-    return if GayFurCity.config.eris_database_url.blank? || eris_exports.empty?
+    return if Fennec.config.eris_database_url.blank? || eris_exports.empty?
 
-    conn = PG.connect(GayFurCity.config.eris_database_url)
+    conn = PG.connect(Fennec.config.eris_database_url)
     eris_exports.each do |name, query|
       generate_export(name, query, date, conn)
     end
@@ -98,6 +98,6 @@ class DbExportJob < ApplicationJob
   end
 
   def storage_manager
-    GayFurCity.config.storage_manager.instance
+    Fennec.config.storage_manager.instance
   end
 end

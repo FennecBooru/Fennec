@@ -205,7 +205,7 @@ module Posts
         context("access control") do
           setup do
             disable_image_size_checks!
-            GayFurCity.config.stubs(:disable_age_checks).returns(true)
+            Fennec.config.stubs(:disable_age_checks).returns(true)
           end
 
           asserts do

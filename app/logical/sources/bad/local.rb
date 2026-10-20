@@ -9,7 +9,7 @@ module Sources
       end
 
       def self.match?(url)
-        url.domain == GayFurCity.config.domain
+        url.domain == Fennec.config.domain
       end
     end
   end

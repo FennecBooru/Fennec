@@ -1,26 +1,26 @@
 default: &default
   adapter: postgresql
   timeout: 5000
-  username: <%= ENV.fetch("GAYFURCITY_DB_USER", "gayfurcity") %>
+  username: <%= ENV.fetch("FENNEC_DB_USER", "fennec") %>
 
 development:
   <<: *default
-  database: <%= ENV.fetch("GAYFURCITY_DB_NAME", "gayfurcity_development") %>
+  database: <%= ENV.fetch("FENNEC_DB_NAME", "fennec_development") %>
   host: postgres
   pool: 5
 
 test:
   <<: *default
-  database: <%= ENV.fetch("GAYFURCITY_TEST_DB_NAME", "test") %>
+  database: <%= ENV.fetch("FENNEC_TEST_DB_NAME", "test") %>
   host: postgres
   pool: 5
 
 <% if Rails.env.production? %>
 production:
   <<: *default
-  database: <%= ENV.fetch("GAYFURCITY_DB_NAME", "gayfurcity") %>
-  password: <%= ENV.fetch("GAYFURCITY_DB_PASSWORD", "") %>
-  host: <%= ENV.fetch("GAYFURCITY_DB_HOST", "postgres") %>
-  port: <%= ENV.fetch("GAYFURCITY_DB_PORT", 5432) %>
-  pool: <%= ENV["GOOD_JOB_PROCESS"] ? ENV.fetch("GAYFURCITY_DB_WORKER_POOL_SIZE", 5) : ENV.fetch("GAYFURCITY_DB_POOL_SIZE", 5) %>
+  database: <%= ENV.fetch("FENNEC_DB_NAME", "fennec") %>
+  password: <%= ENV.fetch("FENNEC_DB_PASSWORD", "") %>
+  host: <%= ENV.fetch("FENNEC_DB_HOST", "postgres") %>
+  port: <%= ENV.fetch("FENNEC_DB_PORT", 5432) %>
+  pool: <%= ENV["GOOD_JOB_PROCESS"] ? ENV.fetch("FENNEC_DB_WORKER_POOL_SIZE", 5) : ENV.fetch("FENNEC_DB_POOL_SIZE", 5) %>
 <% end %>

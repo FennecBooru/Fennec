@@ -48,24 +48,24 @@ PostModeMenu.change_tag_script = function (e) {
 PostModeMenu.initialize_selector = function () {
   $("#mode-box-mode").val(LStorage.Posts.Mode);
 
-  $("#mode-box-mode").on("change.danbooru", function () {
+  $("#mode-box-mode").on("change.fennec", function () {
     PostModeMenu.change();
     $("#tag-script-field:visible").focus().select();
   });
 };
 
 PostModeMenu.initialize_preview_link = function () {
-  $(".post-preview").on("click.danbooru", PostModeMenu.click);
+  $(".post-preview").on("click.fennec", PostModeMenu.click);
 };
 
 PostModeMenu.initialize_edit_form = function () {
   $("#quick-edit-div").hide();
-  $("#quick-edit-form input[value=Cancel]").on("click.danbooru", function (e) {
+  $("#quick-edit-form input[value=Cancel]").on("click.fennec", function (e) {
     PostModeMenu.close_edit_form();
     e.preventDefault();
   });
 
-  $("#quick-edit-form").on("submit.danbooru", function (e) {
+  $("#quick-edit-form").on("submit.fennec", function (e) {
     $.ajax({
       type: "put",
       url: $("#quick-edit-form").attr("action"),
@@ -118,7 +118,7 @@ PostModeMenu.update_sets_menu = function () {
       type: "GET",
       url: "/post_sets/for_select.json",
     }).fail(function (data) {
-      $(window).trigger("danbooru:error", "Error getting sets list: " + data.message);
+      $(window).trigger("fennec:error", "Error getting sets list: " + data.message);
     }).done(function (data) {
       target.on("change", function (e) {
         LStorage.Posts.Set = e.target.value;

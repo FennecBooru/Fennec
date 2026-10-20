@@ -59,7 +59,7 @@ export default {
     },
     afterSuccess(data) {
       this.submitting = false;
-      Danbooru.notice("Audio track submitted for review.");
+      Fennec.notice("Audio track submitted for review.");
       location.assign(data.location);
     },
     afterError(data) {

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module GayFurCity
+module Fennec
   class Logger
     def self.log(exception, expected: false, **params)
       if expected

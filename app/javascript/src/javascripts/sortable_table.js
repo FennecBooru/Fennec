@@ -19,17 +19,17 @@ class SortableTable {
     const $addSpacingLink = $(".add-spacing-link");
 
     if (spacing) {
-      $(".add-spacing-above-link").off("click.gayfurcity.spacing").on("click.gayfurcity.spacing", function (event) {
+      $(".add-spacing-above-link").off("click.fennec.spacing").on("click.fennec.spacing", function (event) {
         event.preventDefault();
         SortableTable.addSpacing(spacing).insertBefore($(this).closest("tr"));
       });
 
-      $(".add-spacing-below-link").off("click.gayfurcity.spacing").on("click.gayfurcity.spacing", function (event) {
+      $(".add-spacing-below-link").off("click.fennec.spacing").on("click.fennec.spacing", function (event) {
         event.preventDefault();
         SortableTable.addSpacing(spacing).insertAfter($(this).closest("tr"));
       });
 
-      $table.off("click.gayfurcity.spacing").on("click.gayfurcity.spacing", ".remove-spacing-link", function (event) {
+      $table.off("click.fennec.spacing").on("click.fennec.spacing", ".remove-spacing-link", function (event) {
         event.preventDefault();
         $(this).closest("tr").remove();
       });
@@ -59,13 +59,13 @@ class SortableTable {
       $rows.sortable("disable");
     };
 
-    $editOrderLink.off("click.gayfurcity.sorting").on("click.gayfurcity.sorting", function (event) {
+    $editOrderLink.off("click.fennec.sorting").on("click.fennec.sorting", function (event) {
       event.preventDefault();
       startEditing();
       Utility.notice("Drag and drop to reorder.");
     });
 
-    $saveOrderLink.off("click.gayfurcity.sorting").on("click.gayfurcity.sorting", function (event) {
+    $saveOrderLink.off("click.fennec.sorting").on("click.fennec.sorting", function (event) {
       event.preventDefault();
       stopEditing();
       const data = SortableTable.reorderData($table, key, start);

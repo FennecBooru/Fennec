@@ -6,7 +6,7 @@ return unless Metrics.enabled?
 require_relative("../../app/logical/cache")
 require_relative("../../lib/prometheus/client/data_stores/redis")
 
-pool = ConnectionPool.new(size: ENV.fetch("GAYFURCITY_METRICS_REDIS_POOL_SIZE", 5), timeout: 5) { Cache.redis }
+pool = ConnectionPool.new(size: ENV.fetch("FENNEC_METRICS_REDIS_POOL_SIZE", 5), timeout: 5) { Cache.redis }
 Prometheus::Client.config.data_store = Prometheus::Client::DataStores::Redis.new(connection_pool: pool)
 
 # The metrics collector below runs off the request cycle (see config/pitchfork.rb, where only
@@ -33,13 +33,13 @@ class MetricsRecord < ActiveRecord::Base # rubocop:disable Rails/ApplicationReco
   end
 end
 MetricsRecord.establish_connection(
-  ActiveRecord::Base.connection_db_config.configuration_hash.merge(pool: ENV.fetch("GAYFURCITY_METRICS_DB_POOL_SIZE", 2).to_i),
+  ActiveRecord::Base.connection_db_config.configuration_hash.merge(pool: ENV.fetch("FENNEC_METRICS_DB_POOL_SIZE", 2).to_i),
 )
 
 Yabeda.configure do
   default_tag(:env, Rails.env)
-  default_tag(:server, GayFurCity.config.server_name)
-  default_tag(:version, GayFurCity.config.version)
+  default_tag(:server, Fennec.config.server_name)
+  default_tag(:version, Fennec.config.version)
 
   group(:storage) do
     %i[store delete delete_dir open exists move_file].each do |method|

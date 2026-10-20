@@ -32,9 +32,9 @@ module DTextHelper
   # `domain` config with a port (e.g. dev's "localhost:4000") has to be stripped down
   # to just the host or it'll never match.
   def default_options
-    domain = GayFurCity.config.domain.to_s.sub(/:\d+\z/, "")
+    domain = Fennec.config.domain.to_s.sub(/:\d+\z/, "")
     # color_names lets [color=name] use any tag category name or alias
-    { domain: domain, internal_domains: [domain], color_names: TagCategory.mapping.keys, github_url: GayFurCity.config.source_code_url }
+    { domain: domain, internal_domains: [domain], color_names: TagCategory.mapping.keys, github_url: Fennec.config.source_code_url }
   end
 
   def format_text(text, **)

@@ -1,34 +1,36 @@
+name: fennec
+
 x-environment: &common-env
-  GAYFURCITY_DOMAIN: localhost:${EXPOSED_SERVER_PORT:-4000}
-  GAYFURCITY_HOSTNAME: http://localhost:${EXPOSED_SERVER_PORT:-4000}
-  GAYFURCITY_CDN_DOMAIN: localhost:${EXPOSED_SERVER_PORT:-4000}
-  GAYFURCITY_CDN_HOSTNAME: http://localhost:${EXPOSED_SERVER_PORT:-4000}
-  GAYFURCITY_REDIS_URL: redis://redis/0
-  GAYFURCITY_ELASTICSEARCH_HOST: elasticsearch
-  GAYFURCITY_MEMCACHED_SERVERS: memcached
-  GAYFURCITY_ERIS_SERVER: http://eris:5588
-  GAYFURCITY_ERIS_DATABASE_URL: postgres://gayfurcity@postgres:5432/eris
-  GAYFURCITY_RECOMMENDER_SERVER: http://recommender:5000
-  GAYFURCITY_AUTOCOMPLETED_SERVER: http://autocompleted:8118
+  FENNEC_DOMAIN: localhost:${EXPOSED_SERVER_PORT:-4000}
+  FENNEC_HOSTNAME: http://localhost:${EXPOSED_SERVER_PORT:-4000}
+  FENNEC_CDN_DOMAIN: localhost:${EXPOSED_SERVER_PORT:-4000}
+  FENNEC_CDN_HOSTNAME: http://localhost:${EXPOSED_SERVER_PORT:-4000}
+  FENNEC_REDIS_URL: redis://redis/0
+  FENNEC_ELASTICSEARCH_HOST: elasticsearch
+  FENNEC_MEMCACHED_SERVERS: memcached
+  FENNEC_ERIS_SERVER: http://eris:5588
+  FENNEC_ERIS_DATABASE_URL: postgres://fennec@postgres:5432/eris
+  FENNEC_RECOMMENDER_SERVER: http://recommender:5000
+  FENNEC_AUTOCOMPLETED_SERVER: http://autocompleted:8118
   # Must be externally accessible
-  GAYFURCITY_REPORTS_SERVER: http://localhost:${EXPOSED_SERVER_PORT:-4000}/reports
+  FENNEC_REPORTS_SERVER: http://localhost:${EXPOSED_SERVER_PORT:-4000}/reports
   # Must be internally accessible
-  GAYFURCITY_REPORTS_SERVER_INTERNAL: http://reports:3000
-  GAYFURCITY_CLICKHOUSE_URL: http://clickhouse:8123
-  GAYFURCITY_REPORTS_ENABLED: 1
-  GAYFURCITY_DISCORD_SITE: http://localhost:4002
-  GAYFURCITY_DISCORD_SECRET: super_secret_for_url_discord
-  GAYFURCITY_REPORT_KEY: super_secret_key_for_reports_signature
+  FENNEC_REPORTS_SERVER_INTERNAL: http://reports:3000
+  FENNEC_CLICKHOUSE_URL: http://clickhouse:8123
+  FENNEC_REPORTS_ENABLED: 1
+  FENNEC_DISCORD_SITE: http://localhost:4002
+  FENNEC_DISCORD_SECRET: super_secret_for_url_discord
+  FENNEC_REPORT_KEY: super_secret_key_for_reports_signature
   # These are just development secrets, do not use them in production
-  GAYFURCITY_PROTECTED_FILE_SECRET: 6686a6413d90c43d5e82403ef271ec25d13cc24e3bfcdd094e73d1eff22a3567
-  GAYFURCITY_REPLACEMENT_FILE_SECRET: b35bc54cdc0d0436fc5867c7ef88f9b10a37ae20a06b37e67614fe60019d7bb1
+  FENNEC_PROTECTED_FILE_SECRET: 6686a6413d90c43d5e82403ef271ec25d13cc24e3bfcdd094e73d1eff22a3567
+  FENNEC_REPLACEMENT_FILE_SECRET: b35bc54cdc0d0436fc5867c7ef88f9b10a37ae20a06b37e67614fe60019d7bb1
   SECRET_TOKEN: 1c58518a891eff4520cadc59afa9e378a9325f1247544ff258096e497f095f45
   SESSION_SECRET_KEY: 44b4f44e9f253c406cbe727d403d500c1cecff943e4d2aea8f5447f28846fffe
-  GAYFURCITY_REMEMBER_KEY: abc123
-  GAYFURCITY_EMAIL_KEY: zDMSATq0W3hmA5p3rKTgD
+  FENNEC_REMEMBER_KEY: abc123
+  FENNEC_EMAIL_KEY: zDMSATq0W3hmA5p3rKTgD
   # Real values (from your Logto tenant) go in .env (gitignored), not here.
-  GAYFURCITY_LOGTO_CLIENT_ID: ${GAYFURCITY_LOGTO_CLIENT_ID:-}
-  GAYFURCITY_LOGTO_CLIENT_SECRET: ${GAYFURCITY_LOGTO_CLIENT_SECRET:-}
+  FENNEC_LOGTO_CLIENT_ID: ${FENNEC_LOGTO_CLIENT_ID:-}
+  FENNEC_LOGTO_CLIENT_SECRET: ${FENNEC_LOGTO_CLIENT_SECRET:-}
    # Hide annoying output from libvips on corrupt files
   VIPS_WARNING: "0"
   EXPOSED_WEBPACKER_PORT: ${EXPOSED_WEBPACKER_PORT:-4003}
@@ -44,14 +46,14 @@ x-depends-on: &common-depends-on
     condition: service_healthy
 
 services:
-  gayfurcity: # metrics port: 9394
+  fennec: # metrics port: 9394
     build:
       context: .
       args:
         HOST_UID: ${HOST_UID:-1000}
         HOST_GID: ${HOST_GID:-1000}
     user: ${DOCKER_USER:-root}
-    image: gayfurcity
+    image: fennec
     healthcheck:
       # this healthcheck is only for the rails app, the jobs process needs to be separated to be healthchecked
       test: wget --no-verbose --tries=1 --spider http://127.0.0.1:9000/up || exit 1
@@ -69,18 +71,18 @@ services:
     environment:
       <<: *common-env
       RAILS_ENV: development
-      GAYFURCITY_DB_USER: gayfurcity
-      GAYFURCITY_DB_NAME: gayfurcity_development
+      FENNEC_DB_USER: fennec
+      FENNEC_DB_NAME: fennec_development
       # METRICS_ENABLED (if you set it explicitly) always wins. Otherwise config/metrics.rb infers
       # it from whether COMPOSE_PROFILES contains "metrics" - forwarded through as-is since Compose
       # has no "is profile X active" interpolation to compute that here.
-      METRICS_ENABLED: ${GAYFURCITY_METRICS_ENABLED:-${METRICS_ENABLED:-}}
+      METRICS_ENABLED: ${FENNEC_METRICS_ENABLED:-${METRICS_ENABLED:-}}
       COMPOSE_PROFILES: ${COMPOSE_PROFILES:-}
     ports:
       - "${EXPOSED_WEBPACKER_PORT:-4003}:${EXPOSED_WEBPACKER_PORT:-4003}"
-    hostname: gayfurcity.containers.local
+    hostname: fennec.containers.local
     labels:
-      - "hostname=gayfurcity.containers.local"
+      - "hostname=fennec.containers.local"
     depends_on:
       <<: *common-depends-on
       autocompleted:
@@ -96,9 +98,9 @@ services:
     tty: true
     init: true
 
-  # For this service to work properly, it must be accessible  from /tags/autocomplete.json on the same url as the primary app
+  # For this service to work properly, it must be accessible from /tags/autocomplete.json on the same url as the primary app
   autocompleted: # metrics port: 9396
-    image: ghcr.io/gayfurcity/autocompleted:174db500da76689fc9844bee399280fc232069c7
+    image: ghcr.io/fennecbooru/autocompleted:5577a68da4095f9d5a9136b1eb1b4d06231c6e3b
     command: /app/autocompleted
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://$$SERVER_ADDR/up || exit 1
@@ -107,16 +109,16 @@ services:
       retries: 5
     environment:
       SERVER_ADDR: autocompleted:8118
-      PG__USER: gayfurcity
+      PG__USER: fennec
       PG__HOST: postgres
       PG__PORT: 5432
-      PG__DBNAME: gayfurcity_development
+      PG__DBNAME: fennec_development
       PG__POOL__MAX_SIZE: 1
       METRICS_ENABLED: ${AUTOCOMPLETED_METRICS_ENABLED:-${METRICS_ENABLED:-}}
       COMPOSE_PROFILES: ${COMPOSE_PROFILES:-}
-    hostname: autocompleted.gayfurcity.containers.local
+    hostname: autocompleted.fennec.containers.local
     labels:
-      - "hostname=autocompleted.gayfurcity.containers.local"
+      - "hostname=autocompleted.fennec.containers.local"
 
   nginx:
     image: nginx:1.28.0-alpine3.21
@@ -133,21 +135,21 @@ services:
       <<: *common-env
       NGINX_PORT: ${NGINX_EXPOSED_PORT:-4000}
       # port must be present here in dev, all requests that require CSRF tokens will break
-      NGINX_PROXY_HOST: ${NGINX_PROXY_HOST:-${GAYFURCITY_DOMAIN:-localhost:${EXPOSED_PROXY_PORT:-4000}}}
+      NGINX_PROXY_HOST: ${NGINX_PROXY_HOST:-${FENNEC_DOMAIN:-localhost:${EXPOSED_PROXY_PORT:-4000}}}
       NGINX_PROXY_PORT: ${NGINX_PROXY_PORT:-4000}
       NGINX_PROXY_SCHEME: ${NGINX_PROXY_SCHEME:-http}
     depends_on:
       autocompleted:
         condition: service_healthy
-      gayfurcity:
+      fennec:
         condition: service_healthy
       reports:
         condition: service_healthy
     ports:
       - "${EXPOSED_SERVER_PORT:-4000}:${NGINX_EXPOSED_PORT:-4000}"
-    hostname: nginx.gayfurcity.containers.local
+    hostname: nginx.fennec.containers.local
     labels:
-      - "hostname=nginx.gayfurcity.containers.local"
+      - "hostname=nginx.fennec.containers.local"
 
   nginx-metrics: # port: 9113
     image: nginx/nginx-prometheus-exporter:1.5.1
@@ -162,34 +164,34 @@ services:
     depends_on:
       - nginx
     profiles: [metrics]
-    hostname: metrics.nginx.gayfurcity.containers.local
+    hostname: metrics.nginx.fennec.containers.local
     labels:
-      - "hostname=metrics.nginx.gayfurcity.containers.local"
+      - "hostname=metrics.nginx.fennec.containers.local"
 
   postgres:
     image: postgres:18.6-alpine3.24
     environment:
-      - POSTGRES_USER=gayfurcity
-      - POSTGRES_DB=gayfurcity_development
+      - POSTGRES_USER=fennec
+      - POSTGRES_DB=fennec_development
       - POSTGRES_HOST_AUTH_METHOD=trust
     volumes:
       - db_data:/var/lib/postgresql
     healthcheck:
-      test: pg_isready -U gayfurcity -d postgres
+      test: pg_isready -U fennec -d postgres
       interval: 20s
       timeout: 2s
       retries: 10
     ports:
       - "${EXPOSED_POSTGRES_PORT:-34518}:5432"
-    hostname: postgres.gayfurcity.containers.local
+    hostname: postgres.fennec.containers.local
     labels:
-      - "hostname=postgres.gayfurcity.containers.local"
+      - "hostname=postgres.fennec.containers.local"
 
   postgres-metrics: # port: 9187
     image: quay.io/prometheuscommunity/postgres-exporter:v0.20.1
     restart: unless-stopped
     environment:
-      - DATA_SOURCE_NAME=postgresql://gayfurcity@postgres:5432/gayfurcity_development?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://fennec@postgres:5432/fennec_development?sslmode=disable
     deploy:
       resources:
         limits:
@@ -199,9 +201,9 @@ services:
     depends_on:
       - postgres
     profiles: [ metrics ]
-    hostname: metrics.postgres.gayfurcity.containers.local
+    hostname: metrics.postgres.fennec.containers.local
     labels:
-      - "hostname=metrics.postgres.gayfurcity.containers.local"
+      - "hostname=metrics.postgres.fennec.containers.local"
 
   clickhouse: # metrics port: 9363
     image: clickhouse/clickhouse-server:24.8.2.3-alpine
@@ -225,9 +227,9 @@ services:
       - clickhouse_data:/var/lib/clickhouse
     ports:
       - "${EXPOSED_CLICKHOUSE_PORT:-34520}:8123"
-    hostname: clickhouse.gayfurcity.containers.local
+    hostname: clickhouse.fennec.containers.local
     labels:
-      - "hostname=clickhouse.gayfurcity.containers.local"
+      - "hostname=clickhouse.fennec.containers.local"
 
   redis:
     image: redis:8.0.1-alpine3.21
@@ -241,9 +243,9 @@ services:
       - redis_data:/data
     ports:
       - "${EXPOSED_REDIS_PORT:-34519}:6379"
-    hostname: redis.gayfurcity.containers.local
+    hostname: redis.fennec.containers.local
     labels:
-      - "hostname=redis.gayfurcity.containers.local"
+      - "hostname=redis.fennec.containers.local"
 
   redis-metrics: # port: 9121
     image: oliver006/redis_exporter:v1.86.0-alpine
@@ -259,9 +261,9 @@ services:
     depends_on:
       - redis
     profiles: [ metrics ]
-    hostname: metrics.redis.gayfurcity.containers.local
+    hostname: metrics.redis.fennec.containers.local
     labels:
-      - "hostname=metrics.redis.gayfurcity.containers.local"
+      - "hostname=metrics.redis.fennec.containers.local"
 
   memcached:
     image: memcached:1.6.38-alpine
@@ -270,9 +272,9 @@ services:
       interval: 30s
       timeout: 2s
       retries: 5
-    hostname: memcached.gayfurcity.containers.local
+    hostname: memcached.fennec.containers.local
     labels:
-      - "hostname=memcached.gayfurcity.containers.local"
+      - "hostname=memcached.fennec.containers.local"
 
   memcached-metrics: # port: 9150
     image: quay.io/prometheus/memcached-exporter:v0.16.0
@@ -287,9 +289,9 @@ services:
     depends_on:
       - memcached
     profiles: [ metrics ]
-    hostname: metrics.memcached.gayfurcity.containers.local
+    hostname: metrics.memcached.fennec.containers.local
     labels:
-      - "hostname=metrics.memcached.gayfurcity.containers.local"
+      - "hostname=metrics.memcached.fennec.containers.local"
 
   elasticsearch:
     build:
@@ -310,9 +312,9 @@ services:
       retries: 12
     ports:
       - "${EXPOSED_ELASTICSEARCH_PORT:-49200}:9200"
-    hostname: elasticsearch.gayfurcity.containers.local
+    hostname: elasticsearch.fennec.containers.local
     labels:
-      - "hostname=elasticsearch.gayfurcity.containers.local"
+      - "hostname=elasticsearch.fennec.containers.local"
 
   elasticsearch-metrics: # port: 9114
     image: quay.io/prometheuscommunity/elasticsearch-exporter:v1.10.0
@@ -327,39 +329,28 @@ services:
     depends_on:
       - elasticsearch
     profiles: [ metrics ]
-    hostname: metrics.elasticsearch.gayfurcity.containers.local
+    hostname: metrics.elasticsearch.fennec.containers.local
     labels:
-      - "hostname=metrics.elasticsearch.gayfurcity.containers.local"
+      - "hostname=metrics.elasticsearch.fennec.containers.local"
 
   eris: # metrics port: 5588
-    image: ghcr.io/e621ng/eris:1.0.1
+    image: ghcr.io/fennecbooru/eris:c7769ca12975f2c938d0f28e835297a566d6fac4
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://127.0.0.1:5588/ready || exit 1
       interval: 30s
       timeout: 2s
       retries: 5
     environment:
-      ERIS_DATABASE_URL: postgres://gayfurcity@postgres:5432/eris
-    depends_on:
-      eris-db:
-        condition: service_completed_successfully
-    hostname: eris.gayfurcity.containers.local
-    labels:
-      - "hostname=eris.gayfurcity.containers.local"
-
-  # Creates eris' database, it doesn't create it itself
-  eris-db:
-    image: postgres:18.6-alpine3.24
-    command:
-      - sh
-      - -c
-      - psql -h postgres -U gayfurcity -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname = 'eris'" | grep -q 1 || createdb -h postgres -U gayfurcity eris
+      ERIS_DATABASE_URL: postgres://fennec@postgres:5432/eris
     depends_on:
       postgres:
         condition: service_healthy
+    hostname: eris.fennec.containers.local
+    labels:
+      - "hostname=eris.fennec.containers.local"
 
   recommender: # metrics port: 5000
-    image: ghcr.io/gayfurcity/recommender:2cd2a0c6970c41bf0c1dda9e5485a1c71c498207
+    image: ghcr.io/fennecbooru/recommender:021153de8ed5d9e2f3babf004f88559972899d5f
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://127.0.0.1:5000/info || exit 1
       interval: 30s
@@ -368,20 +359,20 @@ services:
     volumes:
       - recommender_data:/recommender/data
     environment:
-      DATABASE_URL: postgres://gayfurcity:@postgres/gayfurcity_development
+      DATABASE_URL: postgres://fennec:@postgres/fennec_development
       OPENBLAS_NUM_THREADS: 1
       TRAINING_THREADS: 4
       METRICS_ENABLED: ${RECOMMENDER_METRICS_ENABLED:-${METRICS_ENABLED:-}}
       COMPOSE_PROFILES: ${COMPOSE_PROFILES:-}
-    hostname: recommender.gayfurcity.containers.local
+    hostname: recommender.fennec.containers.local
     labels:
-      - "hostname=recommender.gayfurcity.containers.local"
+      - "hostname=recommender.fennec.containers.local"
 
   # By default, this is bound to /reports on the same url as the primary app for external access
-  # To change this, set the GAYFURCITY_REPORTS_SERVER env variable
-  # For internal access, change the GAYFURCITY_REPORTS_SERVER_INTERNAL env varable (defaults to http://reports:3000)
+  # To change this, set the FENNEC_REPORTS_SERVER env variable
+  # For internal access, change the FENNEC_REPORTS_SERVER_INTERNAL env variable (defaults to http://reports:3000)
   reports: # metrics port: 9100
-    image: ghcr.io/gayfurcity/reports:4c17c3954c98575bdeaf9a79477a2d63f3361d88
+    image: ghcr.io/fennecbooru/reports:19cfdda06fee669ae594088847d2dbabe4383d5b
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/up || exit 1
       interval: 30s
@@ -390,7 +381,7 @@ services:
     environment:
       CLICKHOUSE_URL: http://clickhouse:8123
       REDIS_URL: redis://redis/1
-      SECRET_KEY: ${GAYFURCITY_REPORT_KEY:-super_secret_key_for_reports_signature}
+      SECRET_KEY: ${FENNEC_REPORT_KEY:-super_secret_key_for_reports_signature}
       METRICS_ENABLED: ${REPORTS_METRICS_ENABLED:-${METRICS_ENABLED:-}}
       COMPOSE_PROFILES: ${COMPOSE_PROFILES:-}
     ports:
@@ -400,14 +391,14 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    hostname: reports.gayfurcity.containers.local
+    hostname: reports.fennec.containers.local
     labels:
-      - "hostname=reports.gayfurcity.containers.local"
+      - "hostname=reports.fennec.containers.local"
 
   # Discord integration
 
   discordbot:
-    image: ghcr.io/gayfurcity/discordbot:d5c3b2899ac4e9e96536e2079568133c91682f4c
+    image: ghcr.io/fennecbooru/discordbot:f005d7b1f9fc3abebdd71284bed2f2590eaf8e0a
     environment:
       DISCORD_TOKEN: ${DISCORDBOT_DISCORD_TOKEN-}
       DISCORD_ID: ${DISCORDBOT_DISCORD_ID-}
@@ -418,7 +409,7 @@ services:
       ADMIN_ROLE: ${DISCORDBOT_ADMIN_ROLE-}
       JOINER_PORT: ${JOINER_PORT:-4002}
       JOINER_URL: ${DISCORDBOT_JOINER_URL:-http://localhost:${EXPOSED_JOINER_PORT:-4002}}
-      JOINER_SECRET: ${GAYFURCITY_DISCORD_SECRET:-super_secret_for_url_discord}
+      JOINER_SECRET: ${FENNEC_DISCORD_SECRET:-super_secret_for_url_discord}
       JOINER_CHANNEL_ID: ${DISCORDBOT_JOINER_CHANNEL_ID-}
       AUDIT_LOG_CHANNEL_ID: ${DISCORDBOT_AUDIT_LOG_CHANNEL_ID-}
       EVENT_CHANNEL_ID: ${DISCORDBOT_EVENT_CHANNEL_ID-}
@@ -441,7 +432,7 @@ services:
   # Useful for development
 
   tests:
-    image: gayfurcity
+    image: fennec
     environment:
       <<: *common-env
       RAILS_ENV: test
@@ -463,7 +454,7 @@ services:
       - tests
 
   rubocop:
-    image: gayfurcity
+    image: fennec
     volumes:
       - .:/app
       - rubocop_cache:/rubocop_cache
@@ -472,7 +463,7 @@ services:
       - rubocop
 
   linter:
-    image: gayfurcity
+    image: fennec
     volumes:
       - .:/app
       - node_modules:/app/node_modules
@@ -496,4 +487,4 @@ networks:
     ipam:
       driver: default
     driver_opts:
-      com.docker.network.bridge.name: br-gayfurcity
+      com.docker.network.bridge.name: br-fennec

@@ -46,6 +46,6 @@ module LinkHelper
   end
 
   def site_hostname
-    GayFurCity.config.domain.sub(/:\d+\z/, "").delete_prefix("www.")
+    Fennec.config.domain.sub(/:\d+\z/, "").delete_prefix("www.")
   end
 end

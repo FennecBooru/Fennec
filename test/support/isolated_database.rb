@@ -19,7 +19,7 @@ require("securerandom")
 module IsolatedDatabase
   TEMPLATE_NAME = "test_template"
   TEMPLATE_LOCK_KEY = 8_423_461_920_318_552 # arbitrary constant, just needs to be consistent
-  DB_USER = ENV.fetch("GAYFURCITY_DB_USER", "gayfurcity")
+  DB_USER = ENV.fetch("FENNEC_DB_USER", "fennec")
   DB_HOST = "postgres"
   STRUCTURE_SQL = File.expand_path("../../db/structure.sql", __dir__)
 
@@ -46,7 +46,7 @@ module IsolatedDatabase
   end
 
   def self.setup!
-    ENV["GAYFURCITY_TEST_DB_NAME"] = database_name
+    ENV["FENNEC_TEST_DB_NAME"] = database_name
     reap_orphaned!
     clone!(database_name)
 

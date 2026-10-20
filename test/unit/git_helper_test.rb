@@ -95,14 +95,14 @@ class GitHelperTest < ActiveSupport::TestCase
     should("link to a real commit sha even when upstream's commit is unresolved") do
       helper = GitHelper.send(:allocate)
       commit = "9fd76b75cd45f478aae0edf98e69ac2c894ebad0"
-      origin = GitHelper::RevisionRef.new(commit, "https://github.com/GayFurCity/GayFurCity")
-      upstream = GitHelper::RevisionRef.new(nil, "https://github.com/GayFurCity/GayFurCity", branch: "master")
+      origin = GitHelper::RevisionRef.new(commit, "https://github.com/FennecBooru/Fennec")
+      upstream = GitHelper::RevisionRef.new(nil, "https://github.com/FennecBooru/Fennec", branch: "master")
       helper.instance_variable_set(:@origin, origin)
       helper.instance_variable_set(:@upstream, upstream)
 
       GitHelper::RemoteComparison.any_instance.stubs(:common).returns(commit)
 
-      assert_equal("https://github.com/GayFurCity/GayFurCity/commit/#{commit}", helper.public_commit_url)
+      assert_equal("https://github.com/FennecBooru/Fennec/commit/#{commit}", helper.public_commit_url)
       assert_equal(commit[0..7], helper.public_ref.short_commit)
     end
   end

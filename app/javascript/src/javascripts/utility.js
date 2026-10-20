@@ -71,7 +71,7 @@ Utility.dialog = function (title, html) {
     },
   });
 
-  $dialog.find("form").on("submit.danbooru", function () {
+  $dialog.find("form").on("submit.fennec", function () {
     $dialog.dialog("close");
   });
 };
@@ -159,11 +159,11 @@ $.fn.selectEnd = function () {
 };
 
 $(function () {
-  $(window).on("danbooru:notice", function (event, msg) {
+  $(window).on("fennec:notice", function (event, msg) {
     Utility.notice(msg);
   });
 
-  $(window).on("danbooru:error", function (event, msg) {
+  $(window).on("fennec:error", function (event, msg) {
     Utility.error(msg);
   });
 });

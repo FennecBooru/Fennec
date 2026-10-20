@@ -14,5 +14,5 @@ RelatedTag.init_post_show_editor = function () {
 };
 
 $(function () {
-  $(document).on("danbooru:open-post-edit-tab", RelatedTag.init_post_show_editor);
+  $(document).on("fennec:open-post-edit-tab", RelatedTag.init_post_show_editor);
 });
