@@ -2,7 +2,7 @@
 .env.production
 .bundle
 .yardoc
-config/local_config.rb
+/config.d/
 config/deploy/*.rb
 config/application.yml
 doc/*

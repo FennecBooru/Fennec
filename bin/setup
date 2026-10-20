@@ -16,8 +16,8 @@ FileUtils.chdir(APP_ROOT) do
 
   env = ENV.fetch("RAILS_ENV")
   puts("== Copying sample files ==")
-  unless File.exist?("config/local_config.rb")
-    FileUtils.cp("docker/local_config.rb", "config/local_config.rb")
+  unless File.exist?("config.d/local.rb")
+    FileUtils.cp("docker/local_config.rb", "config.d/local.rb")
   end
   puts("== Creating credentials ==")
   system!("EDITOR=true rails credentials:edit")

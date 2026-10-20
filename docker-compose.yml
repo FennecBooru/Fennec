@@ -438,7 +438,7 @@ services:
       RAILS_ENV: test
     volumes:
       - .:/app
-      - ./docker/local_config.rb:/app/config/local_config.rb
+      - ./docker/local_config.rb:/app/config.d/local.rb
       - node_modules:/app/node_modules
     depends_on:
       <<: *common-depends-on
