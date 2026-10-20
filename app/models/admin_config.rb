@@ -11,7 +11,7 @@ class AdminConfig < ApplicationRecord
   # changing any of these runs AdminConfigUpdateJob with the new value
   UPDATE_JOB_OPTIONS = %i[enable_post_approvals enable_replacement_approvals enable_post_appeals].freeze
   # Globally force disabled, usually because the option just doesn't work/do anything
-  DISABLED_OPTIONS = %w[blacklisted_preview_url]
+  DISABLED_OPTIONS = %w[blacklisted_preview_url].freeze
 
   def enqueue_update_jobs
     saved_changes.slice(*UPDATE_JOB_OPTIONS.map(&:to_s)).each do |name, (_old, value)|

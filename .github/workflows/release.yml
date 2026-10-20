@@ -1,0 +1,111 @@
+name: Weekly Release
+
+on:
+  schedule:
+    - cron: '0 12 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'fennecbooru'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Check for new commits
+        id: check
+        run: |
+          # releases cover the week that ended at the most recent Monday 00:00 UTC
+          cutoff="$(date -u -d "$(date -u +%F) -$(( $(date -u +%u) - 1 )) days" +%FT00:00:00Z)"
+          sunday="$(date -u -d "$cutoff -1 day" +%F)"
+          tag="$(date -u -d "$sunday" +%Y.%m.%d)"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "week_tag=$(date -u -d "$sunday" +%G-W%V)" >> "$GITHUB_OUTPUT"
+
+          if git rev-parse -q --verify "refs/tags/$tag" > /dev/null; then
+            echo "Tag $tag already exists"
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # newest commit on master from before the cutoff, so nothing from the publish day gets in
+          target="$(git rev-list -1 --first-parent --before="$cutoff" HEAD)"
+          if [ -z "$target" ]; then
+            echo "No commits before $cutoff"
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "target=$target" >> "$GITHUB_OUTPUT"
+
+          last="$(git describe --tags --abbrev=0 --match '[0-9][0-9][0-9][0-9].[0-9][0-9].[0-9][0-9]' "$target" 2>/dev/null || true)"
+          echo "last=$last" >> "$GITHUB_OUTPUT"
+          # bot commits (TODO updates) don't warrant a release on their own
+          if [ -n "$last" ]; then
+            count="$(git rev-list --count --perl-regexp --author='^(?!github-actions\[bot\])' "$last..$target")"
+          else
+            count="$(git rev-list --count "$target")"
+          fi
+          echo "$count new commits since ${last:-the beginning}"
+
+          if [ "$count" -gt 0 ]; then
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create release
+        if: steps.check.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.check.outputs.tag }}
+          TARGET: ${{ steps.check.outputs.target }}
+          LAST: ${{ steps.check.outputs.last }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        run: |
+          range="${LAST:+$LAST..}$TARGET"
+          total="$(git rev-list --count "$range")"
+          {
+            echo "## Commits"
+            echo
+            git log -n 100 --format="- %s ([%h]($REPO_URL/commit/%H))" "$range"
+            if [ "$total" -gt 100 ]; then
+              echo
+              echo "...and $(( total - 100 )) more"
+            fi
+            echo
+            if [ -n "$LAST" ]; then
+              echo "**Full diff**: $REPO_URL/compare/$LAST...$TAG"
+            else
+              echo "**Full history**: $REPO_URL/commits/$TAG"
+            fi
+          } > "$RUNNER_TEMP/notes.md"
+          gh release create "$TAG" --target "$TARGET" --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md"
+
+      - name: Create week tag
+        if: steps.check.outputs.release == 'true'
+        env:
+          WEEK_TAG: ${{ steps.check.outputs.week_tag }}
+          TARGET: ${{ steps.check.outputs.target }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$WEEK_TAG" > /dev/null; then
+            echo "Tag $WEEK_TAG already exists"
+          else
+            git tag "$WEEK_TAG" "$TARGET"
+            git push origin "refs/tags/$WEEK_TAG"
+          fi
+
+      # tags created with GITHUB_TOKEN don't trigger push workflows, so start the build manually
+      - name: Trigger build
+        if: steps.check.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.check.outputs.tag }}
+        run: gh workflow run build.yml --ref "$TAG"
