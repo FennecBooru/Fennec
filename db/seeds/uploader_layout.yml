@@ -1,0 +1,157 @@
+# The uploader layout a new site starts with, see UploaderSection.create_defaults!
+# Sections other than tags are built in, their key is their kind. Hints are DText.
+# Buttons are grouped into rows, their tag defaults to the name in snake case. A button with shown_when
+# is only shown while any (or all, with shown_when_mode: all) of those tags are selected.
+- kind: file
+  label: File
+  hint: '"Supported Formats":/help/supported_filetypes'
+  show_in_compact_mode: true
+- kind: sources
+  label: Sources
+  hint: >-
+    You should include: A link to the artists page where this was obtained, and a link to the submission page where
+    this image was obtained. No available source should ONLY be used if the content has never been posted online
+    anywhere else.
+  show_in_compact_mode: true
+- kind: tags
+  key: artist
+  label: Artists
+  hint: |-
+    "How do I tag an artist?":/help/tags
+
+    Please don't use [[anonymous_artist]] or [[unknown_artist]] tags unless they fall under the definitions found on the wiki.
+  placeholder: artist_name, unknown_artist, anonymous_artist etc.
+  requirement: in_progress
+- kind: tags
+  key: character
+  label: Characters
+  hint: Select (and write in) all that apply. See our [[howto:tag_genders|Gender Tagging Guidelines]] for more information.
+  placeholder: character_name solo_focus 1_male 2_females etc.
+  buttons:
+    - { name: Male }
+    - { name: Female }
+    - { name: Andromorph }
+    - { name: Gynomorph }
+    - { name: Hermaphrodite, tag: herm }
+    - { name: Male-Herm, tag: maleherm }
+    - { name: Unknown, tag: unknown_gender }
+    - { name: Masculine, row: 2 }
+    - { name: Feminine, row: 2 }
+    - { name: Manly, row: 2, shown_when: [male, andromorph, maleherm] }
+    - { name: Femboy, row: 2, shown_when: [male, andromorph, maleherm] }
+    - { name: Tomboy, row: 2, shown_when: [female, gynomorph, herm] }
+    - { name: Girly, row: 2, shown_when: [female, gynomorph, herm] }
+    - { name: Solo, row: 3 }
+    - { name: Duo, row: 3 }
+    - { name: Trio, row: 3 }
+    - { name: Group, row: 3 }
+    - { name: Zero Pictured, row: 3 }
+    - { name: Male/Male, row: 4, shown_when: [male], shown_when_mode: all }
+    - { name: Male/Female, row: 4, shown_when: [male, female], shown_when_mode: all }
+    - { name: Male/Andromorph, row: 4, shown_when: [male, andromorph], shown_when_mode: all }
+    - { name: Male/Gynomorph, row: 4, shown_when: [male, gynomorph], shown_when_mode: all }
+    - { name: Male/Herm, row: 4, shown_when: [male, herm], shown_when_mode: all }
+    - { name: Male/Maleherm, row: 4, shown_when: [male, maleherm], shown_when_mode: all }
+    - { name: Male/Unknown, row: 4, shown_when: [male, unknown_gender], shown_when_mode: all }
+    - { name: Female/Female, row: 4, shown_when: [female], shown_when_mode: all }
+    - { name: Female/Andromorph, row: 4, shown_when: [female, andromorph], shown_when_mode: all }
+    - { name: Female/Gynomorph, row: 4, shown_when: [female, gynomorph], shown_when_mode: all }
+    - { name: Female/Herm, row: 4, shown_when: [female, herm], shown_when_mode: all }
+    - { name: Female/Maleherm, row: 4, shown_when: [female, maleherm], shown_when_mode: all }
+    - { name: Female/Unknown, row: 4, shown_when: [female, unknown_gender], shown_when_mode: all }
+    - { name: Andromorph/Andromorph, row: 4, shown_when: [andromorph], shown_when_mode: all }
+    - { name: Andromorph/Gynomorph, row: 4, shown_when: [andromorph, gynomorph], shown_when_mode: all }
+    - { name: Andromorph/Herm, row: 4, shown_when: [andromorph, herm], shown_when_mode: all }
+    - { name: Andromorph/Maleherm, row: 4, shown_when: [andromorph, maleherm], shown_when_mode: all }
+    - { name: Andromorph/Unknown, row: 4, shown_when: [andromorph, unknown_gender], shown_when_mode: all }
+    - { name: Gynomorph/Gynomorph, row: 4, shown_when: [gynomorph], shown_when_mode: all }
+    - { name: Gynomorph/Herm, row: 4, shown_when: [gynomorph, herm], shown_when_mode: all }
+    - { name: Gynomorph/Maleherm, row: 4, shown_when: [gynomorph, maleherm], shown_when_mode: all }
+    - { name: Gynomorph/Unknown, row: 4, shown_when: [gynomorph, unknown_gender], shown_when_mode: all }
+    - { name: Herm/Herm, row: 4, shown_when: [herm], shown_when_mode: all }
+    - { name: Herm/Maleherm, row: 4, shown_when: [herm, maleherm], shown_when_mode: all }
+    - { name: Herm/Unknown, row: 4, shown_when: [herm, unknown_gender], shown_when_mode: all }
+    - { name: Maleherm/Maleherm, row: 4, shown_when: [maleherm], shown_when_mode: all }
+    - { name: Maleherm/Unknown, row: 4, shown_when: [maleherm, unknown_gender], shown_when_mode: all }
+    - { name: Unknown/Unknown, row: 4, shown_when: [unknown_gender], shown_when_mode: all }
+- kind: character_groups
+  label: Character Tagging
+  hint: >-
+    If specific tags apply to a specific character (not the scene as a whole), add them here instead of the general
+    tags box below. Leave the character name blank for an unknown/anonymous character.
+- kind: tags
+  key: species
+  label: Body Types and Species
+  hint: One listed body type per visible character, listed options are mutually exclusive.
+  placeholder: bear dragon hyena rat newt etc.
+  buttons:
+    - { name: Anthro }
+    - { name: Feral }
+    - { name: Humanoid }
+    - { name: Human }
+    - { name: Taur }
+    - { name: Anthro/Anthro, row: 2, shown_when: [anthro], shown_when_mode: all }
+    - { name: Anthro/Feral, row: 2, shown_when: [anthro, feral], shown_when_mode: all }
+    - { name: Anthro/Humanoid, row: 2, shown_when: [anthro, humanoid], shown_when_mode: all }
+    - { name: Anthro/Human, row: 2, shown_when: [anthro, human], shown_when_mode: all }
+    - { name: Anthro/Taur, row: 2, shown_when: [anthro, taur], shown_when_mode: all }
+    - { name: Feral/Feral, row: 2, shown_when: [feral], shown_when_mode: all }
+    - { name: Feral/Humanoid, row: 2, shown_when: [feral, humanoid], shown_when_mode: all }
+    - { name: Feral/Human, row: 2, shown_when: [feral, human], shown_when_mode: all }
+    - { name: Feral/Taur, row: 2, shown_when: [feral, taur], shown_when_mode: all }
+    - { name: Humanoid/Humanoid, row: 2, shown_when: [humanoid], shown_when_mode: all }
+    - { name: Humanoid/Human, row: 2, shown_when: [humanoid, human], shown_when_mode: all }
+    - { name: Humanoid/Taur, row: 2, shown_when: [humanoid, taur], shown_when_mode: all }
+    - { name: Human/Human, row: 2, shown_when: [human], shown_when_mode: all }
+    - { name: Human/Taur, row: 2, shown_when: [human, taur], shown_when_mode: all }
+    - { name: Taur/Taur, row: 2, shown_when: [taur], shown_when_mode: all }
+- kind: tags
+  key: content
+  label: Contentious Content
+  hint: >-
+    Fetishes or subjects that other users may find extreme or objectionable. These allow users to find or blacklist
+    content with ease. Make sure that you are tagging these upon initial upload.
+  placeholder: cub scatplay watersports diaper my_little_pony vore rape hyper etc.
+  buttons:
+    - { name: Cub }
+    - { name: Baby, shown_when: [cub] }
+    - { name: Toddler, shown_when: [cub] }
+    - { name: Child, shown_when: [cub] }
+    - { name: Teenager, shown_when: [cub] }
+    - { name: Male Cub, tag: male_cub, row: 2, shown_when: [cub, male], shown_when_mode: all }
+    - { name: Female Cub, tag: female_cub, row: 2, shown_when: [cub, female], shown_when_mode: all }
+    - { name: Andromorph Cub, tag: andromorph_cub, row: 2, shown_when: [cub, andromorph], shown_when_mode: all }
+    - { name: Gynomorph Cub, tag: gynomorph_cub, row: 2, shown_when: [cub, gynomorph], shown_when_mode: all }
+    - { name: Hermaphrodite Cub, tag: herm_cub, row: 2, shown_when: [cub, herm], shown_when_mode: all }
+    - { name: Male-Herm Cub, tag: maleherm_cub, row: 2, shown_when: [cub, maleherm], shown_when_mode: all }
+    - { name: Unknown Cub, tag: unknown_cub, row: 2, shown_when: [cub, unknown_gender], shown_when_mode: all }
+    - { name: Anthro Cub, tag: anthro_cub, row: 2, shown_when: [cub, anthro], shown_when_mode: all }
+    - { name: Feral Cub, tag: feral_cub, row: 2, shown_when: [cub, feral], shown_when_mode: all }
+    - { name: Taur Cub, tag: taur_cub, row: 2, shown_when: [cub, taur], shown_when_mode: all }
+- kind: rating
+  label: Rating
+  hint: 'Explicit tags include sex, pussy, penis, masturbation, fellatio, etc. ("help":/help/ratings)'
+  show_in_compact_mode: true
+- kind: other_tags
+  label: Other Tags
+  hint: |-
+    Separate tags with spaces. ("help":/help/tags)
+
+    Ensure you've reviewed our [[tag_what_you_see|Tag What You See]] policy.
+  show_in_compact_mode: true
+- kind: parent
+  label: Parent Post ID
+  placeholder: "12345"
+  show_in_compact_mode: true
+- kind: locked_tags
+  label: Locked Tags
+  show_in_compact_mode: true
+- kind: lock_rating
+  label: Lock Rating
+  show_in_compact_mode: true
+- kind: description
+  label: Description
+  show_in_compact_mode: true
+- kind: upload_options
+  label: Upload Options
+  show_in_compact_mode: true

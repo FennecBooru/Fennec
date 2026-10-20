@@ -171,6 +171,8 @@ class ActiveSupport::TestCase # rubocop:disable Style/ClassAndModuleChildren
     # categories are data, so every test starts from the defaults
     TagCategory.delete_all
     TagCategory.create_defaults!(creator_id: User.system.id)
+    UploaderSection.delete_all
+    UploaderSection.create_defaults!(creator_id: User.system.id)
   end
 
   teardown do

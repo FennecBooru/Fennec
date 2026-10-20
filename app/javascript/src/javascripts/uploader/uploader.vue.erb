@@ -1,267 +1,166 @@
 <template>
     <div class="flex-grid-outer">
         <div class="col box-section" style="flex: 2 0 0;">
-            <div class="flex-grid border-bottom">
-                <div class="col">
-                    <label class="section-label" for="post_file">File</label>
-                    <div class="hint"><a href="<%= Routes.help_page_path(id: "supported_filetypes") %>">Supported Formats</a></div>
-                </div>
-                <div class="col2">
-                  <file-input @uploadValueChanged="uploadValue = $event"
-                    @previewChanged="previewData = $event"
-                    @invalidUploadValueChanged="invalidUploadValue = $event"></file-input>
-                </div>
-            </div>
-            <file-preview classes="box-section in-editor below-upload" :data="previewData"></file-preview>
-            <div class="flex-grid border-bottom">
-                <div class="col">
-                    <label class="section-label" for="post_sources">Sources</label>
-                    <div>You should include: A link to the artists page where this was obtained, and a link to the
-                        submission page where this image was obtained. No available source should ONLY be used if the
-                        content has never been posted online anywhere else.
+            <template v-for="section in sections" :key="section.key">
+                <template v-if="section.kind === 'file'">
+                    <div class="flex-grid border-bottom">
+                        <div class="col">
+                            <label class="section-label" for="post_file">{{ section.label }}</label>
+                            <div class="hint" v-html="section.hint"></div>
+                        </div>
+                        <div class="col2">
+                          <file-input @uploadValueChanged="uploadValue = $event"
+                            @previewChanged="previewData = $event"
+                            @invalidUploadValueChanged="invalidUploadValue = $event"></file-input>
+                        </div>
                     </div>
-                </div>
-                <div class="col2">
-                    <sources :maxSources="10" :showErrors="showErrors" v-model:sources="sources" @sourceWarning="sourceWarning = $event"></sources>
-                </div>
-            </div>
-            <template v-if="normalMode">
-                <div class="flex-grid border-bottom">
+                    <file-preview classes="box-section in-editor below-upload" :data="previewData"></file-preview>
+                </template>
+                <div class="flex-grid border-bottom" v-else-if="section.kind === 'sources'">
                     <div class="col">
-                        <label class="section-label" for="names">Artists</label>
-                        <div><a href="<%= Routes.help_page_path(id: "tags") %>">How do I tag an artist?</a></div>
-                        <div v-if="wikiEnabled">Please don't use <a href="<%= Routes.show_or_new_wiki_pages_path(title: "anonymous_artist") %>">anonymous_artist</a> or <a href="<%= Routes.show_or_new_wiki_pages_path(title: "unknown_artist") %>">unknown_artist</a> tags unless they fall under the definitions found on the wiki.</div>
+                        <label class="section-label" for="post_sources">{{ section.label }}</label>
+                        <div v-html="section.hint"></div>
                     </div>
                     <div class="col2">
-                        <div class="box-section background-red" v-show="showErrors && missingArtistTag">
-                            An artist tag is required for in-progress uploads.
-                        </div>
-                        <div>
-            <textarea class="tag-textarea" v-model="tagEntries.artist" id="post_artist" rows="2"
-                      :placeholder="artistTagPlaceholder" data-autocomplete="tag-edit"></textarea>
-                        </div>
+                        <sources :maxSources="10" :showErrors="showErrors" v-model:sources="sources" @sourceWarning="sourceWarning = $event"></sources>
                     </div>
                 </div>
-                <div class="flex-grid border-bottom">
+                <div class="flex-grid border-bottom" v-else-if="section.kind === 'tags'">
                     <div class="col">
-                        <label class="section-label" for="post_sex_tags">Characters</label>
-                        <div>
-                          Select (and write in) all that apply.<template v-if="tagGendersHowtoWikiUrl"> See our <a :href="tagGendersHowtoWikiUrl">Gender Tagging Guidelines</a> for more information.</template>
-                        </div>
+                        <label class="section-label" :for="`post_${section.key}`">{{ section.label }}</label>
+                        <div v-html="section.hint"></div>
                     </div>
                     <div class="col2">
-                      <div class="flex-wrap">
-                        <image-checkbox :check="check" :checks="checkboxes.selected" v-for="check in checkboxes.sex"
-                                            @set="setCheck"
-                                            :key="check.name" :data-tag="check.tag || check.name.toLowerCase().replace(/ /g, '_')"></image-checkbox>
-                      </div>
-                      <hr>
-                      <div class="flex-wrap">
-                        <image-checkbox :check="check" :checks="checkboxes.selected"
-                                        v-for="check in checkboxes.mascfem" @set="setCheck"
-                                        :key="check.name"></image-checkbox>
-                      </div>
-                      <div class="flex-wrap hide-default">
-                        <image-checkbox :check="check" :checks="checkboxes.selected"
-                                        v-for="check in checkboxes.behavior" @set="setCheck"
-                                        :key="check.name" :data-tag="check.tag || check.name.toLowerCase().replace(/ /g, '_')"></image-checkbox>
-                      </div>
-                      <hr>
-                      <div class="flex-wrap">
-                        <image-checkbox :check="check" :checks="checkboxes.selected"
-                                          v-for="check in checkboxes.count" @set="setCheck"
-                                          :key="check.name"></image-checkbox>
-                      </div>
-                      <hr>
-                      <div class="flex-wrap hide-default">
-                          <image-checkbox :check="check" :checks="checkboxes.selected"
-                                          v-for="check in checkboxes.pairing" @set="setCheck"
-                                          :key="check.name" :data-tag-a="check.tagA" :data-tag-b="check.tagB"></image-checkbox>
-                      </div>
-                      <textarea class="tag-textarea" rows="2" v-model="tagEntries.character" id="post_character"
-                                :placeholder="characterTagPlaceholder"
-                                data-autocomplete="tag-edit"></textarea>
+                        <div class="box-section background-red" v-show="showErrors && missingRequiredTag(section)">
+                            A tag in {{ section.label }} is required{{ section.requirement === "in_progress" ? " for in-progress uploads" : "" }}.
+                        </div>
+                        <template v-for="(row, index) in visibleRows(section)" :key="index">
+                            <hr v-if="index > 0">
+                            <div class="flex-wrap">
+                                <image-checkbox :check="check" :checks="checkboxes.selected" v-for="check in row"
+                                                @set="setCheck" :key="check.tag" :data-tag="check.tag"></image-checkbox>
+                            </div>
+                        </template>
+                        <textarea class="tag-textarea" v-model="tagEntries[section.key]" :id="`post_${section.key}`" rows="2"
+                                  :placeholder="section.placeholder" data-autocomplete="tag-edit"></textarea>
                     </div>
                 </div>
-                <div class="flex-grid border-bottom" v-if="characterGroupsEnabled">
+                <div class="flex-grid border-bottom" v-else-if="section.kind === 'character_groups'">
                     <div class="col">
-                        <label class="section-label">Character Tagging</label>
-                        <div>
-                          If specific tags apply to a specific character (not the scene as a whole), add them here
-                          instead of the general tags box below. Leave the character name blank for an
-                          unknown/anonymous character.
-                        </div>
+                        <label class="section-label">{{ section.label }}</label>
+                        <div v-html="section.hint"></div>
                     </div>
                     <div class="col2">
                         <character-group-editor param-name="upload" :native-names="false" @update:model-value="characterGroups = $event"></character-group-editor>
                     </div>
                 </div>
-                <div class="flex-grid border-bottom">
+                <div class="flex-grid border-bottom" v-else-if="section.kind === 'rating'">
                     <div class="col">
-                        <label class="section-label">Body Types and Species</label>
-                        <div>One listed body type per visible character, listed options are mutually exclusive.</div>
+                        <label class="section-label">{{ section.label }}</label>
+                        <div v-html="section.hint"></div>
                     </div>
                     <div class="col2">
-                        <div class="flex-wrap">
-                            <image-checkbox :check="check" :checks="checkboxes.selected"
-                                            v-for="check in checkboxes.body" @set="setCheck"
-                                            :key="check.name" :data-tag="check.tag || check.name.toLowerCase().replace(/ /g, '_')"></image-checkbox>
+                        <div class="box-section background-red" v-if="showErrors && invalidRating">
+                            You must select an appropriate rating for this image.
                         </div>
-                        <hr>
-                        <div class="flex-wrap hide-default">
-                          <image-checkbox :check="check" :checks="checkboxes.selected"
-                                          v-for="check in checkboxes.bodyTypePairing" @set="setCheck"
-                                          :key="check.name" :data-tag-a="check.tagA" :data-tag-b="check.tagB"></image-checkbox>
+                        <div>
+                            <template v-if="!safe">
+                                <button class="toggle-button rating-e" :class="{active: rating==='e'}" @click="rating = 'e'">
+                                    Explicit
+                                </button>
+                                <button class="toggle-button rating-q" :class="{active: rating==='q'}" @click="rating = 'q'">
+                                    Questionable
+                                </button>
+                            </template>
+                            <button class="toggle-button rating-s" :class="{active: rating==='s'}" @click="rating = 's'">Safe
+                            </button>
                         </div>
-                        <textarea class="tag-textarea" rows="2" v-model="tagEntries.species" id="post_species"
-                                  :placeholder="speciesTagPlaceholder"
-                                  data-autocomplete="tag-edit"></textarea>
                     </div>
                 </div>
-                <div class="flex-grid border-bottom">
-                    <div class="col">
-                        <label class="section-label">Contentious Content</label>
-                        <div>
-                            Fetishes or subjects that other users may find extreme or objectionable.
-                            These allow users to find or blacklist content with ease. Make sure that you are tagging
-                            these upon initial upload.
+                <template v-else-if="section.kind === 'other_tags'">
+                    <div class="flex-grid come-together-now">
+                        <div class="col">
+                            <label class="section-label" for="post_tags">{{ section.label }}</label>
+                            <div v-html="section.hint"></div>
+                        </div>
+                        <div class="col2">
+                          <file-preview classes="box-section in-editor" :data="previewData"></file-preview>
+                            <div class="box-section background-red" v-show="showErrors && notEnoughTags">
+                                You must provide at least <b>{{minimumTags - tagCount}}</b> more tags. Tags in other sections count
+                                towards this total.
+                            </div>
+                            <div v-show="!tagPreview.show">
+                                <textarea class="tag-textarea" id="post_tags" v-model="tagEntries.other" rows="5"
+                                          ref="otherTags" data-autocomplete="tag-edit"></textarea>
+                            </div>
+                            <div v-show="tagPreview.show">
+                                <tag-preview :tags="tagPreview.tags" :loading="tagPreview.loading"
+                                             @close="previewFinalTags"></tag-preview>
+                            </div>
+
+                            <div class="related-tag-functions">
+                                Related:
+                                <a href="#" @click.prevent="findRelated()">Tags</a> |
+                                <template v-for="category in relatedCategories" :key="category.id">
+                                    <a href="#" @click.prevent="findRelated(category.id)">{{ category.header }}</a> |
+                                </template>
+                                <a href="#" @click.prevent="previewFinalTags">Preview Final Tags</a>
+                            </div>
                         </div>
                     </div>
+                    <div class="flex-grid border-bottom over-me">
+                        <related-tags v-if="relatedTags.length" :tags="tagsArray" :related="relatedTags"
+                                      :loading="loadingRelated"
+                                      @tag-active="pushTag"></related-tags>
+                    </div>
+                </template>
+                <div class="flex-grid border-bottom" v-else-if="section.kind === 'parent'">
+                    <div class="col">
+                        <label class="section-label">{{ section.label }}</label>
+                        <div v-html="section.hint"></div>
+                    </div>
                     <div class="col2">
-                      <div class="flex-wrap">
-                        <image-checkbox :check="checkboxes.cub" :checks="checkboxes.selected" @set="setCheck"></image-checkbox>
-                        <div class=" hide-default">
-                          <image-checkbox :check="check" :checks="checkboxes.selected"
-                                        v-for="check in checkboxes.cubAge" @set="setCheck"
-                                        :key="check.name" :data-tag="check.tag || check.name.toLowerCase().replace(/ /g, '_')"></image-checkbox>
-                        </div>
-                      </div>
-                      <hr>
-                      <div class="flex-wrap hide-default">
-                        <image-checkbox :check="check" :checks="checkboxes.selected"
-                                        v-for="check in checkboxes.cubGender" @set="setCheck"
-                                        :key="check.name" :data-tag="check.tag || check.name.toLowerCase().replace(/ /g, '_')" :data-gender-tag="check.gender" data-is-cub="true"></image-checkbox>
-                      </div>
-                      <div class="flex-wrap hide-default">
-                        <image-checkbox :check="check" :checks="checkboxes.selected"
-                                        v-for="check in checkboxes.cubBodyType" @set="setCheck"
-                                        :key="check.name" :data-tag="check.tag || check.name.toLowerCase().replace(/ /g, '_')" :data-body-type-tag="check.body_type" data-is-cub="true"></image-checkbox>
-                      </div>
-                      <hr>
-                      <textarea class="tag-textarea" v-model="tagEntries.content" id="post_content" rows="2"
-                        data-autocomplete="tag-edit"
-                        :placeholder="contentTagPlaceholder"></textarea>
+                        <input v-model.number="parentID" :placeholder="section.placeholder"/>
+                    </div>
+                </div>
+                <div class="flex-grid border-bottom" v-else-if="section.kind === 'locked_tags'">
+                    <div class="col">
+                        <label class="section-label">{{ section.label }}</label>
+                        <div v-html="section.hint"></div>
+                    </div>
+                    <div class="col2">
+                        <input type="text" v-model="lockedTags" data-autocomplete="tag-query"/>
+                    </div>
+                </div>
+                <div class="flex-grid border-bottom" v-else-if="section.kind === 'lock_rating'">
+                    <div class="col">
+                        <label class="section-label">{{ section.label }}</label>
+                        <div v-html="section.hint"></div>
+                    </div>
+                    <div class="col2">
+                        <label><input type="checkbox" v-model="ratingLocked"/> Lock Rating</label>
+                    </div>
+                </div>
+                <div class="flex-grid border-bottom" v-else-if="section.kind === 'description'">
+                    <div class="col">
+                        <label class="section-label" for="post_description">{{ section.label }}</label>
+                        <div v-html="section.hint"></div>
+                    </div>
+                    <div class="col2">
+                        <%= ApplicationController.new.render_to_string(partial: "dtext_input", locals: { limit: AdminConfig.instance.post_description_max_size, textarea: '<textarea  class="dtext-formatter-input tag-textarea dtext" id="post_description" rows="10" v-model="description"></textarea>'.html_safe, allow_color: true }) %>
+                    </div>
+                </div>
+                <div class="flex-grid border-bottom" v-else-if="section.kind === 'upload_options'">
+                    <div class="col">
+                        <label class="section-label">{{ section.label }}</label>
+                        <div v-html="section.hint"></div>
+                    </div>
+                    <div class="col2">
+                        <label v-if="allowUploadAsPending"><input type="checkbox" v-model="uploadAsPending"/> Upload As Pending<sup title="Puts the post straight into the pending queue for approval, even if you'd normally skip it." style="cursor: help; margin-left: 0.15em; font-size: 0.75em;">?</sup></label><br v-if="allowUploadAsPending && allowUploadAsInProgress">
+                        <label v-if="allowUploadAsInProgress"><input type="checkbox" v-model="uploadAsInProgress"/> Upload As In Progress<sup title="Hides the post from search results until searched for directly, and lets you replace it instantly with no approval needed while you keep working on it. Push it into the pending queue yourself when you're done, or a janitor can force it in if it's abandoned." style="cursor: help; margin-left: 0.15em; font-size: 0.75em;">?</sup></label>
                     </div>
                 </div>
             </template>
-            <div class="flex-grid border-bottom">
-                <div class="col">
-                    <label class="section-label">Rating</label>
-                    <div>Explicit tags include sex, pussy, penis, masturbation, fellatio, etc.
-                        (<a href="<%= Routes.help_page_path(id: "ratings") %>" target="_blank">help</a>)
-                    </div>
-                </div>
-                <div class="col2">
-                    <div class="box-section background-red" v-if="showErrors && invalidRating">
-                        You must select an appropriate rating for this image.
-                    </div>
-                    <div>
-                        <template v-if="!safe">
-                            <button class="toggle-button rating-e" :class="{active: rating==='e'}" @click="rating = 'e'">
-                                Explicit
-                            </button>
-                            <button class="toggle-button rating-q" :class="{active: rating==='q'}" @click="rating = 'q'">
-                                Questionable
-                            </button>
-                        </template>
-                        <button class="toggle-button rating-s" :class="{active: rating==='s'}" @click="rating = 's'">Safe
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="flex-grid come-together-now">
-                <div class="col">
-                    <label class="section-label" for="post_tags">Other Tags</label>
-                    <div>
-                        Separate tags with spaces. (<a href="<%= Routes.help_page_path(id: "tags") %>" target="_blank">help</a>)
-                    </div>
-                    <div v-if="tagWhatYouSeeWikiUrl">
-                      Ensure you've reviewed our <a :href="tagWhatYouSeeWikiUrl">
-                        Tag What You See
-                      </a> policy.
-                    </div>
-                </div>
-                <div class="col2">
-                  <file-preview classes="box-section in-editor" :data="previewData"></file-preview>
-                    <div class="box-section background-red" v-show="showErrors && notEnoughTags">
-                        You must provide at least <b>{{4 - tagCount}}</b> more tags. Tags in other sections count
-                        towards this total.
-                    </div>
-                    <div v-show="!tagPreview.show">
-                        <textarea class="tag-textarea" id="post_tags" v-model="tagEntries.other" rows="5"
-                                  ref="otherTags" data-autocomplete="tag-edit"></textarea>
-                    </div>
-                    <div v-show="tagPreview.show">
-                        <tag-preview :tags="tagPreview.tags" :loading="tagPreview.loading"
-                                     @close="previewFinalTags"></tag-preview>
-                    </div>
-
-                    <div class="related-tag-functions">
-                        Related:
-                        <a href="#" @click.prevent="findRelated()">Tags</a> |
-                        <template v-for="category in relatedCategories" :key="category.id">
-                            <a href="#" @click.prevent="findRelated(category.id)">{{ category.header }}</a> |
-                        </template>
-                        <a href="#" @click.prevent="previewFinalTags">Preview Final Tags</a>
-                    </div>
-                </div>
-            </div>
-            <div class="flex-grid border-bottom over-me">
-                <related-tags v-if="relatedTags.length" :tags="tagsArray" :related="relatedTags"
-                              :loading="loadingRelated"
-                              @tag-active="pushTag"></related-tags>
-            </div>
-            <div class="flex-grid border-bottom">
-                <div class="col">
-                    <label class="section-label">Parent Post ID</label>
-                </div>
-                <div class="col2">
-                    <input v-model.number="parentID" placeholder="Ex. 12345"/>
-                </div>
-            </div>
-            <div v-if="allowLockedTags" class="flex-grid border-bottom">
-                <div class="col">
-                    <label class="section-label">Locked Tags</label>
-                </div>
-                <div class="col2">
-                    <input type="text" v-model="lockedTags" data-autocomplete="tag-query"/>
-                </div>
-            </div>
-            <div v-if="allowRatingLock" class="flex-grid border-bottom">
-                <div class="col">
-                    <label class="section-label">Lock Rating</label>
-                </div>
-                <div class="col2">
-                    <label><input type="checkbox" v-model="ratingLocked"/> Lock Rating</label>
-                </div>
-            </div>
-            <div class="flex-grid border-bottom">
-                <div class="col">
-                    <label class="section-label" for="post_description">Description</label>
-                </div>
-                <div class="col2">
-                    <%= ApplicationController.new.render_to_string(partial: "dtext_input", locals: { limit: AdminConfig.instance.post_description_max_size, textarea: '<textarea  class="dtext-formatter-input tag-textarea dtext" id="post_description" rows="10" v-model="description"></textarea>'.html_safe, allow_color: true }) %>
-                </div>
-            </div>
-            <div v-if="allowUploadAsPending || allowUploadAsInProgress" class="flex-grid border-bottom">
-                <div class="col">
-                    <label class="section-label">Upload Options</label>
-                </div>
-                <div class="col2">
-                    <label><input type="checkbox" v-model="uploadAsPending"/> Upload As Pending<sup title="Puts the post straight into the pending queue for approval, even if you'd normally skip it." style="cursor: help; margin-left: 0.15em; font-size: 0.75em;">?</sup></label><br>
-                    <label><input type="checkbox" v-model="uploadAsInProgress"/> Upload As In Progress<sup title="Hides the post from search results until searched for directly, and lets you replace it instantly with no approval needed while you keep working on it. Push it into the pending queue yourself when you're done, or a janitor can force it in if it's abandoned." style="cursor: help; margin-left: 0.15em; font-size: 0.75em;">?</sup></label>
-                </div>
-            </div>
             <div class="flex-grid">
                 <div class="col"></div>
                 <div class="col2">
@@ -301,73 +200,6 @@
   import Uploader from "../uploader";
   import Autocomplete from "../autocomplete.js.erb";
 
-  const sex_checks = [
-    {name: "Male"},
-    {name: "Female"},
-    {name: "Andromorph"},
-    {name: "Gynomorph"},
-    {name: "Hermaphrodite", tag: "herm"},
-    {name: "Male-Herm", tag: "maleherm"},
-    {name: "Unknown", tag: "unknown_gender"}];
-  const genders = sex_checks.map(s => s.tag || s.name.toLowerCase().replace(/ /g, "_"));
-  const mascgenders = ["male", "andromorph", "maleherm"];
-  const femgenders = ["female", "gynomorph", "herm"];
-  const ucwords = (str) => str.toString().toLowerCase().replace(/_gender/g, "").replace(/^(.)|\s+(.)/g, r => r.toUpperCase());
-
-  function removeDuplicates(set) {
-    const unique = [];
-    for (const item of set) {
-      if (unique.find(p => p.tagA === item.tagB && p.tagB === item.tagA)) continue;
-      unique.push(item);
-    }
-    return unique;
-  }
-
-  const pairing_checks = removeDuplicates(genders.flatMap(tagA => genders.flatMap(tagB => ({ name: `${ucwords(tagA)}/${ucwords(tagB)}`, tagA, tagB }))))
-
-  const mascfem_checks = [
-    { name: "Masculine" },
-    { name: "Feminine" },
-  ];
-
-  const behavior_checks = [
-    { name: "Manly", genders: mascgenders },
-    { name: "Femboy", genders: mascgenders },
-    { name: "Tomboy", genders: femgenders },
-    { name: "Girly", genders: femgenders },
-  ];
-
-  const char_count_checks = [
-    { name: "Solo" },
-    { name: "Duo" },
-    { name: "Trio" },
-    { name: "Group" },
-    { name: "Zero Pictured" }
-  ];
-
-  const body_type_checks = [
-    { name: "Anthro" },
-    { name: "Feral" },
-    { name: "Humanoid" },
-    { name: "Human" },
-    { name: "Taur" }
-  ];
-
-  const cub_check = { name: "Cub" };
-  const cub_age_checks = [
-    { name: "Baby" },
-    { name: "Toddler" },
-    { name: "Child" },
-    { name: "Teenager" },
-  ]
-
-  const body_types = body_type_checks.map(b => b.tag || b.name.toLowerCase().replace(/ /g, "_"));
-  const body_type_pairing_checks = removeDuplicates(body_types.flatMap(tagA => body_types.flatMap(tagB => ({ name: `${ucwords(tagA)}/${ucwords(tagB)}`, tagA, tagB }))));
-  const cub_ages = cub_age_checks.map(a => a.tag || a.name.toLowerCase().replace(/ /g, "_"));
-
-  const cub_gender_checks = sex_checks.map(s => ({ name: `${s.name} Cub`, tag: `${(s.tag || s.name.toLowerCase().replace(/ /g, "_")).replace(/_gender/, "")}_cub`, gender: s.tag || s.name.toLowerCase().replace(/ /g, "_") }));
-  const cub_body_type_checks = body_type_checks.filter(bt => !/human.*/i.test(bt.name.replace(/ /g, "_"))).map(bt => ({ name: `${bt.name} Cub`, tag: `${bt.tag || bt.name.toLowerCase().replace(/ /g, "_")}_cub`, body_type: bt.tag || bt.name.toLowerCase().replace(/ /g, "_") }));
-
   function tagSorter(a, b) {
     return a.name > b.name ? 1 : -1;
   }
@@ -390,26 +222,11 @@
       "character-group-editor": characterGroupEditor,
     },
     data() {
-      const allChecks = {};
-      const addChecks = function (check) {
-        if (typeof check["tag"] !== "undefined") {
-          allChecks[check.tag] = true;
-          return
-        }
-        allChecks[check.name.toLowerCase().replace(" ", "_")] = true;
-      };
-      sex_checks.forEach(addChecks);
-      mascfem_checks.forEach(addChecks);
-      behavior_checks.forEach(addChecks);
-      char_count_checks.forEach(addChecks);
-      pairing_checks.forEach(addChecks);
-      body_type_checks.forEach(addChecks);
-      body_type_pairing_checks.forEach(addChecks);
-      cub_age_checks.forEach(addChecks);
-      cub_gender_checks.forEach(addChecks);
-      cub_body_type_checks.forEach(addChecks);
-      addChecks(cub_check);
-
+      const layout = Uploader.settings.layout || [];
+      const tagEntries = { other: "" };
+      for (const section of layout) {
+        if (section.kind === "tags") tagEntries[section.key] = "";
+      }
 
       return {
         safe: Uploader.settings.safe_site,
@@ -429,39 +246,15 @@
         characterGroups: [],
         normalMode: !Uploader.settings.compact_mode,
         maxFileSizePerRequest: Uploader.settings.max_file_size_per_request,
-        wikiEnabled: Uploader.settings.wiki_enabled,
         characterGroupsEnabled: Uploader.settings.character_groups_enabled,
-        tagGendersHowtoWikiUrl: Uploader.settings.tag_genders_howto_wiki_url,
-        tagWhatYouSeeWikiUrl: Uploader.settings.tag_what_you_see_wiki_url,
-        artistTagPlaceholder: Uploader.settings.artist_tag_placeholder,
-        characterTagPlaceholder: Uploader.settings.character_tag_placeholder,
-        speciesTagPlaceholder: Uploader.settings.species_tag_placeholder,
-        contentTagPlaceholder: Uploader.settings.content_tag_placeholder,
+        minimumTags: Uploader.settings.minimum_tags,
+        layout: layout,
 
         checkboxes: {
-          sex: sex_checks,
-          mascfem: mascfem_checks,
-          behavior: behavior_checks,
-          pairing: pairing_checks,
-          count: char_count_checks,
-          body: body_type_checks,
-          bodyTypePairing: body_type_pairing_checks,
-          cub: cub_check,
-          cubAge: cub_age_checks,
-          cubGender: cub_gender_checks,
-          cubBodyType: cub_body_type_checks,
           selected: {},
-          all: allChecks
         },
-        tagEntries: {
-          // These had a bizarre naming pattern
-          // Old names are listed below VVV
-          artist: "",     // character: '',
-          character: "",  // sex: '',
-          species: "",    // bodyType: '',
-          content: "",    // theme: '',
-          other: "",      // other: '',
-        },
+        // the "other" box, plus one for each tags section, by key
+        tagEntries: tagEntries,
 
         tagPreview: {
           loading: false,
@@ -491,8 +284,20 @@
         duplicateId: 0,
       };
     },
+    watch: {
+      // hidden buttons are unselected, which can hide more buttons, so this runs again until nothing changes
+      "checkboxes.selected": {
+        deep: true,
+        handler() {
+          for (const button of this.buttons) {
+            if (this.checkboxes.selected[button.tag] && !this.isVisible(button)) {
+              this.checkboxes.selected[button.tag] = false;
+            }
+          }
+        },
+      },
+    },
     mounted() {
-      $(".hide-default button").hide();
       const self = this;
       window.onbeforeunload = unloadWarning.bind(self);
       const params = new URLSearchParams(window.location.search);
@@ -507,29 +312,24 @@
         }
       };
 
-      // Import tags from query parameters
+      // Import tags from query parameters, tags-<key> goes into that tags section
       const fillTags = function() {
-        const queryList = ["tags-artist", "tags-character", "tags-species", "tags-content"];
-
         if(params.has("tags"))
           self.importTags(params.get("tags"), "other");
 
-        if(self.normalMode) {
-          for(const name of queryList) {
-            if(!params.has(name)) continue;
-            self.importTags(params.get(name), name.replace("tags-", ""));
+        const tags = [];
+        for(const [name, value] of params.entries()) {
+          if(!name.startsWith("tags-")) continue;
+          const key = name.replace("tags-", "");
+          if(self.normalMode && key !== "other" && Object.hasOwn(self.tagEntries, key)) {
+            self.importTags(value, key);
+          } else {
+            // compact mode only has the other box, as do sections that aren't shown
+            tags.push(value);
           }
-        } else {
-          // No other inputs in advanced mode, so we can avoid
-          // recalculating duplicates every time in importTags
-          const tags = [];
-          for(const name of queryList) {
-            if(!params.has(name)) continue;
-            tags.push(params.get(name));
-          }
-          if(tags.length > 0)
-            self.importTags(tags.join(" "), "other");
         }
+        if(tags.length > 0)
+          self.importTags(tags.join(" "), "other");
       };
 
       // Import the post rating from a query parameter
@@ -559,6 +359,21 @@
     methods: {
       setCheck(tag, value) {
         this.checkboxes.selected[tag] = value;
+      },
+      isVisible(button) {
+        if (!button.shown_when.length) return true;
+        const selected = (tag) => this.checkboxes.selected[tag] === true;
+        return button.shown_when_mode === "all" ? button.shown_when.every(selected) : button.shown_when.some(selected);
+      },
+      // rows without any shown buttons are left out
+      visibleRows(section) {
+        return section.rows.map(row => row.filter(button => this.isVisible(button))).filter(row => row.length);
+      },
+      missingRequiredTag(section) {
+        if (section.requirement === "none") return false;
+        if (section.requirement === "in_progress" && !this.uploadAsInProgress) return false;
+        if ((this.tagEntries[section.key] || "").trim()) return false;
+        return !section.rows.flat().some(button => this.checkboxes.selected[button.tag] === true);
       },
       afterSuccess(data) {
         this.submitting = false;
@@ -725,10 +540,10 @@
       },
       pushTag(tag, add) {
         this.tagPreview.show = false;
-        const isCheck = typeof this.checkboxes.all[tag] !== "undefined";
+        const button = this.buttonsByTag[tag];
         // In advanced mode we need to push these into the tags area because there are no checkboxes or other
-        // tag fields so we can"t see them otherwise.
-        if (isCheck && this.normalMode) {
+        // tag fields so we can't see them otherwise. A hidden button would just be unselected again.
+        if (button && this.normalMode && (!add || this.isVisible(button))) {
           this.setCheck(tag, add);
           return;
         }
@@ -756,15 +571,23 @@
 
         // Dedupe
         let tagsB = this.normalMode ? [] : (this.tagEntries.other || "").trim().split(" ");
+        const checked = [];
         tagsA.forEach((tag) => {
           if(tagsB.indexOf(tag) >= 0) return;
           // In advanced mode, checkboxes are not available
-          if(this.normalMode && typeof this.checkboxes.all[tag] !== "undefined") {
+          if(this.normalMode && this.buttonsByTag[tag]) {
             this.setCheck(tag, true);
-            this.toggleTag(tag, true);
+            checked.push(tag);
+            return;
           }
           tagsB.push(tag);
         });
+        // all of them are selected first, since buttons can be shown by ones that come later
+        for (const tag of checked) {
+          if (this.isVisible(this.buttonsByTag[tag])) continue;
+          this.setCheck(tag, false);
+          tagsB.push(tag);
+        }
 
         // Without a space at the end, vue panics
         this.tagEntries[this.normalMode ? input : "other"] = tagsB.join(" ") + " ";
@@ -817,7 +640,10 @@
           return sortedRelated;
         };
         const getSelectedTags = function () {
-          const field = self.$refs["otherTags"];
+          // an array, since it's inside the sections loop
+          const field = [].concat(self.$refs["otherTags"])[0];
+          if (!field)
+            return null;
           if (!field.hasOwnProperty("selectionStart"))
             return null;
           const length = field.selectionEnd - field.selectionStart;
@@ -839,104 +665,37 @@
           self.loadingRelated = false;
         });
       },
-      toggleTag(tag, checked) {
-        if (genders.includes(tag)) {
-          this.updateGenderTag(tag, checked);
-        }
-
-        if (body_types.includes(tag)) {
-          this.updateBodyTypeTag(tag, checked);
-        }
-
-        if (tag === "cub") {
-          this.updateCubTags(checked);
-        }
-      },
-      updateGenderTag(tag, checked) {
-        if (!checked) {
-          $(`[data-tag-a=${tag}], [data-tag-b=${tag}], [data-gender-tag=${tag}]`).hide();
-          // I feel like there should be a better way to do this, but I can't find one (I hate vue)
-          $(`[data-tag-a=${tag}].active, [data-tag-b=${tag}].active, [data-gender-tag=${tag}].active`).click();
-          return;
-        }
-        this.updateGenderTags();
-      },
-      updateGenderTags() {
-        this.updateBehaviorTags();
-        const selected = genders.filter(g => this.checkboxes.selected[g] === true);
-        for (const gender of genders) {
-          if (!selected.includes(gender)) continue;
-          const filter = this.checkboxes.selected.cub ? "" : ":not([data-is-cub=true])"
-          $(`[data-gender-tag=${gender}]${filter}`).show();
-          for (const gender2 of genders) {
-            if (!selected.includes(gender2)) continue;
-            $(`[data-tag-a=${gender}][data-tag-b=${gender2}]`).show();
-          }
-        }
-      },
-      updateBodyTypeTag(tag, checked) {
-        if (!checked) {
-          $(`[data-tag-a=${tag}], [data-tag-b=${tag}], [data-body-type-tag=${tag}]`).hide();
-          // I feel like there should be a better way to do this, but I can't find one (I hate vue)
-          $(`[data-tag-a=${tag}].active, [data-tag-b=${tag}].active, [data-body-type-tag=${tag}].active`).click();
-          return;
-        }
-        this.updateBodyTypeTags();
-      },
-      updateBodyTypeTags() {
-        const selected = body_types.filter(g => this.checkboxes.selected[g] === true);
-        for (const body_type of body_types) {
-          if (!selected.includes(body_type)) continue;
-          const filter = this.checkboxes.selected.cub ? "" : ":not([data-is-cub=true])"
-          $(`[data-body-type-tag=${body_type}]${filter}`).show();
-          for (const body_type2 of body_types) {
-            if (!selected.includes(body_type2)) continue;
-            $(`[data-tag-a=${body_type}][data-tag-b=${body_type2}]`).show();
-          }
-        }
-      },
-      updateCubTags(checked) {
-        for (const age of cub_ages) {
-          if (!checked) {
-            $(`[data-tag=${age}], [data-is-cub=true]`).hide();
-            // I feel like there should be a better way to do this, but I can't find one (I hate vue)
-            $(`[data-tag=${age}].active, [data-is-cub=true].active`).click();
-          } else {
-            $(`[data-tag=${age}]`).show();
-          }
-        }
-        this.updateGenderTags();
-        this.updateBodyTypeTags();
-      },
-      updateBehaviorTags() {
-        const selected = genders.filter(g => this.checkboxes.selected[g] === true);
-        for (const behavior of behavior_checks) {
-          const tag = behavior.tag || behavior.name.toLowerCase().replace(/ /g, "_");
-          if (!behavior.genders.some(g => selected.includes(g))) {
-            $(`[data-tag=${tag}]`).hide();
-            // I feel like there should be a better way to do this but I can't find one (I hate vue)
-            $(`[data-tag=${tag}].active`).click();
-          } else {
-            $(`[data-tag=${tag}]`).show();
-          }
-        }
-      }
     },
     computed: {
+      // the sections the user sees, compact mode only shows some of them
+      sections() {
+        return this.layout.filter((section) => {
+          if (!this.normalMode && !section.show_in_compact_mode) return false;
+          switch (section.kind) {
+            case "character_groups": return this.characterGroupsEnabled;
+            case "locked_tags": return this.allowLockedTags;
+            case "lock_rating": return this.allowRatingLock;
+            case "upload_options": return this.allowUploadAsPending || this.allowUploadAsInProgress;
+            default: return true;
+          }
+        });
+      },
+      buttons() {
+        return this.sections.filter(section => section.kind === "tags").flatMap(section => section.rows.flat());
+      },
+      buttonsByTag() {
+        return Object.fromEntries(this.buttons.map(button => [button.tag, button]));
+      },
       characterGroupTagsFlat() {
         return this.characterGroups.flatMap((g) => [...g.characters, ...g.tags]).join(" ");
       },
       // Everything except the character-group tags - this is what's actually submitted as
       // upload[ungrouped_tag_string]; the groups are submitted separately, structured.
       ungroupedTags() {
-        const self = this;
         if (!this.normalMode)
           return this.tagEntries.other;
-        const checked = Object.keys(this.checkboxes.selected).filter(function (x) {
-          return self.checkboxes.selected[x] === true;
-        });
-        return checked.concat([this.tagEntries.other, this.tagEntries.artist, this.tagEntries.character,
-          this.tagEntries.species, this.tagEntries.content]).join(" ").replace(",", " ").trim().replace(/ +/g, " ");
+        const checked = this.buttons.filter(button => this.checkboxes.selected[button.tag] === true).map(button => button.tag);
+        return checked.concat(Object.values(this.tagEntries)).join(" ").replace(",", " ").trim().replace(/ +/g, " ");
       },
       // Full tag set including character-group tags - used for the tag count/validation/preview/related-tag
       // features below, which should treat a character's tags the same as any other tag on the post.
@@ -952,20 +711,20 @@
         }).length;
       },
       notEnoughTags: function () {
-        // In-progress uploads only need an artist tag (see missingArtistTag) - everything else
+        // In-progress uploads only need the required sections (see missingRequiredTags) - everything else
         // gets finished up before the post is pushed into the pending queue.
-        if (this.uploadInProgress)
+        if (this.uploadAsInProgress)
           return false;
-        return this.tagCount < 4;
+        return this.tagCount < this.minimumTags;
       },
-      missingArtistTag: function () {
-        return this.uploadInProgress && this.normalMode && !this.tagEntries.artist.trim();
+      missingRequiredTags: function () {
+        return this.sections.some(section => section.kind === "tags" && this.missingRequiredTag(section));
       },
       invalidRating: function () {
         return !this.rating;
       },
       preventUpload: function () {
-        return this.sourceWarning || this.notEnoughTags || this.missingArtistTag
+        return this.sourceWarning || this.notEnoughTags || this.missingRequiredTags
           || this.invalidRating || this.invalidUploadValue;
       },
       duplicatePath: function () {

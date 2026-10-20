@@ -483,7 +483,19 @@ Rails.application.routes.draw do
     end
   end
   resources(:uploads, only: %i[index show new create]) do
-    get(:settings, on: :collection)
+    collection do
+      get(:settings)
+      resources(:sections, controller: "uploads/sections", as: "upload_sections", except: %i[show]) do
+        collection do
+          post(:reorder)
+        end
+        resources(:buttons, controller: "uploads/buttons", except: %i[show]) do
+          collection do
+            post(:reorder)
+          end
+        end
+      end
+    end
   end
   resources(:users, except: %i[edit update]) do
     resource(:password, only: %i[edit], controller: "users/passwords")

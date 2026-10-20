@@ -11,6 +11,9 @@
     Unsure what to tag your post
     with? <%= link_to("Tagging Checklist", help_page_path(id: "tagging_checklist")) %></p>
 </div>
+<% if policy(UploaderSection).update? %>
+  <p><%= link_to("Customize the uploader", upload_sections_path) %></p>
+<% end %>
 <div id="uploader"></div>
 <% if CurrentUser.upload_limit <= 5 || CurrentUser.post_upload_throttle <= 5 %>
   <% @limit_pieces = CurrentUser.upload_limit_pieces %>

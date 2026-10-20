@@ -4,5 +4,6 @@
   <%= subnav_link_to_if(policy(Upload).create?, "New", new_upload_path) %>
   <%= subnav_link_to("Similar Images Search", posts_eris_path) %>
   <%= subnav_link_to("Help", help_page_path(id: "uploading")) %>
+  <%= subnav_link_to_if(policy(UploaderSection).update?, "Customize Uploader", upload_sections_path) %>
 <% end %>
 <%= latest_link(@uploads) %>

@@ -238,15 +238,10 @@ class AdminConfig
       add_text_field(:takedown_verification_wiki_page)
       add_text_field(:staff_wiki_page)
       add_text_field(:home_wiki_page)
-      add_text_field(:tag_genders_howto_wiki_page)
-      add_text_field(:tag_what_you_see_wiki_page)
     end
 
     category("Uploader") do
-      add_text_field(:artist_tag_placeholder, hint: "Example text shown in the artist tags textarea")
-      add_text_field(:character_tag_placeholder, hint: "Example text shown in the character tags textarea")
-      add_text_field(:species_tag_placeholder, hint: "Example text shown in the species tags textarea")
-      add_text_field(:content_tag_placeholder, hint: "Example text shown in the content/theme tags textarea")
+      add_number_field(:uploader_minimum_tags, hint: "Tags required before uploading, in-progress uploads only need the sections marked as required. The sections and buttons are edited on the uploader's own pages")
     end
 
     category("Features") do

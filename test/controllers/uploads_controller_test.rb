@@ -122,22 +122,38 @@ class UploadsControllerTest < ActionDispatch::IntegrationTest
     end
 
     context("settings action") do
-      should("include the wiki links") do
+      should("include the layout") do
         get_auth(settings_uploads_path, @user, params: { format: :json })
 
         assert_response(:success)
         assert(response.parsed_body["wiki_enabled"])
-        assert_not_nil(response.parsed_body["tag_what_you_see_wiki_url"])
+        assert_equal(4, response.parsed_body["minimum_tags"])
+        assert_equal(UploaderSection.order(:position).pluck(:key), response.parsed_body["layout"].pluck("key"))
+
+        artist = response.parsed_body["layout"].find { |section| section["key"] == "artist" }
+
+        assert_equal("Ex: artist_name, unknown_artist, anonymous_artist etc.", artist["placeholder"])
+        assert_equal("in_progress", artist["requirement"])
+        assert_match(%r{href="/wiki/show_or_new\?title=anonymous_artist"}, artist["hint"])
       end
 
-      should("leave out the wiki links when the wiki is disabled") do
+      should("link hints to posts when the wiki is disabled") do
         stub_admin_config(:enable_wiki, false)
+        create(:tag, name: "anonymous_artist")
         get_auth(settings_uploads_path, @user, params: { format: :json })
 
         assert_response(:success)
         assert_not(response.parsed_body["wiki_enabled"])
-        assert_nil(response.parsed_body["tag_genders_howto_wiki_url"])
-        assert_nil(response.parsed_body["tag_what_you_see_wiki_url"])
+        artist = response.parsed_body["layout"].find { |section| section["key"] == "artist" }
+
+        assert_match(%r{href="/posts\?tags=anonymous_artist"}, artist["hint"])
+      end
+
+      should("leave out sections that are turned off") do
+        UploaderSection.find_by!(kind: "sources").update!(is_enabled: false, updater: create(:admin_user))
+        get_auth(settings_uploads_path, @user, params: { format: :json })
+
+        assert_not_includes(response.parsed_body["layout"].pluck("key"), "sources")
       end
     end
 

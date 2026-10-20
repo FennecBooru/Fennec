@@ -1,0 +1,51 @@
+<h1>Uploader Sections</h1>
+
+<p>The sections of the <%= link_to("uploader", new_upload_path) %>, in order. Tags sections have a box for tags and rows of buttons that add tags. The rest are built in, they can be moved, relabeled, and some can be turned off.</p>
+
+<%= table_for(@sections) do |t| %>
+  <% t.column(:label) do |section| %>
+    <%= section.label %>
+    <% unless section.is_enabled? %>
+      <span class="color-muted">(off)</span>
+    <% end %>
+  <% end %>
+  <% t.column(:key) %>
+  <% t.column("Type") do |section| %>
+    <%= section.tags? ? "Tags" : "Built in" %>
+  <% end %>
+  <% t.column("Buttons") do |section| %>
+    <% if section.tags? %>
+      <%= link_to(section.buttons.size, upload_section_buttons_path(section)) %>
+    <% end %>
+  <% end %>
+  <% t.column("Compact Mode") do |section| %>
+    <%= section.show_in_compact_mode? ? "Shown" : "Hidden" %>
+  <% end %>
+  <% t.column("Updated") do |section| %>
+    <%= link_to_user(section.updater) %>
+    <p><%= compact_time(section.updated_at) %></p>
+  <% end %>
+  <% t.column do |section| %>
+    <% if policy(section).update? %>
+      <%= link_to("Edit", edit_upload_section_path(section)) %>
+    <% end %>
+    <% if section.tags? %>
+      | <%= link_to("Buttons", upload_section_buttons_path(section)) %>
+    <% end %>
+    <% if policy(section).destroy? && section.deletable? %>
+      | <%= link_to("Delete", upload_section_path(section), method: :delete, data: { confirm: "Are you sure you want to delete the #{section.label} section and its buttons?" }) %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<%= render("secondary_links") %>
+
+<% content_for(:page_title) do %>
+  Uploader Sections
+<% end %>
+
+<% if policy(UploaderSection).reorder? %>
+  <%= javascript_tag(nonce: true) do -%>
+    Fennec.SortableTable.init({ table: "#uploader-sections-table", url: "<%= reorder_upload_sections_path(format: :json) %>", key: "position", start: 0 });
+  <% end %>
+<% end %>

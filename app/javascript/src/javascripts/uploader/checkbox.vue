@@ -8,17 +8,11 @@
     computed: {
       value: {
         get() {
-          if (this.checks[this.tagName] === undefined)
-            return false;
-          return this.checks[this.tagName];
+          return this.checks[this.check.tag] === true;
         },
         set(v) {
-          this.$emit('set', this.tagName, v);
-          this.$root.toggleTag(this.tagName, v);
+          this.$emit('set', this.check.tag, v);
         }
-      },
-      tagName() {
-        return this.check.tag || this.check.name.toLowerCase().replace(/ /g, '_');
       }
     }
   }

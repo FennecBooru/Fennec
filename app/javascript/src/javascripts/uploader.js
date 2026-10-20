@@ -18,6 +18,29 @@ import Page from "./utility/page";
  * @prop {number} max_file_size
  * @prop {Record<string, number>} max_file_size_map
  * @prop {number} max_file_size_per_request
+ * @prop {boolean} wiki_enabled
+ * @prop {UploaderSection[]} layout
+ * @prop {number} minimum_tags
+ */
+
+/**
+ * @typedef UploaderSection
+ * @prop {string} kind tags, or the built in section's name
+ * @prop {string} key
+ * @prop {string} label
+ * @prop {string} hint rendered html
+ * @prop {string} placeholder
+ * @prop {"none"|"always"|"in_progress"} requirement
+ * @prop {boolean} show_in_compact_mode
+ * @prop {UploaderButton[][]} rows
+ */
+
+/**
+ * @typedef UploaderButton
+ * @prop {string} name
+ * @prop {string} tag
+ * @prop {string[]} shown_when
+ * @prop {"any"|"all"} shown_when_mode
  */
 
 /**

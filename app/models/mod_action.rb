@@ -41,6 +41,7 @@ class ModAction < ApplicationRecord
     post_id
     message old_message
     domain
+    label old_label section_label
   ].freeze
 
   store_accessor(:values, *VALUES)
@@ -547,6 +548,44 @@ class ModAction < ApplicationRecord
               values += %i[pattern old_pattern note] if CurrentUser.user.is_admin? || !mod.hidden
               values
             },
+    },
+
+    ### Uploader ###
+    uploader_section_create:                    {
+      text: ->(mod, _user) { "Created uploader section \"#{mod.label}\"" },
+      json: %i[label],
+    },
+    uploader_section_delete:                    {
+      text: ->(mod, _user) { "Deleted uploader section \"#{mod.label}\"" },
+      json: %i[label],
+    },
+    uploader_section_update:                    {
+      text: ->(mod, _user) do
+        text = "Updated uploader section \"#{mod.label}\""
+        text += "\nChanged label from \"#{mod.old_label}\" to \"#{mod.label}\"" if mod.old_label != mod.label
+        text
+      end,
+      json: %i[label old_label],
+    },
+    uploader_sections_reorder:                  {
+      text: ->(mod, _user) { "Changed the order of #{mod.total} uploader sections" },
+      json: %i[total],
+    },
+    uploader_button_create:                     {
+      text: ->(mod, _user) { "Created uploader button \"#{mod.name}\" in \"#{mod.section_label}\"" },
+      json: %i[name section_label],
+    },
+    uploader_button_delete:                     {
+      text: ->(mod, _user) { "Deleted uploader button \"#{mod.name}\" from \"#{mod.section_label}\"" },
+      json: %i[name section_label],
+    },
+    uploader_button_update:                     {
+      text: ->(mod, _user) { "Updated uploader button \"#{mod.name}\" in \"#{mod.section_label}\"" },
+      json: %i[name section_label],
+    },
+    uploader_buttons_reorder:                   {
+      text: ->(mod, _user) { "Changed the order of #{mod.total} uploader buttons in \"#{mod.section_label}\"" },
+      json: %i[total section_label],
     },
 
     ### User ###

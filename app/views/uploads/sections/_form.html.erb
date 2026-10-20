@@ -1,0 +1,23 @@
+<%= custom_form_for(@section, url: @section.new_record? ? upload_sections_path : upload_section_path(@section)) do |f| %>
+  <%= error_messages_for("section") %>
+  <% if @section.new_record? %>
+    <%= f.input(:key, hint: "Lowercase letters and underscores. Tags can be filled in with tags-key in the uploader's url, artist, character, and species are used by reupload links. It can't be changed later.") %>
+  <% elsif @section.tags? %>
+    <p><strong>Key:</strong> <%= @section.key %></p>
+  <% else %>
+    <p><strong>Built in:</strong> <%= @section.kind.humanize %></p>
+  <% end %>
+  <%= f.input(:label) %>
+  <%= f.input(:hint, as: :dtext, hint: "Shown under the label") %>
+  <% if @section.tags? || @section.new_record? || @section.kind == "parent" %>
+    <%= f.input(:placeholder, hint: "Example text shown in the box, after \"Ex:\"") %>
+  <% end %>
+  <% if @section.tags? || @section.new_record? %>
+    <%= f.input(:requirement, collection: [["Not required", "none"], ["Always required", "always"], ["Required for in progress uploads", "in_progress"]], include_blank: false, hint: "Whether a tag has to be entered or selected in this section before uploading") %>
+  <% end %>
+  <%= f.input(:show_in_compact_mode, as: :boolean, hint: "Users with the compact uploader only see sections with this") %>
+  <% unless @section.required? %>
+    <%= f.input(:is_enabled, as: :boolean, label: "Enabled") %>
+  <% end %>
+  <%= f.button(:submit, "Save") %>
+<% end %>

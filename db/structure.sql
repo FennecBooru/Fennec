@@ -252,12 +252,6 @@ CREATE TABLE public.admin_config (
     takedown_verification_wiki_page character varying DEFAULT 'help:takedown_verification'::character varying NOT NULL,
     staff_wiki_page character varying DEFAULT 'help:staff'::character varying NOT NULL,
     home_wiki_page character varying DEFAULT 'help:home'::character varying NOT NULL,
-    tag_genders_howto_wiki_page character varying DEFAULT 'howto:tag_genders'::character varying NOT NULL,
-    tag_what_you_see_wiki_page character varying DEFAULT 'tag_what_you_see'::character varying NOT NULL,
-    artist_tag_placeholder character varying DEFAULT 'artist_name, unknown_artist, anonymous_artist etc.'::character varying NOT NULL,
-    character_tag_placeholder character varying DEFAULT 'character_name solo_focus 1_male 2_females etc.'::character varying NOT NULL,
-    species_tag_placeholder character varying DEFAULT 'bear dragon hyena rat newt etc.'::character varying NOT NULL,
-    content_tag_placeholder character varying DEFAULT 'cub scatplay watersports diaper my_little_pony vore rape hyper etc.'::character varying NOT NULL,
     site_icon_size jsonb DEFAULT '{"max": 10000, "min": 512}'::jsonb NOT NULL,
     max_site_asset_file_sizes jsonb DEFAULT '{"jpg": 10240, "png": 10240, "webp": 10240}'::jsonb NOT NULL,
     domain_icon_size jsonb DEFAULT '{"max": 256, "min": 16}'::jsonb NOT NULL,
@@ -288,7 +282,8 @@ CREATE TABLE public.admin_config (
     enable_upload_whitelist boolean DEFAULT true NOT NULL,
     enable_mascots boolean DEFAULT true NOT NULL,
     enable_tickets boolean DEFAULT true NOT NULL,
-    enable_post_flags boolean DEFAULT true NOT NULL
+    enable_post_flags boolean DEFAULT true NOT NULL,
+    uploader_minimum_tags integer DEFAULT 4 NOT NULL
 );
 
 
@@ -3673,6 +3668,90 @@ ALTER SEQUENCE public.upload_whitelists_id_seq OWNED BY public.upload_whitelists
 
 
 --
+-- Name: uploader_buttons; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.uploader_buttons (
+    id bigint NOT NULL,
+    section_id bigint NOT NULL,
+    creator_id bigint NOT NULL,
+    creator_ip_addr inet NOT NULL,
+    updater_id bigint NOT NULL,
+    updater_ip_addr inet NOT NULL,
+    name character varying NOT NULL,
+    tag character varying NOT NULL,
+    "row" integer DEFAULT 1 NOT NULL,
+    "position" integer DEFAULT 0 NOT NULL,
+    shown_when character varying[] DEFAULT '{}'::character varying[] NOT NULL,
+    shown_when_mode character varying DEFAULT 'any'::character varying NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: uploader_buttons_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.uploader_buttons_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: uploader_buttons_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.uploader_buttons_id_seq OWNED BY public.uploader_buttons.id;
+
+
+--
+-- Name: uploader_sections; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.uploader_sections (
+    id bigint NOT NULL,
+    creator_id bigint NOT NULL,
+    creator_ip_addr inet NOT NULL,
+    updater_id bigint NOT NULL,
+    updater_ip_addr inet NOT NULL,
+    kind character varying NOT NULL,
+    key character varying NOT NULL,
+    label character varying NOT NULL,
+    hint text DEFAULT ''::text NOT NULL,
+    placeholder character varying DEFAULT ''::character varying NOT NULL,
+    requirement character varying DEFAULT 'none'::character varying NOT NULL,
+    show_in_compact_mode boolean DEFAULT false NOT NULL,
+    is_enabled boolean DEFAULT true NOT NULL,
+    "position" integer NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: uploader_sections_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.uploader_sections_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: uploader_sections_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.uploader_sections_id_seq OWNED BY public.uploader_sections.id;
+
+
+--
 -- Name: uploads; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -4735,6 +4814,20 @@ ALTER TABLE ONLY public.upload_whitelists ALTER COLUMN id SET DEFAULT nextval('p
 
 
 --
+-- Name: uploader_buttons id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.uploader_buttons ALTER COLUMN id SET DEFAULT nextval('public.uploader_buttons_id_seq'::regclass);
+
+
+--
+-- Name: uploader_sections id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.uploader_sections ALTER COLUMN id SET DEFAULT nextval('public.uploader_sections_id_seq'::regclass);
+
+
+--
 -- Name: uploads id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -5546,6 +5639,30 @@ ALTER TABLE ONLY public.upload_media_assets
 
 ALTER TABLE ONLY public.upload_whitelists
     ADD CONSTRAINT upload_whitelists_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: uploader_buttons uploader_buttons_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.uploader_buttons
+    ADD CONSTRAINT uploader_buttons_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: uploader_sections uploader_sections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.uploader_sections
+    ADD CONSTRAINT uploader_sections_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: uploader_sections uploader_sections_position_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.uploader_sections
+    ADD CONSTRAINT uploader_sections_position_unique UNIQUE ("position") DEFERRABLE INITIALLY DEFERRED;
 
 
 --
@@ -7879,6 +7996,55 @@ CREATE INDEX index_upload_whitelists_on_updater_id ON public.upload_whitelists U
 
 
 --
+-- Name: index_uploader_buttons_on_creator_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_uploader_buttons_on_creator_id ON public.uploader_buttons USING btree (creator_id);
+
+
+--
+-- Name: index_uploader_buttons_on_section_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_uploader_buttons_on_section_id ON public.uploader_buttons USING btree (section_id);
+
+
+--
+-- Name: index_uploader_buttons_on_tag; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_uploader_buttons_on_tag ON public.uploader_buttons USING btree (tag);
+
+
+--
+-- Name: index_uploader_buttons_on_updater_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_uploader_buttons_on_updater_id ON public.uploader_buttons USING btree (updater_id);
+
+
+--
+-- Name: index_uploader_sections_on_creator_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_uploader_sections_on_creator_id ON public.uploader_sections USING btree (creator_id);
+
+
+--
+-- Name: index_uploader_sections_on_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_uploader_sections_on_key ON public.uploader_sections USING btree (key);
+
+
+--
+-- Name: index_uploader_sections_on_updater_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_uploader_sections_on_updater_id ON public.uploader_sections USING btree (updater_id);
+
+
+--
 -- Name: index_uploads_on_source; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -8912,6 +9078,14 @@ ALTER TABLE ONLY public.news_updates
 
 
 --
+-- Name: uploader_buttons fk_rails_5220ed7eb0; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.uploader_buttons
+    ADD CONSTRAINT fk_rails_5220ed7eb0 FOREIGN KEY (creator_id) REFERENCES public.users(id);
+
+
+--
 -- Name: post_replacements fk_rails_5283f71ca8; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -9061,6 +9235,14 @@ ALTER TABLE ONLY public.dmails
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT fk_rails_6527170f4d FOREIGN KEY (avatar_id) REFERENCES public.posts(id);
+
+
+--
+-- Name: uploader_buttons fk_rails_655ae18442; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.uploader_buttons
+    ADD CONSTRAINT fk_rails_655ae18442 FOREIGN KEY (updater_id) REFERENCES public.users(id);
 
 
 --
@@ -9384,6 +9566,14 @@ ALTER TABLE ONLY public.pools
 
 
 --
+-- Name: uploader_buttons fk_rails_ae27ad0a81; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.uploader_buttons
+    ADD CONSTRAINT fk_rails_ae27ad0a81 FOREIGN KEY (section_id) REFERENCES public.uploader_sections(id) ON DELETE CASCADE;
+
+
+--
 -- Name: notifications fk_rails_b080fb4855; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -9544,6 +9734,14 @@ ALTER TABLE ONLY public.tag_aliases
 
 
 --
+-- Name: uploader_sections fk_rails_c6c19e7d92; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.uploader_sections
+    ADD CONSTRAINT fk_rails_c6c19e7d92 FOREIGN KEY (creator_id) REFERENCES public.users(id);
+
+
+--
 -- Name: wiki_page_versions fk_rails_c6ed6113f4; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -9653,6 +9851,14 @@ ALTER TABLE ONLY public.forum_categories
 
 ALTER TABLE ONLY public.avoid_postings
     ADD CONSTRAINT fk_rails_d45cc0f1a1 FOREIGN KEY (creator_id) REFERENCES public.users(id);
+
+
+--
+-- Name: uploader_sections fk_rails_d5e66f074e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.uploader_sections
+    ADD CONSTRAINT fk_rails_d5e66f074e FOREIGN KEY (updater_id) REFERENCES public.users(id);
 
 
 --
@@ -9878,6 +10084,7 @@ ALTER TABLE ONLY public.help_pages
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261020120000'),
 ('20261019233422'),
 ('20261019232458'),
 ('20261018000000'),
@@ -10087,6 +10294,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220106081415');
 
 INSERT INTO "fixes" (id, "index") VALUES
+(250, NULL),
 (249, NULL),
 (248, 2),
 (248, 1),

@@ -1,0 +1,11 @@
+<% content_for(:secondary_links) do %>
+  <%= subnav_link_to("Sections", upload_sections_path) %>
+  <%= subnav_link_to("Listing", upload_section_buttons_path(@section)) %>
+  <%= subnav_link_to_if(policy(UploaderButton).create?, "New", new_upload_section_button_path(@section)) %>
+  <%= subnav_link_to("Uploader", new_upload_path) %>
+  <% if params[:action] == "index" && policy(UploaderButton).reorder? %>
+    |
+    <%= subnav_link_to("Edit Order", "#", class: "edit-order-link") %>
+    <%= subnav_link_to("Save", "#", class: "save-order-link", li_options: { style: "display: none;" }) %>
+  <% end %>
+<% end %>

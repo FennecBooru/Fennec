@@ -3,7 +3,7 @@
 class UploadSettings
   include(ActiveModel::Serializers::JSON)
 
-  ATTRIBUTES = %i[compact_mode safe_site post_tags character_groups_enabled character_groups upload_tags recent_tags allow_locked_tags allow_rating_lock allow_upload_as_pending allow_upload_as_in_progress max_file_size max_file_size_map max_file_size_per_request wiki_enabled tag_genders_howto_wiki_url tag_what_you_see_wiki_url artist_tag_placeholder character_tag_placeholder species_tag_placeholder content_tag_placeholder].freeze
+  ATTRIBUTES = %i[compact_mode safe_site post_tags character_groups_enabled character_groups upload_tags recent_tags allow_locked_tags allow_rating_lock allow_upload_as_pending allow_upload_as_in_progress max_file_size max_file_size_map max_file_size_per_request wiki_enabled layout minimum_tags].freeze
 
   attr_accessor(:user, :post)
 
@@ -76,30 +76,22 @@ class UploadSettings
     Feature.enabled?(:wiki)
   end
 
-  def tag_genders_howto_wiki_url
-    return unless wiki_enabled
-    Routes.show_or_new_wiki_pages_path(title: AdminConfig.instance.tag_genders_howto_wiki_page)
+  # The enabled sections in order, see UploaderSection.layout. Hints are rendered here since their links depend on
+  # things like whether the wiki is enabled
+  def layout
+    sections = UploaderSection.layout
+    # an array instead of a hash when there's nothing to parse
+    hints = DTextHelper.bulk_parse(sections.pluck(:hint).compact_blank.uniq).presence || {}
+    sections.map do |section|
+      section.merge(
+        hint:        hints.dig(section[:hint], :dtext) || "",
+        placeholder: section[:placeholder].present? ? "Ex: #{section[:placeholder]}" : "",
+      )
+    end
   end
 
-  def tag_what_you_see_wiki_url
-    return unless wiki_enabled
-    Routes.show_or_new_wiki_pages_path(title: AdminConfig.instance.tag_what_you_see_wiki_page)
-  end
-
-  def artist_tag_placeholder
-    "Ex: #{AdminConfig.instance.artist_tag_placeholder}"
-  end
-
-  def character_tag_placeholder
-    "Ex: #{AdminConfig.instance.character_tag_placeholder}"
-  end
-
-  def species_tag_placeholder
-    "Ex: #{AdminConfig.instance.species_tag_placeholder}"
-  end
-
-  def content_tag_placeholder
-    "Ex: #{AdminConfig.instance.content_tag_placeholder}"
+  def minimum_tags
+    AdminConfig.instance.uploader_minimum_tags
   end
 
   def serializable_hash(*)

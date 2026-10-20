@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_19_233422) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_20_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -26,7 +26,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_233422) do
     t.string "appeal_notice_wiki_page", default: "internal:appeal_notice", null: false
     t.integer "artist_edit_limit", default: 25, null: false
     t.integer "artist_edit_limit_bypass", default: 15, null: false
-    t.string "artist_tag_placeholder", default: "artist_name, unknown_artist, anonymous_artist etc.", null: false
     t.integer "audio_track_per_day_limit", default: 2, null: false
     t.integer "audio_track_per_day_limit_bypass", default: 20, null: false
     t.integer "audio_track_per_post_limit", default: 5, null: false
@@ -40,7 +39,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_233422) do
     t.string "canonical_app_name", default: "Fennec", null: false
     t.integer "character_edit_limit", default: 25, null: false
     t.integer "character_edit_limit_bypass", default: 15, null: false
-    t.string "character_tag_placeholder", default: "character_name solo_focus 1_male 2_females etc.", null: false
     t.integer "comment_bump_threshold", default: 40, null: false
     t.integer "comment_limit", default: 15, null: false
     t.integer "comment_limit_bypass", default: 15, null: false
@@ -50,7 +48,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_233422) do
     t.integer "compact_uploader_minimum_posts", default: 10, null: false
     t.string "contact_email", default: "admin@localhost", null: false
     t.string "contact_wiki_page", default: "help:contact", null: false
-    t.string "content_tag_placeholder", default: "cub scatplay watersports diaper my_little_pony vore rape hyper etc.", null: false
     t.integer "custom_style_max_size", default: 500000, null: false
     t.string "default_blacklist", default: "", null: false
     t.integer "default_forum_category", default: 1, null: false
@@ -186,18 +183,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_233422) do
     t.integer "show_backtrace", default: 20, null: false
     t.integer "show_tag_scripting", default: 15, null: false
     t.jsonb "site_icon_size", default: {"max" => 10000, "min" => 512}, null: false
-    t.string "species_tag_placeholder", default: "bear dragon hyena rat newt etc.", null: false
     t.string "staff_wiki_page", default: "help:staff", null: false
     t.string "system_user_name", default: "System", null: false
     t.boolean "tag_ai_posts", default: true, null: false
     t.jsonb "tag_change_request_update_limit", default: {"15" => 500, "20" => 1000, "30" => 10000, "40" => 100000, "50" => -1}, null: false
-    t.string "tag_genders_howto_wiki_page", default: "howto:tag_genders", null: false
     t.jsonb "tag_query_limit", default: {"0" => 40}, null: false
     t.integer "tag_suggestion_limit", default: 15, null: false
     t.integer "tag_suggestion_limit_bypass", default: 15, null: false
     t.jsonb "tag_type_edit_implicit_limit", default: {"10" => 100, "15" => 1000}, null: false
     t.jsonb "tag_type_edit_limit", default: {"10" => 100, "15" => 1000, "20" => 10000, "40" => -1}, null: false
-    t.string "tag_what_you_see_wiki_page", default: "tag_what_you_see", null: false
     t.string "takedown_email", default: "admin@localhost", null: false
     t.string "takedown_verification_wiki_page", default: "help:takedown_verification", null: false
     t.string "takedown_wiki_page", default: "help:takedown", null: false
@@ -207,6 +201,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_233422) do
     t.integer "ticket_max_size", default: 5000, null: false
     t.datetime "updated_at"
     t.integer "upload_whitelists_forum_topic", default: 0, null: false
+    t.integer "uploader_minimum_tags", default: 4, null: false
     t.integer "user_about_max_size", default: 50000, null: false
     t.boolean "user_approvals_enabled", default: true, null: false
     t.string "user_approved_wiki_page", default: "internal:user_approved", null: false
@@ -1811,6 +1806,48 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_233422) do
     t.index ["updater_id"], name: "index_upload_whitelists_on_updater_id"
   end
 
+  create_table "uploader_buttons", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "creator_id", null: false
+    t.inet "creator_ip_addr", null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.integer "row", default: 1, null: false
+    t.bigint "section_id", null: false
+    t.string "shown_when", default: [], null: false, array: true
+    t.string "shown_when_mode", default: "any", null: false
+    t.string "tag", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "updater_id", null: false
+    t.inet "updater_ip_addr", null: false
+    t.index ["creator_id"], name: "index_uploader_buttons_on_creator_id"
+    t.index ["section_id"], name: "index_uploader_buttons_on_section_id"
+    t.index ["tag"], name: "index_uploader_buttons_on_tag", unique: true
+    t.index ["updater_id"], name: "index_uploader_buttons_on_updater_id"
+  end
+
+  create_table "uploader_sections", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "creator_id", null: false
+    t.inet "creator_ip_addr", null: false
+    t.text "hint", default: "", null: false
+    t.boolean "is_enabled", default: true, null: false
+    t.string "key", null: false
+    t.string "kind", null: false
+    t.string "label", null: false
+    t.string "placeholder", default: "", null: false
+    t.integer "position", null: false
+    t.string "requirement", default: "none", null: false
+    t.boolean "show_in_compact_mode", default: false, null: false
+    t.datetime "updated_at", null: false
+    t.bigint "updater_id", null: false
+    t.inet "updater_ip_addr", null: false
+    t.index ["creator_id"], name: "index_uploader_sections_on_creator_id"
+    t.index ["key"], name: "index_uploader_sections_on_key", unique: true
+    t.index ["updater_id"], name: "index_uploader_sections_on_updater_id"
+    t.unique_constraint ["position"], deferrable: :deferred, name: "uploader_sections_position_unique"
+  end
+
   create_table "uploads", force: :cascade do |t|
     t.text "backtrace"
     t.datetime "created_at", precision: nil, null: false
@@ -2231,6 +2268,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_19_233422) do
   add_foreign_key "upload_media_assets", "users", column: "creator_id"
   add_foreign_key "upload_whitelists", "users", column: "creator_id"
   add_foreign_key "upload_whitelists", "users", column: "updater_id"
+  add_foreign_key "uploader_buttons", "uploader_sections", column: "section_id", on_delete: :cascade
+  add_foreign_key "uploader_buttons", "users", column: "creator_id"
+  add_foreign_key "uploader_buttons", "users", column: "updater_id"
+  add_foreign_key "uploader_sections", "users", column: "creator_id"
+  add_foreign_key "uploader_sections", "users", column: "updater_id"
   add_foreign_key "uploads", "posts"
   add_foreign_key "uploads", "upload_media_assets"
   add_foreign_key "uploads", "users", column: "uploader_id"

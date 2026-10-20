@@ -1,0 +1,9 @@
+<%= custom_form_for(@button, url: @button.new_record? ? upload_section_buttons_path(@section) : upload_section_button_path(@section, @button)) do |f| %>
+  <%= error_messages_for("button") %>
+  <%= f.input(:name) %>
+  <%= f.input(:tag, hint: "Added while the button is selected. Defaults to the name in lowercase, with underscores for spaces.") %>
+  <%= f.input(:row, hint: "Buttons are grouped into rows, with a line between them") %>
+  <%= f.input(:shown_when_string, label: "Shown when", hint: "Tags of other buttons, separated by spaces. When set, the button is only shown while they're selected.", input_html: { data: { autocomplete: "tag-query" } }) %>
+  <%= f.input(:shown_when_mode, label: "Shown when", collection: [["Any of them are selected", "any"], ["All of them are selected", "all"]], include_blank: false) %>
+  <%= f.button(:submit, "Save") %>
+<% end %>

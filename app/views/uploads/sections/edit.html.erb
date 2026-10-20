@@ -1,0 +1,13 @@
+<h1>Uploader Section: <%= @section.label %></h1>
+
+<% if @section.tags? %>
+  <p><%= link_to("Edit this section's buttons", upload_section_buttons_path(@section)) %></p>
+<% end %>
+
+<%= render("form") %>
+
+<%= render("secondary_links") %>
+
+<% content_for(:page_title) do %>
+  Edit Uploader Section
+<% end %>

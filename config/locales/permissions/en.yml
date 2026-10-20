@@ -56,6 +56,8 @@ en:
       "tags/implications": "Tag Implication"
       "tags/related": "Related Tag"
       "tags/versions": "Tag Version"
+      "uploads/buttons": "Uploader Button"
+      "uploads/sections": "Uploader Section"
       "users/blocks": "User Block"
       "users/count_fixes": "User Count Fixe"
       "users/dmail_filters": "DMail Filter"

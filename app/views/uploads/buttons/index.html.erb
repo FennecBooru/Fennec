@@ -1,0 +1,42 @@
+<h1>Uploader Buttons: <%= link_to(@section.label, edit_upload_section_path(@section)) %></h1>
+
+<p>Each button adds its tag while it's selected. Buttons are shown in rows, ordered within their row. A button with tags under "shown when" only appears while those tags are selected, from any section, and is unselected again when it's hidden.</p>
+
+<%= table_for(@buttons) do |t| %>
+  <% t.column(:row) %>
+  <% t.column(:name) %>
+  <% t.column(:tag) do |button| %>
+    <%= link_to_wiki_or_new(button.tag) %>
+  <% end %>
+  <% t.column("Shown When") do |button| %>
+    <% if button.shown_when.empty? %>
+      <span class="color-muted">Always</span>
+    <% else %>
+      <%= button.shown_when_mode %> of: <%= button.shown_when.join(" ") %>
+    <% end %>
+  <% end %>
+  <% t.column("Updated") do |button| %>
+    <%= link_to_user(button.updater) %>
+    <p><%= compact_time(button.updated_at) %></p>
+  <% end %>
+  <% t.column do |button| %>
+    <% if policy(button).update? %>
+      <%= link_to("Edit", edit_upload_section_button_path(@section, button)) %>
+    <% end %>
+    <% if policy(button).destroy? %>
+      | <%= link_to("Delete", upload_section_button_path(@section, button), method: :delete, data: { confirm: "Are you sure you want to delete the #{button.name} button?" }) %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<%= render("secondary_links") %>
+
+<% content_for(:page_title) do %>
+  Uploader Buttons - <%= @section.label %>
+<% end %>
+
+<% if policy(UploaderButton).reorder? %>
+  <%= javascript_tag(nonce: true) do -%>
+    Fennec.SortableTable.init({ table: "#uploader-buttons-table", url: "<%= reorder_upload_section_buttons_path(@section, format: :json) %>", key: "position", start: 0 });
+  <% end %>
+<% end %>
