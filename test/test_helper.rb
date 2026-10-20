@@ -143,6 +143,8 @@ class ActiveSupport::TestCase # rubocop:disable Style/ClassAndModuleChildren
   ENV["TMPDIR"] = storage_root
 
   setup do
+    # Time.zone is thread-global, so a test that changes it would leak into the next one on the worker
+    Time.zone = Rails.application.config.time_zone
     host = "example.com"
     Socket.stubs(:gethostname).returns(host)
     AdminConfig.any_instance.stubs(:enable_sock_puppet_validation).returns(false)
