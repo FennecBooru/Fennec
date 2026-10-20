@@ -21,7 +21,7 @@ require("rails/test_unit/railtie")
 Bundler.require(*Rails.groups)
 
 require_relative("config")
-Dir[File.expand_path("../config.d/*.rb", __dir__)].sort.each { |file| require(file) }
+Dir[File.expand_path("../config.d/*.rb", __dir__)].each { |file| require(file) }
 %w[middleware logging migrations].each do |name|
   Dir["#{__dir__}/../lib/#{name}/**/*.rb"].each { |f| require(f) }
 end
