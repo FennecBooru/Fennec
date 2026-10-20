@@ -78,6 +78,23 @@ class StorageManagerTest < ActiveSupport::TestCase
         assert_equal("#{@base_url}/data/posts/480p/#{md5}.webm", format.call("webm", :"480p"))
         assert_equal("#{@base_url}/data/posts/480p/#{md5}.mp4", format.call("mp4", :"480p"))
       end
+
+      context("for protected files") do
+        setup do
+          @md5 = SecureRandom.hex(16)
+          @url = -> { @storage_manager.url(@md5, "png", :original, protected: true, prefix: Fennec.config.post_path_prefix, protected_prefix: Fennec.config.protected_path_prefix, secret: "secret", user: create(:user)) }
+        end
+
+        should("sign the url") do
+          assert_match(%r{\A#{@base_url}/data/posts/deleted/#{@md5}\.png\?auth=.+&expires=\d+&uid=\d+\z}, @url.call)
+        end
+
+        should("not sign the url when protecting files is disabled") do
+          Fennec.config.stubs(:protect_files?).returns(false)
+
+          assert_equal("#{@base_url}/data/posts/deleted/#{@md5}.png", @url.call)
+        end
+      end
     end
 
     context("#url_path method") do

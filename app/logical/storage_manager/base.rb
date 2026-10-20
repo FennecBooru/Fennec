@@ -80,7 +80,7 @@ module StorageManager
     def url(md5, file_ext, type, protected: false, prefix: "", protected_prefix: "", hierarchical: :default, secret: Fennec.config.protected_file_secret, user: nil)
       path = url_path(md5, file_ext, type, protected: protected, prefix: prefix, protected_prefix: protected_prefix, hierarchical: hierarchical)
       url = "#{base_url}#{path}"
-      url += protected_params(path, secret: secret, user: user) if protected
+      url += protected_params(path, secret: secret, user: user) if protected && Fennec.config.protect_files?
       url
     end
 

@@ -53,8 +53,11 @@ module Fennec
     config(:site_asset_path_prefix) { "site/" }
     config(:domain_icon_path_prefix) { "domain_icons/" }
 
-    config(:protected_file_secret, required: true) { required!(:protected_file_secret) }
-    config(:replacement_file_secret, required: true) { required!(:replacement_file_secret) }
+    # Deleted and replacement file urls are signed for nginx's secure_link. When disabled they aren't, so the
+    # secure_link blocks need to be removed from the server config, and the secrets aren't needed
+    config(:protect_files, :boolean) { true }
+    config(:protected_file_secret) { required!(:protected_file_secret) if protect_files? }
+    config(:replacement_file_secret) { required!(:replacement_file_secret) if protect_files? }
     config(:remember_key, required: true) { required!(:remember_key) }
     config(:email_key, required: true) { required!(:email_key) }
     config(:discord_secret) { nil }
