@@ -5,6 +5,10 @@ class TagPolicy < ApplicationPolicy
     index?
   end
 
+  def autocomplete?
+    index?
+  end
+
   def preview?
     member?
   end

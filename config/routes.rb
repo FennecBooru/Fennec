@@ -456,6 +456,8 @@ Rails.application.routes.draw do
       get(:preview)
       get(:meta_search)
       get(:followed)
+      # nginx sends this to autocompleted when it's used, so this is only reached without it
+      resource(:autocomplete, controller: "tags/autocomplete", as: "tag_autocomplete", only: %i[show])
       resource(:related, controller: "tags/related", as: "related_tags", only: %i[show]) do
         collection do
           get(:bulk)
