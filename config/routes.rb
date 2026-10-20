@@ -450,6 +450,7 @@ Rails.application.routes.draw do
   resource(:status, only: %i[show])
   resource(:system, only: %i[show]) do
     get(:dbsize, on: :collection)
+    get(:config, on: :collection, action: :config_options)
   end
   resources(:tags, constraints: id_name_constraint, only: %i[index show edit update]) do
     collection do

@@ -8,4 +8,8 @@ class SystemInfoPolicy < ApplicationPolicy
   def dbsize?
     user.is_owner?
   end
+
+  def config_options?
+    user.is_owner?
+  end
 end

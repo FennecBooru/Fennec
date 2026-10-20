@@ -4,6 +4,16 @@ module Fennec
   class Config < YiffSpace::Config::Builder
     self.env_name = "FENNEC"
 
+    # options whose block takes arguments, these can't be read on their own for /system/config
+    def self.config(name, *, **, &block)
+      (@argument_options ||= Set.new) << name.to_sym if block&.arity&.positive?
+      super
+    end
+
+    def self.argument_options
+      @argument_options ||= Set.new
+    end
+
     # `bin/rails generate`/`destroy` boot the full application, which means every `required: true`
     # config below is read during initialization - but generators don't need real infrastructure
     # (redis, elasticsearch, secrets, ...), and requiring it makes them impossible to run outside
@@ -111,7 +121,7 @@ module Fennec
       config(:enabled, :boolean) { present?(:telemetry_endpoint, :telemetry_username, :telemetry_password) }
       config(:endpoint) { nil }
       config(:organization) { "default" }
-      config(:stream) { Config.safe_app_name.downcase }
+      config(:stream) { ::AdminConfig.instance.safe_app_name.downcase }
       config(:username) { nil }
       config(:password) { nil }
     end

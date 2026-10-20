@@ -267,5 +267,6 @@ module SiteMap
     link("Exceptions", policy: ExceptionLog)                        { admin_exceptions_path }
     link("System", policy: SystemInfo, action: :show?)              { system_path }
     link("Database Size", policy: SystemInfo, action: :dbsize?)     { dbsize_system_path }
+    link("System Config", policy: SystemInfo, action: :config_options?) { config_system_path }
   end
 end

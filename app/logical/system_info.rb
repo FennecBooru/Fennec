@@ -20,6 +20,10 @@ class SystemInfo
     @dbsize ||= DbSize.new
   end
 
+  def config_options
+    @config_options ||= ConfigOptions.new.load
+  end
+
   def reports
     @reports ||= begin
       data = Reports.get_stats

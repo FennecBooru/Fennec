@@ -1,0 +1,41 @@
+<h1>System Info: Config</h1>
+
+<% render(partial: "secondary_links") %>
+
+<p>Set through environment variables, <code>config/local_config.rb</code>, or ruby files in <code>config.d</code>. Secrets are hidden.</p>
+
+<table class="striped" id="config-options">
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>Value</th>
+    <th>Source</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% @options.options.each do |option| %>
+    <tr>
+      <td><code><%= option.name %></code></td>
+      <td>
+        <% case option.state %>
+        <% when :arguments %>
+          <i>(takes arguments)</i>
+        <% when :error %>
+          <i>(error: <%= option.value %>)</i>
+        <% when :secret %>
+          <i><%= option.value %></i>
+        <% else %>
+          <% if option.value.nil? %>
+            <i>(not set)</i>
+          <% elsif option.value.is_a?(String) %>
+            <%= option.value %>
+          <% else %>
+            <code><%= option.value.inspect %></code>
+          <% end %>
+        <% end %>
+      </td>
+      <td><%= option.source %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

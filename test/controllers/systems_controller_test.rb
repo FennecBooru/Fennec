@@ -69,5 +69,25 @@ class SystemsControllerTest < ActionDispatch::IntegrationTest
         end
       end
     end
+
+    context("config_options action") do
+      should("render with secrets hidden") do
+        Fennec.config.stubs(:remember_key).returns("supersecret")
+        Fennec.config.stubs(:redis_url).returns("redis://user:hunter2@redis:6379/0")
+        get_auth(config_system_path, @user)
+
+        assert_response(:success)
+        assert_select("#config-options td code", text: "remember_key")
+        assert_select("#config-options td code", text: "can_user_see_post")
+        assert_select("#config-options td", text: "redis://user:[hidden]@redis:6379/0")
+        assert_no_match(/supersecret|hunter2/, response.body)
+      end
+
+      context("access control") do
+        asserts do
+          access.gte(User::Levels::OWNER).get { config_system_path }
+        end
+      end
+    end
   end
 end
