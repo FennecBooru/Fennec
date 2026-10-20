@@ -190,6 +190,12 @@ class ActiveSupport::TestCase # rubocop:disable Style/ClassAndModuleChildren
   # collide, mirroring IsolatedDatabase's own single-process setup.
   parallelize(workers: :number_of_processors)
 
+  # webpacker compiles packs on demand with no lock between processes, so workers rendering a page at the same time
+  # can read the manifest while another one is writing it. Compiled once here instead, before they fork
+  parallelize_before_fork do
+    Webpacker.compiler.compile
+  end
+
   parallelize_setup do |worker|
     self.storage_root = "#{storage_root}-n#{worker}"
     ENV["TMPDIR"] = storage_root
