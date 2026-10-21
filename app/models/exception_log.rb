@@ -37,6 +37,8 @@ class ExceptionLog < ApplicationRecord
       extra_params: extra_params,
     )
 
+    DiscordExceptionNotification.deliver_later(log)
+
     if report
       Telemetry.exception(exception, source: source, ip_addr: log.ip_addr.to_s, code: log.code, referrer: extra_params[:referrer], user_agent: extra_params[:user_agent], **extra)
     end
@@ -46,6 +48,11 @@ class ExceptionLog < ApplicationRecord
     TraceLogger.error("ExceptionLog", "Failed to log exception: #{e.message}")
     TraceLogger.error(exception)
     nil
+  end
+
+  def self.prune!
+    days = AdminConfig.exception_log_retention
+    where(created_at: ...days.days.ago).delete_all if days > 0
   end
 
   def user

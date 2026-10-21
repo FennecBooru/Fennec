@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_20_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_20_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -105,6 +105,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_130000) do
     t.boolean "enable_user_feedback", default: true, null: false
     t.boolean "enable_view_tracking", default: true, null: false
     t.boolean "enable_wiki", default: true, null: false
+    t.integer "exception_log_retention", default: 0, null: false
     t.boolean "flag_ai_posts", default: true, null: false
     t.string "flag_notice_wiki_page", default: "internal:flag_notice", null: false
     t.jsonb "followed_tag_limit", default: {"10" => 100, "15" => 500, "20" => 1000}, null: false

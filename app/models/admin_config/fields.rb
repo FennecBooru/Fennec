@@ -196,6 +196,7 @@ class AdminConfig
       add_select_field(:default_user_timezone, -> { time_zone_options_for_select(@config.default_user_timezone) })
       add_number_field(:forum_topic_stale_window, hint: "in days")
       add_number_field(:forum_topic_aibur_stale_window, hint: "in days")
+      add_number_field(:exception_log_retention, hint: "in days, exception logs older than this are deleted daily, 0 keeps them forever")
       add_number_field(:comment_bump_threshold, hint: "posts with more comments will not be bumped")
       add_number_field(:compact_uploader_minimum_posts)
       add_number_field(:post_sample_size, hint: "When calculating statistics based on the posts table, gather this many posts to sample from")

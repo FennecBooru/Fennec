@@ -441,6 +441,7 @@ module Fennec
       config(:moderator_stats_webhook_url) { nil }
       config(:aibur_stats_webhook_url) { nil }
       config(:webhook_url) { nil }
+      config(:exceptions_webhook_url) { nil }
     end
 
     subconfig(:storage_manager) do
