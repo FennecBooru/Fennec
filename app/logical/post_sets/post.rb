@@ -8,7 +8,7 @@ module PostSets
       super(current_user)
       tags ||= ""
       @public_tag_array = apply_ratio_tags(TagQuery.scan(tags))
-      tags += " rating:s" if current_user.safe_mode?
+      tags += " rating:s" if current_user.safe_mode? && Feature.enabled?(:ratings)
       tags += " -status:deleted" unless TagQuery.has_metatag?(tags, "status", "-status")
       @tag_array = apply_ratio_tags(TagQuery.scan(tags))
       @page = page

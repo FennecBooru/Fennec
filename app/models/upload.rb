@@ -124,6 +124,10 @@ class Upload < ApplicationRecord
   end
 
   def assign_rating_from_tags
+    unless Feature.enabled?(:ratings)
+      self.rating = "q"
+      return
+    end
     if (rating = TagQuery.fetch_metatag(tag_string, "rating"))
       self.rating = rating.downcase.first
     end

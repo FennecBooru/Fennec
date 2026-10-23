@@ -47,6 +47,8 @@ module Feature
   define(:post_approvals)
   define(:post_flags)
   define(:post_sets)
+  # when off new posts are saved as questionable, so they're filtered if ratings are turned back on
+  define(:ratings)
   define(:recommendations)
   define(:replacement_approvals)
   define(:reports)

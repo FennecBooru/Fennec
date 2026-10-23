@@ -1255,13 +1255,13 @@ class Post < ApplicationRecord
           end
 
         when /^rating:([qse])/i
-          self.rating = $1
+          self.rating = $1 if Feature.enabled?(:ratings)
 
         when /^(-?)locked:notes?$/i
           self.is_note_locked = ($1 != "-") if updater.is_janitor?
 
         when /^(-?)locked:rating$/i
-          self.is_rating_locked = ($1 != "-") if updater.is_janitor?
+          self.is_rating_locked = ($1 != "-") if updater.is_janitor? && Feature.enabled?(:ratings)
 
         when /^(-?)locked:status$/i
           self.is_status_locked = ($1 != "-") if updater.is_admin?
@@ -1596,7 +1596,7 @@ class Post < ApplicationRecord
   module CountMethods
     def fast_count(user, tags = "", enable_safe_mode: user.safe_mode?, include_deleted: nil)
       tags = tags.to_s
-      tags += " rating:s" if enable_safe_mode
+      tags += " rating:s" if enable_safe_mode && Feature.enabled?(:ratings)
       tags += " -status:deleted" if include_deleted != true && (include_deleted == false || !TagQuery.has_metatag?(tags, "status", "-status"))
       tags = TagQuery.normalize(tags)
 
@@ -2440,8 +2440,9 @@ class Post < ApplicationRecord
   extend(SearchMethods)
 
   def safeblocked?(user)
-    return true if AdminConfig.instance.safe_mode? && rating != "s"
-    (AdminConfig.instance.safe_mode? || user.enable_safe_mode?) && (rating != "s" || has_tag?(*AdminConfig.ary(:safeblocked_tags)))
+    unsafe_rating = rating != "s" && Feature.enabled?(:ratings)
+    return true if AdminConfig.instance.safe_mode? && unsafe_rating
+    (AdminConfig.instance.safe_mode? || user.enable_safe_mode?) && (unsafe_rating || has_tag?(*AdminConfig.ary(:safeblocked_tags)))
   end
 
   def deleteblocked?(user)

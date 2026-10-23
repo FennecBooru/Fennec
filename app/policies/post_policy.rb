@@ -117,11 +117,12 @@ class PostPolicy < ApplicationPolicy
       source old_source
       parent_id old_parent_id
       description old_description
-      rating old_rating
       edit_reason
     ]
+    attr += %i[rating old_rating] if Feature.enabled?(:ratings)
     attr << { character_groups_attributes: [{ characters: [], tags: [] }] }
-    attr += %i[is_rating_locked thumbnail_frame] if user.is_trusted?
+    attr += %i[thumbnail_frame] if user.is_trusted?
+    attr += %i[is_rating_locked] if user.is_trusted? && Feature.enabled?(:ratings)
     attr += %i[is_note_locked] if user.is_janitor? && Feature.enabled?(:notes)
     attr += %i[bg_color] if user.is_janitor?
     attr += %i[is_unlisted] if user.is_approver?

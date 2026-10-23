@@ -95,7 +95,7 @@ module PostsHelper
       icon + amount
     end
     comments = Feature.enabled?(:comments) ? tag.span("C#{post.visible_comment_count(CurrentUser)}", class: "post-score-comments") : ""
-    rating = tag.span(post.rating.upcase, class: "post-score-rating")
+    rating = Feature.enabled?(:ratings) ? tag.span(post.rating.upcase, class: "post-score-rating") : ""
     views = tag.span(class: "post-score-views post-score-views-classes-#{post.id}") do
       icon = tag.i("", class: "fa-regular fa-eye")
       if views.is_a?(Array)

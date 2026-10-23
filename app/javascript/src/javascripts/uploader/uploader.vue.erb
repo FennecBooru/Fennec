@@ -721,7 +721,7 @@
         return this.sections.some(section => section.kind === "tags" && this.missingRequiredTag(section));
       },
       invalidRating: function () {
-        return !this.rating;
+        return this.sections.some(section => section.kind === "rating") && !this.rating;
       },
       preventUpload: function () {
         return this.sourceWarning || this.notEnoughTags || this.missingRequiredTags

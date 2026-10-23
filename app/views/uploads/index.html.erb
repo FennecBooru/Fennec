@@ -11,10 +11,12 @@
       <%= link_to("##{upload.id}", upload) %>
     </span>
 
-    <span class="post-info">
-      <strong>Rating</strong>
-      <%= upload.rating %>
-    </span>
+    <% if Feature.enabled?(:ratings) %>
+      <span class="post-info">
+        <strong>Rating</strong>
+        <%= upload.rating %>
+      </span>
+    <% end %>
 
     <% if upload.post.present? %>
       <span class="post-info">

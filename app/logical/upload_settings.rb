@@ -80,6 +80,7 @@ class UploadSettings
   # things like whether the wiki is enabled
   def layout
     sections = UploaderSection.layout
+    sections = sections.reject { |section| section[:kind].in?(%w[rating lock_rating]) } unless Feature.enabled?(:ratings)
     # an array instead of a hash when there's nothing to parse
     hints = DTextHelper.bulk_parse(sections.pluck(:hint).compact_blank.uniq).presence || {}
     sections.map do |section|

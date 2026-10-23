@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_20_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_23_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -89,6 +89,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_140000) do
     t.boolean "enable_post_approvals", default: true, null: false
     t.boolean "enable_post_flags", default: true, null: false
     t.boolean "enable_post_sets", default: true, null: false
+    t.boolean "enable_ratings", default: true, null: false
     t.boolean "enable_recommendations", default: true, null: false
     t.boolean "enable_replacement_approvals", default: true, null: false
     t.boolean "enable_reports", default: true, null: false

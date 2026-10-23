@@ -94,7 +94,7 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
   end
 
   def build
-    if @enable_safe_mode
+    if @enable_safe_mode && Feature.enabled?(:ratings)
       must.push({ term: { rating: "s" } })
     end
 

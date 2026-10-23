@@ -1,3 +1,5 @@
+import Utility from "./utility";
+
 const HoverZoom = new EventTarget();
 
 const placeholder = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
@@ -181,7 +183,7 @@ HoverZoom.init_functionality = function () {
         .appendTo(zoomInfo);
     }
 
-    if (post.rating) {
+    if (post.rating && Utility.meta("enable-ratings") !== "false") {
       const ratingClass = {
         e: "explicit",
         q: "questionable",

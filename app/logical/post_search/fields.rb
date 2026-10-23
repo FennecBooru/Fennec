@@ -110,16 +110,16 @@ module PostSearch
     RATING_OPTIONS = [%w[Safe s], %w[Questionable q], %w[Explicit e]].freeze
     STATUS_OPTIONS = [%w[Active active], %w[Pending pending], %w[Flagged flagged], %w[Deleted deleted], %w[Appealed appealed],
                       %w[Unlisted unlisted], ["In Progress", "in_progress"], %w[Modqueue modqueue], %w[Any any], %w[All all],].freeze
-    LOCKED_OPTIONS = [%w[Rating rating], %w[Note note], %w[Status status]].freeze
+    LOCKED_OPTIONS = -> { [(%w[Rating rating] if Feature.enabled?(:ratings)), %w[Note note], %w[Status status]].compact }
     CHILD_OPTIONS = [%w[Any any], %w[None none]].freeze
     FILETYPE_OPTIONS = Post::EXTENSIONS.map { |ext| [ext.upcase, ext] }.freeze
     ORDER_OPTIONS = -> { TagQuery.order_metatags.map { |o| [o.tr("_", " ").titleize, o] } }
 
     category("Rating & Status") do
-      add_select_field(:rating, RATING_OPTIONS, negatable: true, hint: "Leave blank for any rating")
+      add_select_field(:rating, RATING_OPTIONS, negatable: true, hint: "Leave blank for any rating", feature: :ratings)
       add_select_field(:status, STATUS_OPTIONS, hint: "Defaults to not deleted or unlisted")
       add_select_field(:locked, LOCKED_OPTIONS, negatable: true, name: "Locked Field")
-      add_boolean_field(:ratinglocked)
+      add_boolean_field(:ratinglocked, feature: :ratings)
       add_boolean_field(:notelocked)
       add_boolean_field(:statuslocked)
     end

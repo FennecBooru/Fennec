@@ -269,6 +269,7 @@ class AdminConfig
       add_boolean_field(:enable_uploader_verification, hint: "Mark posts uploaded by a user linked to one of their artist tags as verified. Disabling it keeps the linked users, but hides the marks and ignores the artverified metatag")
       add_boolean_field(:enable_comments, hint: "Enable comments. Disabling it keeps existing comments, but hides them")
       add_boolean_field(:enable_wiki, hint: "Enable the wiki. When disabled, only staff can view and edit wiki pages, so the pages behind the static and help pages can still be edited. Tag links go to the tag's posts instead")
+      add_boolean_field(:enable_ratings, hint: "Enable post ratings. When disabled, ratings are hidden and can't be changed, new posts are saved as questionable, and safe mode only hides the safeblocked tags")
       add_boolean_field(:enable_post_sets, name: "Enable Sets", hint: "Enable sets. When disabled, the set metatags are ignored and posts won't show their sets")
       add_boolean_field(:enable_pools, hint: "Enable pools. When disabled, the pool metatags are ignored and posts won't show their pools")
       add_boolean_field(:enable_pool_artists, hint: "Show the artists of each pool's posts on the pool list, and allow searching pools by artist. Has no effect if pools are disabled")
