@@ -38,6 +38,21 @@
 @import "common/user_styles.scss";
 @import "common/voting.scss";
 
+html.shinx-cursor,
+html.shinx-cursor * {
+  cursor: var(--shinx-cursor) !important;
+}
+
+html.shinx-cursor a[href],
+html.shinx-cursor a[href] * {
+  cursor: var(--strike-loaf-cursor) !important;
+}
+
+html.shinx-cursor #nav .logo,
+html.shinx-cursor #nav .mobile-logo a {
+  background-image: var(--shinx-logo) !important;
+}
+
 @import "specific/admin_dashboards.scss";
 @import "specific/admin_logs.scss";
 @import "specific/api_keys.scss";
