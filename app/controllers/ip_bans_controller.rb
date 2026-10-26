@@ -2,6 +2,7 @@
 
 class IpBansController < ApplicationController
   respond_to(:html, :json)
+  before_action(:block_apikey_authentication)
 
   def index
     @ip_bans = authorize(IpBan).html_includes(request, :creator)

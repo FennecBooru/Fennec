@@ -22,6 +22,7 @@
   <%= f.input(:can_manage_aibur, collection: [%w[Yes true], %w[No false]], label: "Manage Tag Change Requests") %>
   <%= f.input(:no_aibur_voting, collection: [%w[Yes true], %w[No false]], label: "No AIBUR Voting") %>
   <%= f.input(:age_verified, collection: [%w[Yes true], %w[No false]], label: "Age Verified") %>
+  <%= f.input(:allow_dmail_api, collection: [%w[Yes true], %w[No false]], label: "Allow Creating DMails With API") %>
 
   <%= f.button(:submit, value: "Update") %>
 <% end %>

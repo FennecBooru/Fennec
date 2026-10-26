@@ -17,6 +17,12 @@ module TestHelpers
       send(method_name, url, **options)
     end
 
+    def method_api_key_authenticated(method_name, url, user, options)
+      api_key = create(:api_key, user: user)
+      headers = { "Authorization" => ActionController::HttpAuthentication::Basic.encode_credentials(user.name, api_key.key) }
+      send(method_name, url, **options, headers: headers.merge(options[:headers] || {}))
+    end
+
     def get_auth(url, user, options = {})
       method_authenticated(:get, url, user, options)
     end

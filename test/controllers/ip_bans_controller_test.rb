@@ -18,6 +18,7 @@ class IpBansControllerTest < ActionDispatch::IntegrationTest
       context("access control") do
         asserts do
           access.gte(User::Levels::ADMIN).get(new_ip_ban_path)
+          access.none.api_key.get(new_ip_ban_path)
         end
       end
     end
@@ -33,6 +34,7 @@ class IpBansControllerTest < ActionDispatch::IntegrationTest
         asserts do
           access.gte(User::Levels::ADMIN).post(ip_bans_path).params { { ip_ban: { ip_addr: "100.#{rand(0..255)}.#{rand(0..255)}.#{rand(0..255)}", reason: "xyz" } } }.success(:redirect)
           access.gte(User::Levels::ADMIN).json.post(ip_bans_path).params { { ip_ban: { ip_addr: "100.#{rand(0..255)}.#{rand(0..255)}.#{rand(0..255)}", reason: "xyz" } } }
+          access.none.api_key.post(ip_bans_path).params { { ip_ban: { ip_addr: "100.#{rand(0..255)}.#{rand(0..255)}.#{rand(0..255)}", reason: "xyz" } } }
         end
       end
     end
@@ -58,6 +60,7 @@ class IpBansControllerTest < ActionDispatch::IntegrationTest
         asserts do
           access.gte(User::Levels::ADMIN).get(ip_bans_path)
           access.gte(User::Levels::ADMIN).json.get(ip_bans_path)
+          access.none.api_key.get(ip_bans_path)
         end
       end
 
@@ -96,6 +99,7 @@ class IpBansControllerTest < ActionDispatch::IntegrationTest
         asserts do
           access.gte(User::Levels::ADMIN).delete { ip_ban_path(@ip_ban) }.success(:redirect)
           access.gte(User::Levels::ADMIN).json.delete { ip_ban_path(@ip_ban) }.success(:no_content)
+          access.none.api_key.delete { ip_ban_path(@ip_ban) }
         end
       end
     end

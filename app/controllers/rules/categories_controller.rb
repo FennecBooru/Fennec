@@ -6,6 +6,7 @@ module Rules
     respond_to(:html, except: %i[index])
     respond_to(:json)
     respond_to(:js, only: %i[reorder])
+    before_action(:block_apikey_authentication, except: %i[index])
 
     def index
       @categories = authorize(RuleCategory).order(:order).paginate(params[:page], limit: params[:limit])

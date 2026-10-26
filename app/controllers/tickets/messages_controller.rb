@@ -3,8 +3,8 @@
 module Tickets
   class MessagesController < ApplicationController
     requires_feature(:tickets)
-    respond_to(:html, except: %i[index])
-    respond_to(:json)
+    respond_to(:html, :json)
+    before_action(:block_apikey_authentication, except: %i[index])
 
     def index
       @ticket = Ticket.find(params[:ticket_id])

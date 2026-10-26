@@ -122,6 +122,7 @@ class User < ApplicationRecord
     AGE_VERIFIED                     = pref(1 << 32, settable: false, private: false)
     CAN_UPLOAD_IN_PROGRESS           = pref(1 << 33, settable: false, public: true)
     DISABLE_CHARACTER_TAG_GROUPING   = pref(1 << 34)
+    ALLOW_DMAIL_API                  = pref(1 << 35, settable: false)
 
     def self.map
       constants.to_h { |name| [name.to_s.downcase, const_get(name)] }
@@ -1206,12 +1207,12 @@ class User < ApplicationRecord
       if bit_prefs != bit_prefs_before_last_save
         added = []
         removed = []
-        UserAdminEdit::PREFERENCES.select { |p| p.second.present? }.each do |key, name|
-          next unless send("saved_change_to_#{key}?")
+        UserAdminEdit::PREFERENCES.select { |p| p.description.present? }.each do |pref|
+          next unless send("saved_change_to_#{pref.flag}?")
           if send(key)
-            added << name
+            added << pref.description
           else
-            removed << name
+            removed << pref.description
           end
         end
 

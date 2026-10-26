@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class BansController < ApplicationController
-  respond_to(:html)
-  respond_to(:json, only: %i[index show])
+  respond_to(:html, :json)
+  before_action(:block_apikey_authentication, except: %i[index show])
 
   def index
     @bans = authorize(Ban).html_includes(request, :user, :creator)

@@ -4,6 +4,7 @@ module Security
   class LockdownController < ApplicationController
     respond_to(:html)
     wrap_parameters(:lockdown)
+    before_action(:block_apikey_authentication)
 
     def index
       authorize(%i[security lockdown])

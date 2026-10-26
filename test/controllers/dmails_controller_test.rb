@@ -231,10 +231,21 @@ class DmailsControllerTest < ActionDispatch::IntegrationTest
         assert_equal(@dmail.id, reply.parent_id)
       end
 
+      should("allow api keys for users with dmail api access") do
+        @user.update!(allow_dmail_api: true)
+
+        assert_difference("Dmail.count", 1) do
+          method_api_key_authenticated(:post, dmails_path, @user, params: { dmail: { to_id: @user2.id, title: "abc", body: "abc" }, format: :json })
+        end
+
+        assert_response(:success)
+      end
+
       context("access control") do
         setup { @admin = create(:admin_user) }
         asserts do
           access.gte(User::Levels::REJECTED).post(dmails_path).params { { dmail: { to_id: @admin.id, title: "abc", body: "abc" } } }.success(:redirect)
+          access.none.api_key.post(dmails_path).params { { dmail: { to_id: @admin.id, title: "abc", body: "abc" } } }
         end
       end
     end

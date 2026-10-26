@@ -36,6 +36,7 @@ class RulesControllerTest < ActionDispatch::IntegrationTest
       context("access control") do
         asserts do
           access.gte(User::Levels::ADMIN).get(new_rule_path)
+          access.none.api_key.get(new_rule_path)
         end
       end
     end
@@ -65,6 +66,7 @@ class RulesControllerTest < ActionDispatch::IntegrationTest
         asserts do
           access.gte(User::Levels::ADMIN).post(rules_path).params { { rule: { name: SecureRandom.hex(6), description: SecureRandom.hex(6), category_id: @category.id } } }.success(:redirect)
           access.gte(User::Levels::ADMIN).json.post(rules_path).params { { rule: { name: SecureRandom.hex(6), description: SecureRandom.hex(6), category_id: @category.id } } }
+          access.none.api_key.post(rules_path).params { { rule: { name: SecureRandom.hex(6), description: SecureRandom.hex(6), category_id: @category.id } } }
         end
       end
     end
@@ -79,6 +81,7 @@ class RulesControllerTest < ActionDispatch::IntegrationTest
       context("access control") do
         asserts do
           access.gte(User::Levels::ADMIN).get { edit_rule_path(@rule) }
+          access.none.api_key.get { edit_rule_path(@rule) }
         end
       end
     end
@@ -109,6 +112,7 @@ class RulesControllerTest < ActionDispatch::IntegrationTest
         asserts do
           access.gte(User::Levels::ADMIN).put { rule_path(@rule) }.params { { rule: { name: SecureRandom.hex(6), description: SecureRandom.hex(6) } } }.success(:redirect)
           access.gte(User::Levels::ADMIN).json.put { rule_path(@rule) }.params { { rule: { name: SecureRandom.hex(6), description: SecureRandom.hex(6) } } }
+          access.none.api_key.put { rule_path(@rule) }.params { { rule: { name: SecureRandom.hex(6), description: SecureRandom.hex(6) } } }
         end
       end
     end
@@ -138,6 +142,31 @@ class RulesControllerTest < ActionDispatch::IntegrationTest
         asserts do
           access.gte(User::Levels::ADMIN).delete { rule_path(@rule) }.success(:redirect)
           access.gte(User::Levels::ADMIN).json.delete { rule_path(@rule) }.success(:no_content)
+          access.none.api_key.delete { rule_path(@rule) }
+        end
+      end
+    end
+
+    context("order action") do
+      context("access control") do
+        asserts do
+          access.none.api_key.get(order_rules_path)
+        end
+      end
+    end
+
+    context("reorder action") do
+      context("access control") do
+        asserts do
+          access.none.api_key.json.post(reorder_rules_path)
+        end
+      end
+    end
+
+    context("builder action") do
+      context("access control") do
+        asserts do
+          access.none.api_key.json.get(builder_rules_path)
         end
       end
     end

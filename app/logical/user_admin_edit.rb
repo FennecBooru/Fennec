@@ -5,18 +5,21 @@ class UserAdminEdit
 
   delegate(:errors, to: :user)
 
+  # description is used for mod actions
+  Pref = Struct.new(:flag, :description, :limiter)
   PREFERENCES = [
-    [:can_approve_posts, "approve posts", :is_admin?],
-    [:unrestricted_uploads, "unrestricted uploads", :is_admin?],
-    [:can_upload_in_progress, "upload in-progress posts", :is_admin?],
-    [:no_flagging, "flagging ban", :is_admin?],
-    [:no_replacements, "replacements ban", :is_admin?],
-    [:no_aibur_voting, "tag change request voting ban", :is_admin?],
-    [:can_manage_aibur, "manage tag change requests", :is_owner?],
-    [:force_name_change, nil, :is_admin?],
-    [:enable_privacy_mode, nil, :is_admin?],
-    [:email_verified, nil, :is_owner?],
-    [:age_verified, nil, :is_owner?],
+    Pref.new(:can_approve_posts, "approve posts", :is_admin?),
+    Pref.new(:unrestricted_uploads, "unrestricted uploads", :is_admin?),
+    Pref.new(:can_upload_in_progress, "upload in-progress posts", :is_admin?),
+    Pref.new(:no_flagging, "flagging ban", :is_admin?),
+    Pref.new(:no_replacements, "replacements ban", :is_admin?),
+    Pref.new(:no_aibur_voting, "tag change request voting ban", :is_admin?),
+    Pref.new(:can_manage_aibur, "manage tag change requests", :is_owner?),
+    Pref.new(:force_name_change, nil, :is_admin?),
+    Pref.new(:enable_privacy_mode, nil, :is_admin?),
+    Pref.new(:email_verified, nil, :is_owner?),
+    Pref.new(:age_verified, nil, :is_owner?),
+    Pref.new(:allow_dmail_api, "dmail creation api access", :is_admin?),
   ].freeze
 
   def initialize(user, promoter, ip_addr, options)
@@ -27,7 +30,7 @@ class UserAdminEdit
   end
 
   def apply_preferences
-    PREFERENCES.select { |p| promoter.send(p.third) }.map(&:first).each do |key|
+    PREFERENCES.select { |p| promoter.send(p.limiter) }.map(&:flag).each do |key|
       old = user.send("#{key}?")
       new = options[key].to_s.truthy?
       next if !options.key?(key) || old == new

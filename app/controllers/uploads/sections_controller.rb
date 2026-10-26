@@ -3,6 +3,7 @@
 module Uploads
   class SectionsController < ApplicationController
     respond_to(:html, :json)
+    before_action(:block_apikey_authentication, except: %i[index])
     before_action(:load_section, only: %i[edit update destroy])
 
     def index

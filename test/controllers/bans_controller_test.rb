@@ -110,7 +110,7 @@ class BansControllerTest < ActionDispatch::IntegrationTest
       context("access control") do
         asserts do
           access.gte(User::Levels::MODERATOR).post(bans_path).params { { ban: { duration: 60, reason: "xxx", user_id: create(:user).id } } }.success(:redirect)
-          # access.levels([]).post(bans_path).params { { ban: { duration: 60, reason: "xxx", user_id: create(:user).id } } }
+          access.none.api_key.post(bans_path).params { { ban: { duration: 60, reason: "xxx", user_id: create(:user).id } } }
         end
       end
     end
@@ -139,7 +139,7 @@ class BansControllerTest < ActionDispatch::IntegrationTest
       context("access control") do
         asserts do
           access.gte(User::Levels::MODERATOR).put { ban_path(@ban) }.params { { ban: { reason: "xxx", duration: 60 } } }.success(:redirect)
-          # access.levels([]).json.put { ban_path(@ban) }.params { { ban: { reason: "xxx", duration: 60 } } }
+          access.none.api_key.json.put { ban_path(@ban) }.params { { ban: { reason: "xxx", duration: 60 } } }
         end
       end
     end
@@ -158,6 +158,7 @@ class BansControllerTest < ActionDispatch::IntegrationTest
       context("access control") do
         asserts do
           access.gte(User::Levels::MODERATOR).put { delete_ban_path(create(:ban, user: @user, creator: @mod)) }.success(:redirect)
+          access.none.api_key.put { delete_ban_path(create(:ban, user: @user, creator: @mod)) }
         end
       end
     end
@@ -188,6 +189,7 @@ class BansControllerTest < ActionDispatch::IntegrationTest
       context("access control") do
         asserts do
           access.gte(User::Levels::ADMIN).delete { ban_path(create(:ban, user: @user, creator: create(:moderator_user))) }.success(:redirect)
+          access.none.api_key.delete { ban_path(create(:ban, user: @user, creator: create(:moderator_user))) }
         end
       end
     end
@@ -208,6 +210,7 @@ class BansControllerTest < ActionDispatch::IntegrationTest
       context("access control") do
         asserts do
           access.gte(User::Levels::MODERATOR).put { undelete_ban_path(@ban) }.success(:redirect)
+          access.none.api_key.put { undelete_ban_path(@ban) }
         end
       end
     end

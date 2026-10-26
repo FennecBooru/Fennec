@@ -35,6 +35,7 @@ module Uploads
         context("access control") do
           asserts do
             access.gte(User::Levels::ADMIN).get { new_upload_section_button_path(@section) }
+            access.none.api_key.get { new_upload_section_button_path(@section) }
           end
         end
       end
@@ -43,6 +44,7 @@ module Uploads
         context("access control") do
           asserts do
             access.gte(User::Levels::ADMIN).get { edit_upload_section_button_path(@section, @button) }
+            access.none.api_key.get { edit_upload_section_button_path(@section, @button) }
           end
         end
       end
@@ -64,6 +66,7 @@ module Uploads
         context("access control") do
           asserts do
             access.gte(User::Levels::ADMIN).post { upload_section_buttons_path(@section) }.params { { uploader_button: { name: "Access #{SecureRandom.hex(4)}" } } }.success(:redirect)
+            access.none.api_key.post { upload_section_buttons_path(@section) }.params { { uploader_button: { name: "Access #{SecureRandom.hex(4)}" } } }
           end
         end
       end
@@ -87,6 +90,7 @@ module Uploads
         context("access control") do
           asserts do
             access.gte(User::Levels::ADMIN).put { upload_section_button_path(@section, @button) }.params({ uploader_button: { name: "Access" } }).success(:redirect)
+            access.none.api_key.put { upload_section_button_path(@section, @button) }.params({ uploader_button: { name: "Access" } })
           end
         end
       end
@@ -113,6 +117,7 @@ module Uploads
         context("access control") do
           asserts do
             access.gte(User::Levels::ADMIN).delete { upload_section_button_path(@section, create(:uploader_button, section: @section)) }.success(:redirect)
+            access.none.api_key.delete { upload_section_button_path(@section, create(:uploader_button, section: @section)) }
           end
         end
       end
@@ -147,6 +152,12 @@ module Uploads
           post_auth(reorder_upload_section_buttons_path(@section, format: :json), create(:moderator_user), params: @order.to_json, headers: { "CONTENT_TYPE" => "application/json" })
 
           assert_response(:forbidden)
+        end
+
+        context("access control") do
+          asserts do
+            access.none.api_key.json.post { reorder_upload_section_buttons_path(@section) }
+          end
         end
       end
     end

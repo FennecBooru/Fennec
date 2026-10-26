@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class DmailsController < ApplicationController
-  respond_to(:html)
-  respond_to(:json, except: %i[new create])
+  respond_to(:html, :json)
+  before_action(:block_create_unless_allowed, only: :create)
 
   def index
     @query = authorize(Dmail).html_includes(request, :from, :to)
@@ -89,5 +89,12 @@ class DmailsController < ApplicationController
     @dmail.mark_not_spam!(CurrentUser.user)
     notice("DMail marked as not spam")
     respond_with(@dmail)
+  end
+
+  private
+
+  def block_create_unless_allowed
+    return if CurrentUser.user.allow_dmail_api?
+    block_apikey_authentication
   end
 end

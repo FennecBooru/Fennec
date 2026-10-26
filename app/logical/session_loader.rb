@@ -53,7 +53,7 @@ class SessionLoader
   end
 
   def has_api_authentication?
-    request.authorization.present? || params[:login].present? || (params[:api_key].present? && params[:api_key].is_a?(String))
+    request.authorization.present? || (params[:login].present? && params[:api_key].present? && params[:api_key].is_a?(String))
   end
 
   def has_remember_token?
@@ -79,6 +79,7 @@ class SessionLoader
     CurrentUser.user = user
     session[:user_id] = user.id
     session[:ph] = user.password_token # This has been validated by the remember token
+    RequestStore.store[:authentication_type] = :remember
   rescue StandardError
     nil
   end
@@ -93,8 +94,10 @@ class SessionLoader
     raise(AuthenticationFailure, "API keys are disabled") unless Feature.enabled?(:api_keys)
     if request.authorization
       authenticate_basic_auth
+      RequestStore.store[:authentication_type] = :apikey
     elsif params[:login].present? && params[:api_key].present?
       authenticate_api_key(params[:login], params[:api_key])
+      RequestStore.store[:authentication_type] = :apikey
     else
       raise(AuthenticationFailure)
     end
@@ -119,6 +122,7 @@ class SessionLoader
     raise(AuthenticationFailure) if user.nil?
     return if session[:ph] != user.password_token
     CurrentUser.user = user
+    RequestStore.store[:authentication_type] = :user
   end
 
   def update_last_logged_in_at

@@ -55,13 +55,17 @@ class UserPresenter < ApplicationPresenter
       if user.no_aibur_voting?
         permissions << "no tag change request voting"
       end
+
+      if user.allow_dmail_api?
+        permissions << "allow creating dmails with api"
+      end
     end
 
-    permissions.join(", ")
+    permissions
   end
 
   def permissions_compact
-    perms = permissions.split(", ")
+    perms = permissions
     return Helpers.tag.span(permissions, class: "permissions-list") if perms.length <= 2
     visible = perms.slice(0, 2)
     Helpers.safe_join([Helpers.tag.span(visible.join(", "), class: "permissions-list", data: { short: visible.join(", "), full: perms.join(", ") }), " ", Helpers.link_to("»", "#", title: "Expand", class: "expand-permissions-link"), Helpers.link_to("«", "#", title: "Collapse", class: "collapse-permissions-link", style: "display: none;")])

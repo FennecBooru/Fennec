@@ -21,6 +21,7 @@ module TestHelpers
       @min = false
       @max = false
       @filter = nil
+      @api_key = false
     end
 
     def path(value = nil, &block)
@@ -98,6 +99,10 @@ module TestHelpers
       min(a).max(b)
     end
 
+    def none
+      levels([])
+    end
+
     def filter(value = nil, &block)
       @filter = block || value
       self
@@ -128,6 +133,12 @@ module TestHelpers
       format(:json)
     end
 
+    # authenticate with an api key instead of logging in
+    def api_key
+      @api_key = true
+      self
+    end
+
     def exec(&block)
       if block.present?
         @exec = block
@@ -138,6 +149,7 @@ module TestHelpers
       path = @path
       params = @params
       format = @format
+      api_key = @api_key
       get_params = proc do |user|
         value = instance_exec(*(params.arity == 0 ? [] : [user]), &params)
         if format
@@ -146,7 +158,16 @@ module TestHelpers
         end
         value
       end
-      @exec ||= ->(user) { send("#{instance_exec(*(method.arity == 0 ? [] : [user]), &method)}_auth", instance_exec(*(path.arity == 0 ? [] : [user]), &path), user, params: instance_exec(user, &get_params)) }
+      @exec ||= ->(user) do
+        method_name = instance_exec(*(method.arity == 0 ? [] : [user]), &method)
+        url = instance_exec(*(path.arity == 0 ? [] : [user]), &path)
+        options = { params: instance_exec(user, &get_params) }
+        if api_key
+          method_api_key_authenticated(method_name, url, user, options)
+        else
+          send("#{method_name}_auth", url, user, options)
+        end
+      end
     end
 
     def build
@@ -164,7 +185,7 @@ module TestHelpers
       if anonymous_response.nil?
         if anonymous_success
           anonymous_response = :success
-        elsif fail_response == :forbidden && @format != :json
+        elsif fail_response == :forbidden && @format != :json && !@api_key
           anonymous_response = :redirect
         else
           anonymous_response = fail_response
@@ -203,8 +224,9 @@ module TestHelpers
         instance_exec(User::Levels::BANNED, :forbidden, "not allow", ban_setup, &per_level)
       end
 
-      if @format
-        klass.context("for #{@format}", &block)
+      name = [("for #{@format}" if @format), ("with api key" if @api_key)].compact.join(" ")
+      if name.present?
+        klass.context(name, &block)
       else
         klass.instance_exec(&block)
       end

@@ -27,6 +27,8 @@ module Security
         context("access control") do
           asserts do
             access.gte(User::Levels::ADMIN).get(security_root_path)
+            access.none.api_key.get(security_root_path)
+            access.none.api_key.get(security_lockdown_index_path)
           end
         end
       end
@@ -43,6 +45,7 @@ module Security
         context("access control") do
           asserts do
             access.gte(User::Levels::ADMIN).put(panic_security_lockdown_index_path).success(:redirect)
+            access.none.api_key.put(panic_security_lockdown_index_path)
           end
         end
       end
@@ -59,6 +62,7 @@ module Security
         context("access control") do
           asserts do
             access.gte(User::Levels::ADMIN).put(enact_security_lockdown_index_path).params { { lockdown: Security::Lockdown::BOOLEAN_TYPES.index_with { |_type| true } } }.success(:redirect)
+            access.none.api_key.put(enact_security_lockdown_index_path).params { { lockdown: Security::Lockdown::BOOLEAN_TYPES.index_with { |_type| true } } }
           end
         end
       end
@@ -73,6 +77,7 @@ module Security
         context("access control") do
           asserts do
             access.gte(User::Levels::ADMIN).put(enact_security_lockdown_index_path).params { { uploads_min_level: { min_level: User::Levels::TRUSTED } } }.success(:redirect)
+            access.none.api_key.put(uploads_min_level_security_lockdown_index_path).params { { uploads_min_level: { min_level: User::Levels::TRUSTED } } }
           end
         end
       end
@@ -87,6 +92,7 @@ module Security
         context("access control") do
           asserts do
             access.gte(User::Levels::ADMIN).put(uploads_hide_pending_security_lockdown_index_path).params { { uploads_hide_pending: { duration: 24 } } }.success(:redirect)
+            access.none.api_key.put(uploads_hide_pending_security_lockdown_index_path).params { { uploads_hide_pending: { duration: 24 } } }
           end
         end
       end

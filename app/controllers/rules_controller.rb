@@ -3,6 +3,7 @@
 class RulesController < ApplicationController
   requires_feature(:rules)
   before_action(:load_categories, only: %i[index new create edit update order])
+  before_action(:block_apikey_authentication, except: %i[index])
   respond_to(:html, :json)
   respond_to(:js, only: %i[reorder])
 

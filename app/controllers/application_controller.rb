@@ -390,4 +390,20 @@ class ApplicationController < ActionController::Base
   def model_name
     controller_name.classify
   end
+
+  def apikey_authentication?
+    RequestStore.store[:authentication_type] == :apikey
+  end
+
+  def user_authentication?
+    RequestStore.store[:authentication_type] == :user
+  end
+
+  def remember_authentication?
+    RequestStore.store[:authentication_type] == :remember
+  end
+
+  def block_apikey_authentication
+    render_expected_error(403, "apikey authentication is not allowed for this action") if apikey_authentication?
+  end
 end

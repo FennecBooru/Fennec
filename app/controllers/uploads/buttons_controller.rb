@@ -3,6 +3,7 @@
 module Uploads
   class ButtonsController < ApplicationController
     respond_to(:html, :json)
+    before_action(:block_apikey_authentication, except: %i[index])
     before_action(:load_section)
     before_action(:load_button, only: %i[edit update destroy])
 

@@ -2,6 +2,7 @@
 
 class ApiKeysController < ApplicationController
   requires_feature(:api_keys)
+  before_action(:block_apikey_authentication)
   before_action(:requires_reauthentication)
   before_action(:load_api_key, except: %i[index new create])
   respond_to(:html, :json)

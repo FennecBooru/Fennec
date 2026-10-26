@@ -2,7 +2,8 @@
 
 class TicketsController < ApplicationController
   requires_feature(:tickets)
-  respond_to(:html, :json, except: %i[create new])
+  respond_to(:html, :json)
+  before_action(:block_apikey_authentication, only: %i[create])
 
   def index
     @tickets = authorize(Ticket).html_includes(request, :creator, :accused, :claimant, :model)

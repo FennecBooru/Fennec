@@ -34,6 +34,7 @@ module Uploads
         context("access control") do
           asserts do
             access.gte(User::Levels::ADMIN).get(new_upload_section_path)
+            access.none.api_key.get(new_upload_section_path)
           end
         end
       end
@@ -48,6 +49,7 @@ module Uploads
         context("access control") do
           asserts do
             access.gte(User::Levels::ADMIN).get { edit_upload_section_path(@section) }
+            access.none.api_key.get { edit_upload_section_path(@section) }
           end
         end
       end
@@ -76,6 +78,7 @@ module Uploads
         context("access control") do
           asserts do
             access.gte(User::Levels::ADMIN).post(upload_sections_path).params { { uploader_section: { key: "accesstest", label: "Access" } } }.success(:redirect)
+            access.none.api_key.post(upload_sections_path).params { { uploader_section: { key: "accesstest", label: "Access" } } }
           end
         end
       end
@@ -100,6 +103,7 @@ module Uploads
         context("access control") do
           asserts do
             access.gte(User::Levels::ADMIN).put { upload_section_path(@section) }.params({ uploader_section: { label: "Access" } }).success(:redirect)
+            access.none.api_key.put { upload_section_path(@section) }.params({ uploader_section: { label: "Access" } })
           end
         end
       end
@@ -125,6 +129,7 @@ module Uploads
         context("access control") do
           asserts do
             access.gte(User::Levels::ADMIN).delete { upload_section_path(create(:uploader_section)) }.success(:redirect)
+            access.none.api_key.delete { upload_section_path(create(:uploader_section)) }
           end
         end
       end
@@ -161,6 +166,12 @@ module Uploads
           post_auth(reorder_upload_sections_path(format: :json), create(:moderator_user), params: @order.to_json, headers: { "CONTENT_TYPE" => "application/json" })
 
           assert_response(:forbidden)
+        end
+
+        context("access control") do
+          asserts do
+            access.none.api_key.json.post(reorder_upload_sections_path)
+          end
         end
       end
     end

@@ -21,6 +21,7 @@ module Rules
         context("access control") do
           asserts do
             access.gte(User::Levels::ADMIN).get(new_rule_category_path)
+            access.none.api_key.get(new_rule_category_path)
           end
         end
       end
@@ -35,6 +36,7 @@ module Rules
         context("access control") do
           asserts do
             access.gte(User::Levels::ADMIN).get { edit_rule_category_path(@category) }
+            access.none.api_key.get { edit_rule_category_path(@category) }
           end
         end
       end
@@ -62,6 +64,7 @@ module Rules
           asserts do
             access.gte(User::Levels::ADMIN).post(rule_categories_path).params { { rule_category: { name: SecureRandom.hex(6) } } }.success(:redirect)
             access.gte(User::Levels::ADMIN).json.post(rule_categories_path).params { { rule_category: { name: SecureRandom.hex(6) } } }
+            access.none.api_key.post(rule_categories_path).params { { rule_category: { name: SecureRandom.hex(6) } } }
           end
         end
       end
@@ -91,6 +94,7 @@ module Rules
           asserts do
             access.gte(User::Levels::ADMIN).put { rule_category_path(@category) }.params { { rule_category: { name: SecureRandom.hex(6) } } }.success(:redirect)
             access.gte(User::Levels::ADMIN).json.put { rule_category_path(@category) }.params { { rule_category: { name: SecureRandom.hex(6) } } }
+            access.none.api_key.put { rule_category_path(@category) }.params { { rule_category: { name: SecureRandom.hex(6) } } }
           end
         end
       end
@@ -156,6 +160,23 @@ module Rules
           asserts do
             access.gte(User::Levels::ADMIN).delete { rule_category_path(@category) }.success(:redirect)
             access.gte(User::Levels::ADMIN).json.delete { rule_category_path(@category) }.success(:no_content)
+            access.none.api_key.delete { rule_category_path(@category) }
+          end
+        end
+      end
+
+      context("order action") do
+        context("access control") do
+          asserts do
+            access.none.api_key.get(order_rule_categories_path)
+          end
+        end
+      end
+
+      context("reorder action") do
+        context("access control") do
+          asserts do
+            access.none.api_key.json.post(reorder_rule_categories_path)
           end
         end
       end

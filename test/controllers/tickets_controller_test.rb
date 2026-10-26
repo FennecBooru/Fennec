@@ -135,6 +135,14 @@ class TicketsControllerTest < ActionDispatch::IntegrationTest
       end
     end
 
+    context("create action") do
+      context("access control") do
+        asserts do
+          access.none.api_key.post(tickets_path).params { { ticket: { model_id: create(:comment).id, model_type: "Comment", reason: "test" } } }
+        end
+      end
+    end
+
     context("ticket messages controller") do
       setup do
         @ticket = create(:ticket, creator: @reporter, model: create(:comment))
@@ -321,6 +329,13 @@ class TicketsControllerTest < ActionDispatch::IntegrationTest
         end
 
         assert_response(:forbidden)
+      end
+
+      context("access control") do
+        asserts do
+          access.none.api_key.post { ticket_messages_path(@ticket) }.params({ ticket_message: { body: "more info" } })
+          access.none.api_key.delete { ticket_message_path(@ticket, create(:ticket_message, ticket: @ticket)) }
+        end
       end
     end
 

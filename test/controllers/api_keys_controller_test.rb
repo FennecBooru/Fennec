@@ -50,6 +50,7 @@ class ApiKeysControllerTest < ActionDispatch::IntegrationTest
       context("access control") do
         asserts do
           access.gte(User::Levels::REJECTED).get { user_api_keys_path(@user) }
+          access.none.api_key.get { user_api_keys_path(@user) }
         end
       end
     end
@@ -70,6 +71,7 @@ class ApiKeysControllerTest < ActionDispatch::IntegrationTest
       context("access control") do
         asserts do
           access.gte(User::Levels::REJECTED).get { new_user_api_key_path(@user) }
+          access.none.api_key.get { new_user_api_key_path(@user) }
         end
       end
     end
@@ -86,6 +88,7 @@ class ApiKeysControllerTest < ActionDispatch::IntegrationTest
         asserts do
           access.gte(User::Levels::REJECTED).post { |user| user_api_keys_path(user) }.params({ api_key: { name: "blah" } }).success(:redirect)
           access.gte(User::Levels::REJECTED).json.post { |user| user_api_keys_path(user) }.params({ api_key: { name: "blah" } })
+          access.none.api_key.post { |user| user_api_keys_path(user) }.params({ api_key: { name: "blah" } })
         end
       end
     end
@@ -106,6 +109,7 @@ class ApiKeysControllerTest < ActionDispatch::IntegrationTest
       context("access control") do
         asserts do
           access.gte(User::Levels::REJECTED).get { |user| edit_api_key_path(create(:api_key, user: user)) }
+          access.none.api_key.get { |user| edit_api_key_path(create(:api_key, user: user)) }
         end
       end
     end
@@ -128,6 +132,7 @@ class ApiKeysControllerTest < ActionDispatch::IntegrationTest
         asserts do
           access.gte(User::Levels::REJECTED).put { |user| api_key_path(create(:api_key, user: user)) }.params({ api_key: { name: "blah" } }).success(:redirect)
           access.gte(User::Levels::REJECTED).json.put { |user| api_key_path(create(:api_key, user: user)) }.params({ api_key: { name: "blah" } })
+          access.none.api_key.put { |user| api_key_path(create(:api_key, user: user)) }.params({ api_key: { name: "blah" } })
         end
       end
     end
@@ -151,6 +156,15 @@ class ApiKeysControllerTest < ActionDispatch::IntegrationTest
         asserts do
           access.gte(User::Levels::REJECTED).delete { |user| api_key_path(create(:api_key, user: user)) }.success(:redirect)
           access.gte(User::Levels::REJECTED).json.delete { |user| api_key_path(create(:api_key, user: user)) }
+          access.none.api_key.delete { |user| api_key_path(create(:api_key, user: user)) }
+        end
+      end
+    end
+
+    context("usage action") do
+      context("access control") do
+        asserts do
+          access.none.api_key.get { |user| usage_api_key_path(create(:api_key, user: user)) }
         end
       end
     end

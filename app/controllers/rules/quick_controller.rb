@@ -4,6 +4,7 @@ module Rules
   class QuickController < ApplicationController
     requires_feature(:rules)
     respond_to(:html, :json)
+    before_action(:block_apikey_authentication, except: %i[index])
 
     def index
       @quick = authorize(QuickRule).order(:order).paginate(params[:page], limit: params[:limit])
