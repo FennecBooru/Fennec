@@ -230,15 +230,22 @@ class Tag < ApplicationRecord
       end
 
       names.each do |name, cat|
-        existing << Tag.new.tap do |t|
-          t.name = name
-          t.category_id = TagCategory.value_for(cat)
-          t.reason = reason
-          t.creator = user
-          t.save
-        end
+        existing << create_or_find_by_name(name, category: cat, user: user, reason: reason)
       end
       existing
+    end
+
+    # Another process (or a parallel_find_each thread) can create the same tag after our lookup. Depending
+    # on when it commits, we either fail the uniqueness validation or hit the unique index on insert;
+    # either way, use the tag it created
+    def create_or_find_by_name(name, category:, user:, reason: nil)
+      tag = Tag.create_or_find_by(name: name) do |t|
+        t.category_id = TagCategory.value_for(category)
+        t.reason = reason
+        t.creator = user
+      end
+      return tag if tag.persisted? || !tag.errors.of_kind?(:name, :taken)
+      Tag.find_by(name: name) || tag
     end
 
     def find_or_create_by_name(name, user:, reason: nil, artist: false)
@@ -270,13 +277,7 @@ class Tag < ApplicationRecord
 
         tag
       else
-        Tag.new.tap do |t|
-          t.name = name
-          t.category_id = TagCategory.value_for(category)
-          t.reason = reason
-          t.creator = user
-          t.save
-        end
+        create_or_find_by_name(name, category: category, user: user, reason: reason)
       end
     end
   end

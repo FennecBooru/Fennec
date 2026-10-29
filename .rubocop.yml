@@ -109,6 +109,7 @@ Rails/Output:
     - db/seeds/*.rb
     - db/fixes/*.rb
     - lib/fix_tracker.rb
+    - test/benchmark/*.rb
   Include:
     - test/**/*.rb
 

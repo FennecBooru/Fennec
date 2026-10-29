@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_23_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_27_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -1441,6 +1441,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_120000) do
     t.bigint "uploader_id", null: false
     t.inet "uploader_ip_addr", null: false
     t.string "vote_string", default: "", null: false
+    t.index "lower(locked_tags) gin_trgm_ops", name: "index_posts_on_lower_locked_tags_gin_trgm_ops", using: :gin
     t.index "string_to_array(tag_string, ' '::text)", name: "index_posts_on_string_to_array_tag_string", using: :gin
     t.index ["change_seq"], name: "index_posts_on_change_seq", unique: true
     t.index ["created_at"], name: "index_posts_on_created_at"

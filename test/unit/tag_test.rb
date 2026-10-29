@@ -236,6 +236,27 @@ class TagTest < ActiveSupport::TestCase
       end
     end
 
+    context("when created concurrently") do
+      setup do
+        @existing = create(:tag, name: "hoge")
+      end
+
+      should("return the existing tag when it was committed before validation") do
+        assert_no_difference("Tag.count") do
+          assert_equal(@existing.id, Tag.create_or_find_by_name("hoge", category: nil, user: @janitor).id)
+        end
+      end
+
+      # the other transaction hadn't committed yet, so validation passed and the insert hits the unique index
+      should("return the existing tag when the insert conflicts") do
+        ActiveRecord::Validations::UniquenessValidator.any_instance.stubs(:validate_each)
+
+        assert_no_difference("Tag.count") do
+          assert_equal(@existing.id, Tag.create_or_find_by_name("hoge", category: nil, user: @janitor).id)
+        end
+      end
+    end
+
     context("when deprecated") do
       should("require a wiki page") do
         tag = build(:tag, is_deprecated: true)

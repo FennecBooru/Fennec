@@ -7502,6 +7502,13 @@ CREATE INDEX index_posts_on_is_pending ON public.posts USING btree (is_pending) 
 
 
 --
+-- Name: index_posts_on_lower_locked_tags_gin_trgm_ops; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_posts_on_lower_locked_tags_gin_trgm_ops ON public.posts USING gin (lower(locked_tags) public.gin_trgm_ops);
+
+
+--
 -- Name: index_posts_on_parent_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -10088,6 +10095,7 @@ ALTER TABLE ONLY public.help_pages
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261027120000'),
 ('20261023120000'),
 ('20261020140000'),
 ('20261020130000'),
