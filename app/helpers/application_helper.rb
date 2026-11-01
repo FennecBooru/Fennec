@@ -228,7 +228,8 @@ module ApplicationHelper
 
   def link_to_latest(id)
     return "" unless id
-    subnav_link_to("Latest", params.permit!.merge(page: "b#{id + 1}"))
+    # wrapped in params: so keys like host and protocol stay in the query string
+    subnav_link_to("Latest", { params: request.query_parameters.merge("page" => "b#{id + 1}") })
   end
 
   def latest_link(records, raw: false, separator: !raw)
