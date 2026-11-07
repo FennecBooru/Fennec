@@ -334,7 +334,7 @@ services:
       - "hostname=metrics.elasticsearch.fennec.containers.local"
 
   eris: # metrics port: 5588
-    image: ghcr.io/fennecbooru/eris:c7769ca12975f2c938d0f28e835297a566d6fac4
+    image: ghcr.io/fennecbooru/eris:84391d843c0e1b898d1f9c74b698cf6a8b4e0faa
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://127.0.0.1:5588/ready || exit 1
       interval: 30s
