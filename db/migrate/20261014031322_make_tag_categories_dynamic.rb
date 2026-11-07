@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class MakeTagCategoriesDynamic < ActiveRecord::Migration[8.1]
-  with_admin_config_override!
+  before { admin_config_override! }
+  after { AdminConfig.delete_cache }
 
   ID_MAP = {
     0  => "general",
@@ -76,7 +77,6 @@ class MakeTagCategoriesDynamic < ActiveRecord::Migration[8.1]
         say_with_time("Restoring AdminConfig values from tag categories") do
           AdminConfig.reset_column_information
           CONFIG_MAP.each { |key, (id, column)| restore_config(id, column, key) }
-          AdminConfig.delete_cache
           CONFIG_MAP.size
         end
       end
@@ -85,7 +85,6 @@ class MakeTagCategoriesDynamic < ActiveRecord::Migration[8.1]
     remove_column(:admin_config, :artist_exclusion_tags, :text, null: false, default: "avoid_posting, conditional_dnp, epilepsy_warning, sound_warning")
     remove_column(:admin_config, :contributor_suffixes, :text, null: false, default: "va, modeler")
     remove_column(:admin_config, :lore_suffixes, :text, null: false, default: "lore")
-    up_only { AdminConfig.delete_cache }
   end
 
   def backfill_category(id, column, key)

@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class AddTimeoutConfigOptions < ActiveRecord::Migration[7.1]
-  with_config_override!
+  before { config_override! }
+  after { Config.delete_cache }
 
   def change
     add_column(:config, :postgres_query_timeout, :jsonb, default: {
@@ -27,7 +28,5 @@ class AddTimeoutConfigOptions < ActiveRecord::Migration[7.1]
       User::Levels::TRUSTED      => 20_000,
       User::Levels::FORMER_STAFF => 30_000,
     }, null: false)
-
-    Config.delete_cache
   end
 end

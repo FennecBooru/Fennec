@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class CreateDomainIcons < ActiveRecord::Migration[8.1]
-  with_admin_config_override!
+  before { admin_config_override! }
+  after { AdminConfig.delete_cache }
 
   def change
     create_table(:domain_icon_media_assets) do |t|
@@ -40,6 +41,5 @@ class CreateDomainIcons < ActiveRecord::Migration[8.1]
 
     add_column(:admin_config, :domain_icon_size, :jsonb, null: false, default: { min: 16, max: 256 })
     add_column(:admin_config, :max_domain_icon_file_sizes, :jsonb, null: false, default: { png: 256, jpg: 256, gif: 256, webp: 256 })
-    AdminConfig.delete_cache
   end
 end

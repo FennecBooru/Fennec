@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class CreateSiteAssets < ActiveRecord::Migration[8.1]
-  with_admin_config_override!
+  before { admin_config_override! }
+  after { AdminConfig.delete_cache }
 
   def change
     create_table(:site_media_assets) do |t|
@@ -43,6 +44,5 @@ class CreateSiteAssets < ActiveRecord::Migration[8.1]
 
     add_column(:admin_config, :site_icon_size, :jsonb, null: false, default: { min: 512, max: 10_000 })
     add_column(:admin_config, :max_site_asset_file_sizes, :jsonb, null: false, default: { png: 10_240, jpg: 10_240, webp: 10_240 })
-    AdminConfig.delete_cache
   end
 end

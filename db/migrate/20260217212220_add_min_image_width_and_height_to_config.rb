@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class AddMinImageWidthAndHeightToConfig < ActiveRecord::Migration[7.1]
-  with_config_override!
+  before { config_override! }
+  after { Config.delete_cache }
 
   DEFAULT_IMAGE_MAX = 40_000
   DEFAULT_IMAGE_MIN = 300
@@ -40,7 +41,6 @@ class AddMinImageWidthAndHeightToConfig < ActiveRecord::Migration[7.1]
         max: max_height,
       }.to_json,])
     end
-    Config.delete_cache
   end
 
   def up_mascot
@@ -70,7 +70,6 @@ class AddMinImageWidthAndHeightToConfig < ActiveRecord::Migration[7.1]
         max: max_height,
       }.to_json,])
     end
-    Config.delete_cache
   end
 
   def down
@@ -93,7 +92,6 @@ class AddMinImageWidthAndHeightToConfig < ActiveRecord::Migration[7.1]
     if max_height != default_height
       Config.where(id: Config.config_id).update_all(["max_image_height = ?", max_height])
     end
-    Config.delete_cache
   end
 
   def down_mascot
@@ -111,6 +109,5 @@ class AddMinImageWidthAndHeightToConfig < ActiveRecord::Migration[7.1]
     if max_height != default_height
       Config.where(id: Config.config_id).update_all(["max_mascot_height = ?", max_height])
     end
-    Config.delete_cache
   end
 end

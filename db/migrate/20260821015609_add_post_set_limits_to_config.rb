@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class AddPostSetLimitsToConfig < ActiveRecord::Migration[8.1]
-  with_config_override!
+  before { config_override! }
+  after { Config.delete_cache }
 
   def change
     add_column(:config, :post_set_create_limit, :integer, null: false, default: 6)
@@ -12,7 +13,5 @@ class AddPostSetLimitsToConfig < ActiveRecord::Migration[8.1]
       User::Levels::TRUSTED  => 150,
       User::Levels::ADMIN    => -1,
     })
-
-    Config.delete_cache
   end
 end

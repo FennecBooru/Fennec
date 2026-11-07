@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class RenameDefaultAppNameToFennec < ActiveRecord::Migration[8.1]
+  before { admin_config_override! }
+  after { AdminConfig.delete_cache }
+
   def change
     change_column_default(:admin_config, :app_name, from: "GayFur City", to: "Fennec")
     change_column_default(:admin_config, :canonical_app_name, from: "GayFur City", to: "Fennec")

@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class CreateConfig < ActiveRecord::Migration[7.1]
-  with_config_override!
+  before { config_override! }
+  after { Config.delete_cache }
 
   def change
     create_table(:config, id: false) do |t|
@@ -155,6 +156,5 @@ class CreateConfig < ActiveRecord::Migration[7.1]
       t.column(:post_sample_size, :integer, default: 300, null: false)
       t.column(:updated_at, :datetime)
     end
-    Config.delete_cache
   end
 end

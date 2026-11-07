@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class CreateUploaderSections < ActiveRecord::Migration[8.1]
-  with_admin_config_override!
+  before { admin_config_override! }
+  after { AdminConfig.delete_cache }
 
   # admin config column => uploader section key
   PLACEHOLDER_MAP = {
@@ -67,7 +68,6 @@ class CreateUploaderSections < ActiveRecord::Migration[8.1]
         say_with_time("Restoring AdminConfig placeholders from uploader sections") do
           AdminConfig.reset_column_information
           PLACEHOLDER_MAP.each { |column, key| restore_placeholder(column, key) }
-          AdminConfig.delete_cache
           PLACEHOLDER_MAP.size
         end
       end
@@ -79,7 +79,6 @@ class CreateUploaderSections < ActiveRecord::Migration[8.1]
     remove_column(:admin_config, :content_tag_placeholder, :string, null: false, default: "cub scatplay watersports diaper my_little_pony vore rape hyper etc.")
     remove_column(:admin_config, :tag_genders_howto_wiki_page, :string, null: false, default: "howto:tag_genders")
     remove_column(:admin_config, :tag_what_you_see_wiki_page, :string, null: false, default: "tag_what_you_see")
-    up_only { AdminConfig.delete_cache }
   end
 
   def backfill_placeholder(column, key)
