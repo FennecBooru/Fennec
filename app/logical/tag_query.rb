@@ -2,6 +2,7 @@
 
 class TagQuery
   class CountExceededError < StandardError; end
+  class TermNotAllowedError < StandardError; end
 
   # (a b c) / -(a b c) / ~(a b c): a parenthesized tag group, recursively parsed as its own
   # TagQuery and combined into the outer search as a single unit (respectively: all of its
@@ -122,6 +123,15 @@ class TagQuery
       hard_limit = AdminConfig.instance.anonymous_hard_tag_limit
       if query.to_s.split.size > hard_limit
         raise(CountExceededError, "Your query exceeds the limit.")
+      end
+
+      terms = AdminConfig.instance.anonymous_restricted_search_terms.split
+      if terms.any?
+        regex = /\A[-~]?(#{terms.map { |term| Regexp.escape(term) }.join('|')}):/i
+        included = query.to_s.split.grep(regex)
+        if included.any?
+          raise(TermNotAllowedError, "you cannot use the #{'term'.pluralize(included.size)}: #{included.join(', ')}")
+        end
       end
     end
 

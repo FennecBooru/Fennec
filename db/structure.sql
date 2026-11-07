@@ -287,7 +287,8 @@ CREATE TABLE public.admin_config (
     enable_pool_artists boolean DEFAULT true NOT NULL,
     enable_uploader_verification boolean DEFAULT true NOT NULL,
     exception_log_retention integer DEFAULT 0 NOT NULL,
-    enable_ratings boolean DEFAULT true NOT NULL
+    enable_ratings boolean DEFAULT true NOT NULL,
+    anonymous_restricted_search_terms character varying DEFAULT ''::character varying NOT NULL
 );
 
 
@@ -10095,6 +10096,7 @@ ALTER TABLE ONLY public.help_pages
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261107183957'),
 ('20261027120000'),
 ('20261023120000'),
 ('20261020140000'),

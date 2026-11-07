@@ -122,7 +122,7 @@ class ApplicationController < ActionController::Base
       render_unsupported_format
     when Fennec::Paginator::PaginationError
       render_expected_error(410, exception.message)
-    when TagQuery::CountExceededError
+    when TagQuery::CountExceededError, TagQuery::TermNotAllowedError
       render_expected_error(422, exception.message)
     when FeatureUnavailable
       render_expected_error(501, "This feature isn't available")

@@ -211,6 +211,7 @@ class AdminConfig
       add_text_field(:download_preview_url, hint: "Shown in place of a thumbnail for a download-only file with no viewable preview")
       add_text_field(:missing_preview_url, hint: "Shown in place of a post replacement's thumbnail when it's a metadata-only backup with no real file (see PostReplacement#metadata_only?)")
       add_text_field(:placeholder_preview_url, hint: "Shown in place of a user avatar thumbnail while the real one hasn't loaded yet")
+      add_text_field(:anonymous_restricted_search_terms, hint: "Meta tags separated by spaces (aliases are not included)")
     end
 
     category("Timeouts") do

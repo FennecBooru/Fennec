@@ -45,7 +45,7 @@ class TagQueryTest < ActiveSupport::TestCase
 
   context("anonymous_hard_tag_limit") do
     should("reject an anonymous query over the limit before parsing it") do
-      AdminConfig.any_instance.stubs(:anonymous_hard_tag_limit).returns(2)
+      stub_admin_config(:anonymous_hard_tag_limit, 2)
       TagQuery.any_instance.expects(:parse_query).never
 
       assert_raise(TagQuery::CountExceededError) do
@@ -54,7 +54,7 @@ class TagQueryTest < ActiveSupport::TestCase
     end
 
     should("not affect logged-in users") do
-      AdminConfig.any_instance.stubs(:anonymous_hard_tag_limit).returns(2)
+      stub_admin_config(:anonymous_hard_tag_limit, 2)
 
       assert_nothing_raised do
         TagQuery.new("a b c", @user)
@@ -62,10 +62,70 @@ class TagQueryTest < ActiveSupport::TestCase
     end
 
     should("not reject an anonymous query at or under the limit") do
-      AdminConfig.any_instance.stubs(:anonymous_hard_tag_limit).returns(2)
+      stub_admin_config(:anonymous_hard_tag_limit, 2)
 
       assert_nothing_raised do
         TagQuery.new("a b", User.anonymous)
+      end
+    end
+  end
+
+  context("anonymous_restricted_search_terms") do
+    setup do
+      stub_admin_config(:anonymous_restricted_search_terms, "user fav")
+    end
+
+    should("reject an anonymous query using a restricted term") do
+      error = assert_raise(TagQuery::TermNotAllowedError) do
+        TagQuery.new("a user:bob", User.anonymous)
+      end
+      assert_equal("you cannot use the term: user:bob", error.message)
+    end
+
+    should("list every restricted term used") do
+      error = assert_raise(TagQuery::TermNotAllowedError) do
+        TagQuery.new("user:bob a fav:alice", User.anonymous)
+      end
+      assert_equal("you cannot use the terms: user:bob, fav:alice", error.message)
+    end
+
+    should("reject negated and optional restricted terms") do
+      assert_raise(TagQuery::TermNotAllowedError) { TagQuery.new("-user:bob", User.anonymous) }
+      assert_raise(TagQuery::TermNotAllowedError) { TagQuery.new("~user:bob", User.anonymous) }
+    end
+
+    should("reject restricted terms regardless of case") do
+      assert_raise(TagQuery::TermNotAllowedError) { TagQuery.new("USER:bob", User.anonymous) }
+    end
+
+    should("reject restricted terms inside a group") do
+      assert_raise(TagQuery::TermNotAllowedError) { TagQuery.new("a ( b user:bob )", User.anonymous) }
+    end
+
+    should("allow terms that aren't restricted") do
+      assert_nothing_raised do
+        TagQuery.new("a id:1 username:bob user", User.anonymous)
+      end
+    end
+
+    should("treat restricted terms literally") do
+      stub_admin_config(:anonymous_restricted_search_terms, "u.er")
+
+      assert_nothing_raised { TagQuery.new("user:bob", User.anonymous) }
+      assert_raise(TagQuery::TermNotAllowedError) { TagQuery.new("u.er:bob", User.anonymous) }
+    end
+
+    should("not affect logged-in users") do
+      assert_nothing_raised do
+        TagQuery.new("user:bob fav:alice", @user)
+      end
+    end
+
+    should("allow everything when blank") do
+      stub_admin_config(:anonymous_restricted_search_terms, "")
+
+      assert_nothing_raised do
+        TagQuery.new("user:bob fav:alice", User.anonymous)
       end
     end
   end
