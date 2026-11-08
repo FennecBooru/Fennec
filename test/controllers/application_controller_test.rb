@@ -44,8 +44,9 @@ class ApplicationControllerTest < ActionDispatch::IntegrationTest
 
     should("not let query params change the host of the latest link") do
       user = create(:moderator_user)
-      create(:post_flag, post: create(:post), creator: user)
-      get_auth(post_events_path, user, params: { host: "evil.example", protocol: "javascript", port: 1234, search: { post_id: 1 } })
+      post = create(:post)
+      create(:post_flag, post: post, creator: user)
+      get_auth(post_events_path, user, params: { host: "evil.example", protocol: "javascript", port: 1234, search: { post_id: post.id } })
 
       assert_response(:ok)
       assert_select("#subnav-latest-link") do |links|
@@ -56,7 +57,7 @@ class ApplicationControllerTest < ActionDispatch::IntegrationTest
 
         assert_equal("evil.example", query["host"])
         assert_equal("javascript", query["protocol"])
-        assert_equal("1", query.dig("search", "post_id"))
+        assert_equal(post.id.to_s, query.dig("search", "post_id"))
         assert_match(/\Ab\d+\z/, query["page"])
       end
     end

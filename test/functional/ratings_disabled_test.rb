@@ -11,14 +11,15 @@ class RatingsDisabledTest < ActionDispatch::IntegrationTest
     end
 
     should("save uploads as questionable") do
-      upload = CurrentUser.scoped(@user) { create(:jpg_upload, uploader: @user, tag_string: "aaa rating:e", rating: "s") }
+      upload = create(:jpg_upload, uploader: @user, tag_string: "aaa rating:e", rating: "s")
 
       assert_equal("q", upload.post.rating)
     end
 
     should("ignore rating changes") do
       put_auth(post_path(@post), @user, params: { post: { rating: "e", old_rating: "s" } })
-      CurrentUser.scoped(@user) { @post.update(tag_string: "#{@post.tag_string} rating:e locked:rating") }
+      @post.updater = @user
+      @post.update(tag_string: "#{@post.tag_string} rating:e locked:rating")
 
       @post.reload
 
@@ -43,7 +44,7 @@ class RatingsDisabledTest < ActionDispatch::IntegrationTest
     end
 
     should("leave the rating sections out of the uploader") do
-      kinds = CurrentUser.scoped(@user) { UploadSettings.new(@user).layout.pluck(:kind) }
+      kinds = UploadSettings.new(@user).layout.pluck(:kind)
 
       assert_not_includes(kinds, "rating")
       assert_not_includes(kinds, "lock_rating")

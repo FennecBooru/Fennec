@@ -1209,7 +1209,7 @@ class User < ApplicationRecord
         removed = []
         UserAdminEdit::PREFERENCES.select { |p| p.description.present? }.each do |pref|
           next unless send("saved_change_to_#{pref.flag}?")
-          if send(key)
+          if send(pref.flag)
             added << pref.description
           else
             removed << pref.description
