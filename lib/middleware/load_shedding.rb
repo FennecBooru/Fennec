@@ -18,7 +18,7 @@ module Middleware
       waited = queue_time_ms(env)
       return @app.call(env) if waited.nil?
 
-      priority = priority?(env)
+      priority = RequestIdentity.claims_user?(env)
       limit = priority ? @user_ms : @anonymous_ms
       return @app.call(env) if limit.to_i <= 0 || waited < limit
 
@@ -33,17 +33,6 @@ module Middleware
       started = value.to_f
       started /= 1000 while started > 100_000_000_000 # past year 5138 in seconds, so it's ms or µs
       [(Time.now.to_f - started) * 1000, 0].max
-    end
-
-    # Only checks what's cheap and can't be faked: the signed session and remember cookie. An api key can be faked,
-    # but a bad one is rejected before the request does any real work.
-    def priority?(env)
-      request = ActionDispatch::Request.new(env)
-      return true if request.authorization.present?
-      return true if request.GET["login"].present? && request.GET["api_key"].present?
-      request.session[:user_id].present? || request.cookie_jar.encrypted[:remember].present?
-    rescue StandardError
-      false
     end
 
     def overloaded(env)

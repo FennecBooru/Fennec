@@ -118,21 +118,23 @@ class TagQuery
   delegate(:[], :include?, to: :@q)
   attr_reader(:q, :user, :resolve_aliases, :tag_count)
 
+  # The limits on anonymous searches, returns the error to raise or nil. Middleware::AnonymousSearchLimits also checks
+  # these before the request reaches the app, so they're rejected without loading anything
+  def self.anonymous_violation(query)
+    tags = query.to_s.split
+    return CountExceededError.new("Your query exceeds the limit.") if tags.size > AdminConfig.instance.anonymous_hard_tag_limit
+
+    terms = AdminConfig.instance.anonymous_restricted_search_terms.split
+    return nil if terms.empty?
+    regex = /\A[-~]?(#{terms.map { |term| Regexp.escape(term) }.join('|')}):/i
+    included = tags.grep(regex)
+    TermNotAllowedError.new("you cannot use the #{'term'.pluralize(included.size)}: #{included.join(', ')}") if included.any?
+  end
+
   def initialize(query, user, resolve_aliases: true, free_tags_count: 0, depth: 0)
     if user.is_anonymous?
-      hard_limit = AdminConfig.instance.anonymous_hard_tag_limit
-      if query.to_s.split.size > hard_limit
-        raise(CountExceededError, "Your query exceeds the limit.")
-      end
-
-      terms = AdminConfig.instance.anonymous_restricted_search_terms.split
-      if terms.any?
-        regex = /\A[-~]?(#{terms.map { |term| Regexp.escape(term) }.join('|')}):/i
-        included = query.to_s.split.grep(regex)
-        if included.any?
-          raise(TermNotAllowedError, "you cannot use the #{'term'.pluralize(included.size)}: #{included.join(', ')}")
-        end
-      end
+      error = self.class.anonymous_violation(query)
+      raise(error) if error
     end
 
     if depth > GROUP_DEPTH_LIMIT

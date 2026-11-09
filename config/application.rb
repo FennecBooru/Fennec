@@ -94,5 +94,6 @@ module Fennec
     config.middleware.insert_before(Rails::Rack::Logger, Middleware::StdoutRequestLog) if Rails.env.production?
     # after the session, which it reads to let logged in users through first
     config.middleware.insert_after(ActionDispatch::Session::CookieStore, Middleware::LoadShedding)
+    config.middleware.insert_after(Middleware::LoadShedding, Middleware::AnonymousSearchLimits)
   end
 end
