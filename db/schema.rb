@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_07_183957) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_09_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -20,6 +20,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_183957) do
     t.integer "alias_and_implication_forum_category", default: 1, null: false
     t.integer "alias_category_change_cutoff", default: 10000, null: false
     t.integer "anonymous_hard_tag_limit", default: 40, null: false
+    t.integer "anonymous_negated_tag_limit", default: -1, null: false
     t.string "anonymous_restricted_search_terms", default: "", null: false
     t.string "anonymous_user_name", default: "Anonymous", null: false
     t.string "app_description", default: "Furry image booru.", null: false

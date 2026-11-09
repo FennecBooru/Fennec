@@ -124,6 +124,11 @@ class TagQuery
     tags = query.to_s.split
     return CountExceededError.new("Your query exceeds the limit.") if tags.size > AdminConfig.instance.anonymous_hard_tag_limit
 
+    negated_limit = AdminConfig.instance.anonymous_negated_tag_limit
+    if negated_limit >= 0 && tags.count { |tag| tag.match?(/\A-./) } > negated_limit
+      return CountExceededError.new("You can only exclude #{negated_limit} #{'tag'.pluralize(negated_limit)}.")
+    end
+
     terms = AdminConfig.instance.anonymous_restricted_search_terms.split
     return nil if terms.empty?
     regex = /\A[-~]?(#{terms.map { |term| Regexp.escape(term) }.join('|')}):/i

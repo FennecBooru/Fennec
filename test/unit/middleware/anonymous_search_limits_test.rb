@@ -41,9 +41,24 @@ module Middleware
       assert_equal(200, @middleware.call(env("/posts.json?tags=fav%3Abob", "HTTP_AUTHORIZATION" => "Basic abc")).first)
     end
 
+    should("check the search on post pages") do
+      assert_equal(422, @middleware.call(env("/posts/1?q=a+b+c")).first)
+      assert_equal(422, @middleware.call(env("/posts/1/show_seq?q=fav%3Abob&seq=next")).first)
+      assert_equal(422, @middleware.call(env("/posts/1/show_seq?tags=a+b+c&seq=next")).first)
+      assert_equal(200, @middleware.call(env("/posts/1?q=a+b")).first)
+    end
+
     should("only check post searches") do
       assert_equal(200, @middleware.call(env("/posts/1?tags=a+b+c")).first)
+      assert_equal(200, @middleware.call(env("/posts/1/comments?q=a+b+c")).first)
       assert_equal(200, @middleware.call(env("/posts?tags=a+b+c", method: "POST")).first)
+    end
+
+    should("reject anonymous searches excluding too many tags") do
+      stub_admin_config(:anonymous_negated_tag_limit, 1)
+
+      assert_equal(422, @middleware.call(env("/posts?tags=-a+-b")).first)
+      assert_equal(200, @middleware.call(env("/posts?tags=a+-b")).first)
     end
 
     should("escape the message") do

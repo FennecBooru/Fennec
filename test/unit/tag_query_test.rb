@@ -70,6 +70,30 @@ class TagQueryTest < ActiveSupport::TestCase
     end
   end
 
+  context("anonymous_negated_tag_limit") do
+    should("reject an anonymous query excluding too many tags") do
+      stub_admin_config(:anonymous_negated_tag_limit, 1)
+
+      error = assert_raise(TagQuery::CountExceededError) do
+        TagQuery.new("a -b -c", User.anonymous)
+      end
+      assert_equal("You can only exclude 1 tag.", error.message)
+    end
+
+    should("allow queries at the limit, and logged in users") do
+      stub_admin_config(:anonymous_negated_tag_limit, 1)
+
+      assert_nothing_raised do
+        TagQuery.new("a -b", User.anonymous)
+        TagQuery.new("a -b -c", @user)
+      end
+    end
+
+    should("be unlimited by default") do
+      assert_nothing_raised { TagQuery.new("-a -b -c -d -e", User.anonymous) }
+    end
+  end
+
   context("anonymous_restricted_search_terms") do
     setup do
       stub_admin_config(:anonymous_restricted_search_terms, "user fav")

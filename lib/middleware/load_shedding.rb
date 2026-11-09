@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative("plain_page")
+
 module Middleware
   # Turns away requests that waited too long for a worker, so an overloaded app answers quickly instead of working
   # through a backlog of requests whose clients have already given up. Anonymous requests are turned away first,
@@ -44,15 +46,6 @@ module Middleware
       end
     end
 
-    PAGE = <<~HTML
-      <!doctype html>
-      <html lang="en">
-      <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Overloaded</title></head>
-      <body style="font-family: sans-serif; max-width: 40em; margin: 4em auto; padding: 0 1em">
-      <h1>The site is overloaded</h1>
-      <p>We're getting more requests than we can handle right now. Try again in a moment, logged in users are let through first.</p>
-      </body>
-      </html>
-    HTML
+    PAGE = PlainPage.render("The site is overloaded", "<p>We're getting more requests than we can handle right now. Try again in a moment, logged in users are let through first.</p>")
   end
 end
