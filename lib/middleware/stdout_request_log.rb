@@ -8,6 +8,7 @@ module Middleware
     MAX_QUERY_LENGTH = 500
     # [up to this many ms, ansi color]
     COLORS = [
+      [25, "34"], # blue
       [200, "32"], # green
       [1000, "33"], # yellow
       [5000, "31"], # red

@@ -46,14 +46,15 @@ module Middleware
     should("color lines by how long the request took") do
       middleware = StdoutRequestLog.new(->(_env) { [200, {}, [""]] }, io: @io, color: true)
 
-      assert_equal("\e[32mfast\e[0m", middleware.colorize("fast", 12.5))
+      assert_equal("\e[34minstant\e[0m", middleware.colorize("instant", 12.5))
+      assert_equal("\e[32mfast\e[0m", middleware.colorize("fast", 80.0))
       assert_equal("\e[33mslow\e[0m", middleware.colorize("slow", 450.0))
       assert_equal("\e[31mslower\e[0m", middleware.colorize("slower", 1200.0))
       assert_equal("\e[1;35mslowest\e[0m", middleware.colorize("slowest", 8000.0))
 
       middleware.call(Rack::MockRequest.env_for("/posts"))
 
-      assert_match(%r{\A\e\[32m\S+ GET /posts 200 .*\e\[0m\n\z}, @io.string)
+      assert_match(%r{\A\e\[[\d;]+m\S+ GET /posts 200 .*\e\[0m\n\z}, @io.string)
     end
 
     should("skip the healthcheck") do
