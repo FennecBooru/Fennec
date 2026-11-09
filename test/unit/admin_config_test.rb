@@ -81,4 +81,28 @@ class AdminConfigTest < ActiveSupport::TestCase
       assert_equal(5, AdminConfig.instance.test_column)
     end
   end
+
+  context("AdminConfig.instance during a request") do
+    setup { RequestStore.begin! }
+
+    teardown do
+      RequestStore.end!
+      RequestStore.clear!
+    end
+
+    should("only read the cache once") do
+      AdminConfig.instance
+      Cache.expects(:fetch).never
+
+      3.times { AdminConfig.instance }
+    end
+
+    should("see an update made during the request") do
+      enabled = AdminConfig.instance.enable_wiki
+      AdminConfig.uncached.update_columns(enable_wiki: !enabled)
+      AdminConfig.delete_cache
+
+      assert_equal(!enabled, AdminConfig.instance.enable_wiki)
+    end
+  end
 end
