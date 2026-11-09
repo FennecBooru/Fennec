@@ -55,6 +55,10 @@ Yabeda.configure do
     histogram(:runtime, comment: "How long background jobs take to execute", tags: %i[job_class], unit: :seconds, buckets: Prometheus::Client::Histogram::DEFAULT_BUCKETS)
   end
 
+  group(:requests) do
+    counter(:shed, comment: "Requests turned away because they waited too long for a worker", tags: %i[priority])
+  end
+
   group(:site) do
     gauge(:total_posts, comment: "The total number of posts")
     gauge(:total_active_posts, comment: "The total number of non-deleted posts")

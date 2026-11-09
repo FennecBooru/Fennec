@@ -89,6 +89,10 @@ module Fennec
     end
 
     config(:memcached_servers, :array) { [] }
+    # Requests that waited longer than this many ms for a worker get a 503 instead, see Middleware::LoadShedding.
+    # Needs nginx to send X-Request-Start, 0 turns it off
+    config(:load_shedding_anonymous_ms, :integer) { 2000 }
+    config(:load_shedding_user_ms, :integer) { 10_000 }
     config(:recommender_server) { nil }
     config(:eris_server) { nil }
     # Bearer token for eris, must match its ERIS_TOKEN
