@@ -9,7 +9,7 @@ module Middleware
     end
 
     should("log one line per request") do
-      middleware = StdoutRequestLog.new(->(_env) { [201, {}, [""]] }, io: @io)
+      middleware = StdoutRequestLog.new(->(_env) { [201, {}, [""]] }, io: @io, color: false)
 
       middleware.call(Rack::MockRequest.env_for("/posts", :method => "POST", "REMOTE_ADDR" => "1.2.3.4"))
 
@@ -20,7 +20,7 @@ module Middleware
     end
 
     should("log the query string with sensitive values filtered") do
-      middleware = StdoutRequestLog.new(->(_env) { [200, {}, [""]] }, io: @io)
+      middleware = StdoutRequestLog.new(->(_env) { [200, {}, [""]] }, io: @io, color: false)
 
       middleware.call(Rack::MockRequest.env_for("/posts.json?tags=fox+rating%3As&login=bob&api_key=secret&page=2"))
 
@@ -29,7 +29,7 @@ module Middleware
     end
 
     should("truncate long query strings") do
-      middleware = StdoutRequestLog.new(->(_env) { [200, {}, [""]] }, io: @io)
+      middleware = StdoutRequestLog.new(->(_env) { [200, {}, [""]] }, io: @io, color: false)
 
       middleware.call(Rack::MockRequest.env_for("/posts?tags=#{'a' * 2000}"))
 
@@ -37,14 +37,27 @@ module Middleware
     end
 
     should("log a 500 when the app raises") do
-      middleware = StdoutRequestLog.new(->(_env) { raise("boom") }, io: @io)
+      middleware = StdoutRequestLog.new(->(_env) { raise("boom") }, io: @io, color: false)
 
       assert_raises(RuntimeError) { middleware.call(Rack::MockRequest.env_for("/test")) }
       assert_match(%r{ GET /test 500 }, @io.string)
     end
 
+    should("color lines by how long the request took") do
+      middleware = StdoutRequestLog.new(->(_env) { [200, {}, [""]] }, io: @io, color: true)
+
+      assert_equal("\e[32mfast\e[0m", middleware.colorize("fast", 12.5))
+      assert_equal("\e[33mslow\e[0m", middleware.colorize("slow", 450.0))
+      assert_equal("\e[31mslower\e[0m", middleware.colorize("slower", 1200.0))
+      assert_equal("\e[1;35mslowest\e[0m", middleware.colorize("slowest", 8000.0))
+
+      middleware.call(Rack::MockRequest.env_for("/posts"))
+
+      assert_match(%r{\A\e\[32m\S+ GET /posts 200 .*\e\[0m\n\z}, @io.string)
+    end
+
     should("skip the healthcheck") do
-      middleware = StdoutRequestLog.new(->(_env) { [200, {}, [""]] }, io: @io)
+      middleware = StdoutRequestLog.new(->(_env) { [200, {}, [""]] }, io: @io, color: false)
 
       middleware.call(Rack::MockRequest.env_for("/up"))
 
