@@ -32,6 +32,16 @@ module Middleware
       assert_includes(body.join, "overloaded")
     end
 
+    should("log the dropped request with how long it waited") do
+      io = StringIO.new
+      middleware = LoadShedding.new(->(_env) { [200, {}, ["ok"]] }, anonymous_ms: 1000, user_ms: 5000, io: io)
+      request = env(:waited => 2, "REMOTE_ADDR" => "1.2.3.4")
+      request["action_dispatch.request_id"] = "abc123"
+      middleware.call(request)
+
+      assert_match(/\A\[abc123\]\[1\.2\.3\.4\]\[waited \d+\.\dms\] DROPPED anonymous\n\z/, io.string)
+    end
+
     should("answer json requests with json") do
       status, _headers, body = @middleware.call(env("/posts.json", waited: 2))
 

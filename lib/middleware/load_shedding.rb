@@ -9,10 +9,12 @@ module Middleware
   #
   # The wait is measured from the X-Request-Start header, which nginx sets. Requests without it are never turned away.
   class LoadShedding
-    def initialize(app, anonymous_ms: Fennec.config.load_shedding_anonymous_ms, user_ms: Fennec.config.load_shedding_user_ms)
+    # io gets a line per dropped request, only in production like Middleware::StdoutRequestLog
+    def initialize(app, anonymous_ms: Fennec.config.load_shedding_anonymous_ms, user_ms: Fennec.config.load_shedding_user_ms, io: Rails.env.production? ? $stdout : nil)
       @app = app
       @anonymous_ms = anonymous_ms
       @user_ms = user_ms
+      @io = io
     end
 
     def call(env)
@@ -24,7 +26,9 @@ module Middleware
       limit = priority ? @user_ms : @anonymous_ms
       return @app.call(env) if limit.to_i <= 0 || waited < limit
 
-      Yabeda.requests.shed.increment({ priority: priority ? "user" : "anonymous" }) if Metrics.enabled?
+      kind = priority ? "user" : "anonymous"
+      Yabeda.requests.shed.increment({ priority: kind }) if Metrics.enabled?
+      @io&.syswrite("#{StdoutRequestLog.prefix(env, "waited #{waited.round(1)}ms")} DROPPED #{kind}\n")
       overloaded(env)
     end
 
