@@ -105,5 +105,34 @@ class GitHelperTest < ActiveSupport::TestCase
       assert_equal("https://github.com/FennecBooru/Fennec/commit/#{commit}", helper.public_commit_url)
       assert_equal(commit[0..7], helper.public_ref.short_commit)
     end
+
+    should("not ask github when the deployed code is the public repo") do
+      helper = GitHelper.send(:allocate)
+      commit = "9fd76b75cd45f478aae0edf98e69ac2c894ebad0"
+      helper.instance_variable_set(:@origin, GitHelper::RevisionRef.new(commit, "https://github.com/FennecBooru/Fennec"))
+      helper.instance_variable_set(:@upstream, GitHelper::RevisionRef.new(nil, "https://github.com/FennecBooru/Fennec", branch: "master"))
+
+      assert_equal("https://github.com/FennecBooru/Fennec/commit/#{commit}", helper.public_commit_url)
+      assert_not_requested(:get, /api\.github\.com/)
+    end
+
+    should("only ask github once for an internal repo") do
+      Rails.stubs(:cache).returns(ActiveSupport::Cache::MemoryStore.new)
+      commit = "9fd76b75cd45f478aae0edf98e69ac2c894ebad0"
+      origin = GitHelper::RevisionRef.new(commit, "https://github.com/FennecBooru/Internal")
+      upstream = GitHelper::RevisionRef.new(nil, "https://github.com/FennecBooru/Fennec", branch: "master")
+      request = stub_request(:get, "https://api.github.com/repos/FennecBooru/Internal/compare/#{commit}...master")
+                .to_return(body: { behind_by: 0, ahead_by: 0, merge_base_commit: { sha: commit } }.to_json)
+
+      2.times do
+        # a fresh helper per worker, they share the cache
+        helper = GitHelper.send(:allocate)
+        helper.instance_variable_set(:@origin, origin)
+        helper.instance_variable_set(:@upstream, upstream)
+        3.times { helper.public_commit_url }
+      end
+
+      assert_requested(request, times: 1)
+    end
   end
 end

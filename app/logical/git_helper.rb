@@ -271,8 +271,9 @@ class GitHelper
 
     private
 
+    # every page's footer links the common commit, so this is shared between workers instead of asking github each time
     def data
-      @data ||= fetch
+      @data ||= Cache.fetch("git_remote_comparison:#{@a.commit}:#{@b.branch || @b.commit}:#{@a.url || @b.url}", expires_in: 1.hour) { fetch }
     end
 
     def fetch
@@ -318,8 +319,19 @@ class GitHelper
     origin
   end
 
+  # Where the deployed code meets the public repo. Only an internal repo that's separate from the public one needs a
+  # comparison, otherwise the deployed commit is already public
   def common_commit
-    upstream.present? ? origin.compare(upstream).common : origin.commit
+    internal_repo? ? public_comparison.common : origin.commit
+  end
+
+  def internal_repo?
+    upstream.present? && origin.url.present? && origin.url != upstream.url
+  end
+
+  # kept so the comparison isn't redone on every page
+  def public_comparison
+    @public_comparison ||= origin.compare(upstream)
   end
 
   def commit_url(commit)
