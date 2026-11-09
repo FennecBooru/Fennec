@@ -48,6 +48,7 @@ export { default as CurrentUser } from "../src/javascripts/models/CurrentUser.js
 export { default as DeferredPosts } from "../src/javascripts/utility/deferred_posts.js";
 export { default as DText } from "../src/javascripts/dtext.js";
 export { default as MFA } from "../src/javascripts/mfa.js";
+export { default as MissingThumbnails } from "../src/javascripts/missing_thumbnails.js";
 export { default as Note } from "../src/javascripts/notes.js";
 export { default as Notification } from "../src/javascripts/notifications.js";
 export { default as Page } from "../src/javascripts/utility/page.js";
