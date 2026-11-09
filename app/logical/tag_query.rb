@@ -118,10 +118,14 @@ class TagQuery
   delegate(:[], :include?, to: :@q)
   attr_reader(:q, :user, :resolve_aliases, :tag_count)
 
+  # Searches get these added by the app (PostSets::Post, PostSearchContext, Post.tag_match), so they don't count towards
+  # the anonymous limits
+  APP_ADDED_TERMS = %w[-status:deleted rating:s].freeze
+
   # The limits on anonymous searches, returns the error to raise or nil. Middleware::AnonymousSearchLimits also checks
   # these before the request reaches the app, so they're rejected without loading anything
   def self.anonymous_violation(query)
-    tags = query.to_s.split
+    tags = query.to_s.split - APP_ADDED_TERMS
     return CountExceededError.new("Your query exceeds the limit.") if tags.size > AdminConfig.instance.anonymous_hard_tag_limit
 
     negated_limit = AdminConfig.instance.anonymous_negated_tag_limit

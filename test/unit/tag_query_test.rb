@@ -89,6 +89,13 @@ class TagQueryTest < ActiveSupport::TestCase
       end
     end
 
+    should("not count the terms the app adds") do
+      stub_admin_config(:anonymous_negated_tag_limit, 1)
+      stub_admin_config(:anonymous_hard_tag_limit, 2)
+
+      assert_nothing_raised { TagQuery.new("a -b -status:deleted rating:s", User.anonymous) }
+    end
+
     should("be unlimited by default") do
       assert_nothing_raised { TagQuery.new("-a -b -c -d -e", User.anonymous) }
     end

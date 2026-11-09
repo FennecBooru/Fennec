@@ -18,6 +18,13 @@ class AnonymousSearchLimitsIntegrationTest < ActionDispatch::IntegrationTest
       assert_includes(response.body, "Your query exceeds the limit")
     end
 
+    should("allow anonymous searches at the limits, despite the terms the app adds") do
+      stub_admin_config(:anonymous_negated_tag_limit, 1)
+      get(posts_path, params: { tags: "a -b" })
+
+      assert_response(:success)
+    end
+
     should("work for logged in users") do
       get_auth(posts_path, @user, params: { tags: "a b c" })
 
