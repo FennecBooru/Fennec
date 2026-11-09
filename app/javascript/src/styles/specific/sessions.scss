@@ -65,62 +65,10 @@ div#c-sessions {
         }
       }
 
-      .recaptcha-mock {
-        box-sizing: border-box;
+      .cf-turnstile {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: .75rem;
-        width: 100%;
-        max-width: 304px;
-        height: 78px;
-        margin: 0 auto .75rem;
-        padding: 0 1rem;
-        background-color: #222222;
-        border: 1px solid #333333;
-        border-radius: $border-radius-half;
-
-        .recaptcha-mock-checkbox {
-          display: flex;
-          align-items: center;
-          gap: .5rem;
-          font-size: $font-size;
-          color: #ffffff;
-
-          .checkbox {
-            display: block;
-            width: 28px;
-            height: 28px;
-            background-color: #ffffff;
-            border: 2px solid #c1c1c1;
-            border-radius: 2px;
-          }
-        }
-
-        .recaptcha-mock-badge {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          flex-shrink: 0;
-
-          .recaptcha-mock-logo {
-            width: 32px;
-            height: 32px;
-            background-color: #4285f4;
-            border-radius: 50%;
-          }
-
-          .recaptcha-mock-links {
-            font-size: 60%;
-            color: #9aa0a6;
-            text-align: center;
-            line-height: 1.3em;
-
-            a {
-              color: #9aa0a6;
-            }
-          }
-        }
+        justify-content: center;
+        margin-bottom: .75rem;
       }
     }
 

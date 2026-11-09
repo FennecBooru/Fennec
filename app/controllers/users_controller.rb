@@ -60,7 +60,7 @@ class UsersController < ApplicationController
       @user = User.new(permitted_attributes(User).merge({ last_ip_addr: request.remote_ip }))
       @user.validate_email_format = true
       @user.email_verified = false if Fennec.config.enable_email? && AdminConfig.instance.enable_email_verification?
-      if !Fennec.config.recaptcha.enabled? || verify_recaptcha(model: @user)
+      if !Turnstile.enabled? || Turnstile.verify(params["cf-turnstile-response"], action: "signup", remote_ip: request.remote_ip)
         @user.save
         if @user.errors.empty?
           session[:user_id] = @user.id

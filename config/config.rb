@@ -245,8 +245,9 @@ module Fennec
       !post.is_deleted?
     end
 
-    subconfig(:recaptcha) do
-      config(:enabled, :boolean) { Rails.env.production? && present?(:recaptcha_site_key, :recaptcha_secret_key) }
+    # Cloudflare Turnstile on signup, see Turnstile
+    subconfig(:turnstile) do
+      config(:enabled, :boolean) { Rails.env.production? && present?(:turnstile_site_key, :turnstile_secret_key) }
       config(:site_key) { nil }
       config(:secret_key) { nil }
     end

@@ -85,7 +85,3 @@ $(function () {
   initMarkAllAsRead();
   initSearch();
 });
-
-window.submitInvisibleRecaptchaForm = function () {
-  document.getElementById("signup-form").submit();
-};

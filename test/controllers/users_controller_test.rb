@@ -3,6 +3,11 @@
 require("test_helper")
 
 class UsersControllerTest < ActionDispatch::IntegrationTest
+  def stub_siteverify(**result)
+    stub_request(:post, Turnstile::VERIFY_URL)
+      .to_return(body: { success: true, action: "signup", hostname: Turnstile.hostname }.merge(result).to_json)
+  end
+
   context("The users controller") do
     setup do
       @user = create(:user)
@@ -120,7 +125,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
     context("new action") do
       setup do
-        Fennec.config.stubs(:recaptcha_enabled).returns(false)
+        Fennec.config.stubs(:turnstile_enabled).returns(false)
       end
 
       should("redirect to the sign in page") do
@@ -154,6 +159,61 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
         assert_equal(AdminConfig.instance.records_per_page, created_user.per_page)
         assert_not_nil(created_user.last_ip_addr)
         assert_predicate(created_user.user_events.user_creation, :exists?)
+      end
+
+      context("with turnstile enabled") do
+        setup do
+          Fennec.config.stubs(:turnstile_enabled).returns(true)
+          Fennec.config.stubs(:turnstile_site_key).returns("test-sitekey")
+          Fennec.config.stubs(:turnstile_secret_key).returns("test-secret")
+          @params = { "user": { name: "turnstile_user", password: "xxxxx1", password_confirmation: "xxxxx1" }, "cf-turnstile-response": "token" }
+        end
+
+        should("create the user when the token is valid") do
+          request = stub_siteverify.with(body: hash_including("secret" => "test-secret", "response" => "token", "remoteip" => "127.0.0.1"))
+
+          assert_difference(-> { User.count }, 1) { post(users_path, params: @params) }
+          assert_requested(request)
+        end
+
+        should("not create the user when the token is rejected") do
+          stub_siteverify(success: false)
+
+          assert_no_difference(-> { User.count }) { post(users_path, params: @params) }
+        end
+
+        should("not accept a token for another form") do
+          stub_siteverify(action: "login")
+
+          assert_no_difference(-> { User.count }) { post(users_path, params: @params) }
+        end
+
+        should("not accept a token for another site") do
+          stub_siteverify(hostname: "other.example")
+
+          assert_no_difference(-> { User.count }) { post(users_path, params: @params) }
+        end
+
+        should("not create the user without a token") do
+          assert_no_difference(-> { User.count }) { post(users_path, params: @params.except(:"cf-turnstile-response")) }
+          assert_not_requested(:post, Turnstile::VERIFY_URL)
+        end
+
+        should("not create the user when cloudflare fails") do
+          stub_request(:post, Turnstile::VERIFY_URL).to_return(status: 500)
+
+          assert_no_difference(-> { User.count }) { post(users_path, params: @params) }
+
+          stub_request(:post, Turnstile::VERIFY_URL).to_timeout
+
+          assert_no_difference(-> { User.count }) { post(users_path, params: @params) }
+        end
+
+        should("show the widget on the signup forms") do
+          get(new_session_path)
+
+          assert_select(".cf-turnstile[data-sitekey='test-sitekey'][data-action='signup']")
+        end
       end
 
       context("with sockpuppet validation enabled") do

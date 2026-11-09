@@ -25,8 +25,8 @@
 
     <%= f.input(:time_zone, include_blank: false) %>
 
-    <% if Fennec.config.recaptcha.enabled? %>
-      <%= recaptcha_tags(theme: "dark", nonce: content_security_policy_nonce) %>
+    <% if Turnstile.enabled? %>
+      <%= turnstile_tags(action: "signup") %>
     <% end %>
     <%= f.submit("Sign up", data: { disable_with: "Signing up..." }) %>
   <% end %>

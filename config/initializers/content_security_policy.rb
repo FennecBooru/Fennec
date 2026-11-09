@@ -13,14 +13,14 @@ Rails.application.configure do
       policy.script_src(:self, :unsafe_inline, :unsafe_eval, "https:")
       policy.connect_src(:self, "https://plausible.furry.computer", "ws://localhost:#{ENV.fetch('EXPOSED_WEBPACKER_PORT', 4003)}")
     else
-      policy.script_src(:self, "https://www.google.com/recaptcha/", "https://www.gstatic.com/recaptcha/", "https://www.recaptcha.net/", "https://cdnjs.cloudflare.com", "https://plausible.furry.computer")
+      policy.script_src(:self, "https://challenges.cloudflare.com", "https://cdnjs.cloudflare.com", "https://plausible.furry.computer")
       policy.connect_src(:self, "https://plausible.furry.computer")
     end
     policy.style_src(:self, :unsafe_inline, "https://cdnjs.cloudflare.com")
     policy.object_src(:self, Fennec.config.cdn_domain)
     policy.media_src(:self, Fennec.config.cdn_domain)
     policy.frame_ancestors(:self)
-    policy.frame_src(:self, "https://www.google.com/recaptcha/", "https://www.recaptcha.net/")
+    policy.frame_src(:self, "https://challenges.cloudflare.com")
     policy.font_src(:self)
     policy.img_src(:self, :data, :blob, Fennec.config.cdn_domain)
     policy.child_src(:none)

@@ -74,19 +74,8 @@
       <%= f.input(:password_confirmation) %>
       <%= f.input(:time_zone, include_blank: false) %>
 
-      <% if Fennec.config.recaptcha.enabled? %>
-        <%= recaptcha_tags(theme: "dark", nonce: content_security_policy_nonce) %>
-      <% elsif !Rails.env.production? %>
-        <div class="recaptcha-mock">
-          <div class="recaptcha-mock-checkbox">
-            <span class="checkbox"></span>
-            <span>I'm not a robot</span>
-          </div>
-          <div class="recaptcha-mock-badge">
-            <div class="recaptcha-mock-logo"></div>
-            <div class="recaptcha-mock-links">reCAPTCHA<br><a href="#">Privacy</a> - <a href="#">Terms</a></div>
-          </div>
-        </div>
+      <% if Turnstile.enabled? %>
+        <%= turnstile_tags(action: "signup") %>
       <% end %>
       <%= f.submit("Sign up", data: { disable_with: "Signing up..." }) %>
     <% end %>
