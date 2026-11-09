@@ -100,7 +100,14 @@ class AdminConfig < ApplicationRecord
     get_user(option, user)
   end
 
+  # Kept for the rest of the request, it's read for every feature check and each read from the cache took ~0.4ms,
+  # which added up to seconds on pages like the post versions listing
   def self.instance
+    return cached unless RequestStore.active?
+    RequestStore.store[:admin_config] ||= cached
+  end
+
+  def self.cached
     Cache.fetch(cache_key) do
       uncached
     end
@@ -129,6 +136,7 @@ class AdminConfig < ApplicationRecord
   end
 
   def self.delete_cache
+    RequestStore.store.delete(:admin_config)
     Cache.delete(cache_key)
     Cache.delete("#{cache_key}:hash_columns")
   end
