@@ -31,5 +31,6 @@
 ### XXXs
 | Filename | line # | XXX |
 |:------|:------:|:------|
-| [app/models/post.rb](app/models/post.rb#L1870) | 1870 | This must happen *after* the `is_deleted` flag is set to true (issue #3419). |
+| [app/models/post.rb](app/models/post.rb#L1871) | 1871 | This must happen *after* the `is_deleted` flag is set to true (issue #3419). |
+| [app/models/tag.rb](app/models/tag.rb#L123) | 123 | Is multi_write worth it here? Normal usage of this will be short put lists and then never touched. |
 | [test/test_helpers/minitest.rb](test/test_helpers/minitest.rb#L3) | 3 | Testing modules should not have a say in if we can or cannot use assert_equal with nil |
