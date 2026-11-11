@@ -3170,8 +3170,9 @@ class PostTest < ActiveSupport::TestCase
       assert_equal([{ "tags" => %w[fluffy_(oc) domestic_cat felid] }], post.character_groups)
     end
 
-    should("drop artist, meta, and invalid category tags out of a group into the ungrouped tags") do
+    should("drop artist, copyright, meta, and invalid category tags out of a group into the ungrouped tags") do
       create(:tag, name: "some_artist", category_id: TagCategory.artist)
+      create(:tag, name: "some_copyright", category_id: TagCategory.copyright)
       create(:tag, name: "some_meta")
       create(:tag, name: "some_invalid")
       Tag.where(name: "some_meta").update_all(category_id: TagCategory.meta)
@@ -3179,12 +3180,27 @@ class PostTest < ActiveSupport::TestCase
       # update_all skips the callback that keeps the category cache current
       Tag.where(name: %w[some_meta some_invalid]).find_each(&:update_category_cache)
       post = create(:post, tag_string: "solo")
-      save_with_groups(post, [{ characters: ["fluffy_(oc)"], tags: %w[blue_eyes some_artist some_meta some_invalid] }], "solo")
+      save_with_groups(post, [{ characters: ["fluffy_(oc)"], tags: %w[blue_eyes some_artist some_copyright some_meta some_invalid] }], "solo")
 
       assert_equal([{ "tags" => %w[fluffy_(oc) blue_eyes] }], post.character_groups)
       assert_includes(post.ungrouped_tags, "some_artist")
+      assert_includes(post.ungrouped_tags, "some_copyright")
       assert_includes(post.ungrouped_tags, "some_meta")
       assert_includes(post.ungrouped_tags, "some_invalid")
+    end
+
+    should("prevent adding tags that have prevent_group_tagging=true") do
+      a = create(:tag, prevent_group_tagging: false).name
+      b = create(:tag, prevent_group_tagging: true).name
+      c = create(:tag, prevent_group_tagging: false).name
+
+      post = create(:post, tag_string: "tagme")
+      save_with_groups(post, [{ characters: [], tags: [a, b] }], c)
+
+      assert_equal([{ "tags" => [a] }], post.character_groups)
+      assert_not_includes(post.ungrouped_tags, a)
+      assert_includes(post.ungrouped_tags, b)
+      assert_includes(post.ungrouped_tags, c)
     end
 
     should("prune a tag from its group when it's force-removed by locked tags") do

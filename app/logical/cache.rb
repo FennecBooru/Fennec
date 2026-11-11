@@ -18,6 +18,10 @@ class Cache
     Rails.cache.write(key, value, expires_in: expires_in)
   end
 
+  def self.write_multi(*, **)
+    Rails.cache.write_multi(*, **)
+  end
+
   def self.delete(key)
     Rails.cache.delete(key)
   end

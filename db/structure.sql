@@ -3398,7 +3398,8 @@ CREATE TABLE public.tag_versions (
     updater_id bigint NOT NULL,
     reason character varying DEFAULT ''::character varying NOT NULL,
     is_deprecated boolean NOT NULL,
-    updater_ip_addr inet NOT NULL
+    updater_ip_addr inet NOT NULL,
+    prevent_group_tagging boolean NOT NULL
 );
 
 
@@ -3438,7 +3439,8 @@ CREATE TABLE public.tags (
     follower_count integer DEFAULT 0 NOT NULL,
     is_deprecated boolean DEFAULT false NOT NULL,
     creator_id bigint NOT NULL,
-    creator_ip_addr inet NOT NULL
+    creator_ip_addr inet NOT NULL,
+    prevent_group_tagging boolean DEFAULT false NOT NULL
 );
 
 
@@ -10097,6 +10099,7 @@ ALTER TABLE ONLY public.help_pages
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261111013555'),
 ('20261109140000'),
 ('20261107183957'),
 ('20261027120000'),
