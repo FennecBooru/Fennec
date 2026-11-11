@@ -607,7 +607,7 @@ class Post < ApplicationRecord
     # These categories don't identify or describe a character, so they're never allowed into a
     # character group - finalize_character_groups strips them back out to the ungrouped tags.
     def self.ungroupable_categories
-      [TagCategory.artist, TagCategory.meta, TagCategory.invalid].compact
+      [TagCategory.artist, TagCategory.copyright, TagCategory.meta, TagCategory.invalid].compact
     end
 
     attr_reader(:ungrouped_tag_string_input, :character_groups_attributes_input)
@@ -744,7 +744,8 @@ class Post < ApplicationRecord
       # Artist/meta/invalid tags can't describe a character, so they always fall back to the
       # ungrouped tags instead - even if the UI (or an implication) put one in a group.
       categories = Tag.categories_for(groups.flatten.uniq)
-      groups = groups.map { |tags| tags.reject { |t| TagMethods.ungroupable_categories.include?(categories[t]) } }
+      groupings = Tag.grouping(groups.flatten.uniq)
+      groups = groups.map { |tags| tags.reject { |t| TagMethods.ungroupable_categories.include?(categories[t]) || groupings[t] } }
 
       self.character_groups = groups.compact_blank.map { |tags| { "tags" => tags.uniq } }
     ensure

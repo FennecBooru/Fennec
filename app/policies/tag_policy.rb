@@ -40,12 +40,13 @@ class TagPolicy < ApplicationPolicy
 
   def permitted_attributes
     attr = %i[category_id reason]
+    attr += %i[prevent_group_tagging] if user.is_trusted?
     attr += %i[is_deprecated is_locked] if user.is_admin?
     attr
   end
 
   def permitted_search_params
-    params = super + %i[fuzzy_name_matches name_matches name category_id hide_empty has_wiki has_artist is_locked is_deprecated creator_id creator_name] + nested_search_params(creator: User)
+    params = super + %i[fuzzy_name_matches name_matches name category_id hide_empty has_wiki has_artist is_locked is_deprecated prevent_group_tagging creator_id creator_name] + nested_search_params(creator: User)
     params << :ip_addr if can_search_ip_addr?
     params
   end

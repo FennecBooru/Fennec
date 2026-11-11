@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_09_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_013555) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -1686,6 +1686,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_09_140000) do
     t.datetime "created_at", precision: nil, null: false
     t.boolean "is_deprecated", null: false
     t.boolean "is_locked", null: false
+    t.boolean "prevent_group_tagging", null: false
     t.string "reason", default: "", null: false
     t.bigint "tag_id", null: false
     t.datetime "updated_at", precision: nil, null: false
@@ -1705,6 +1706,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_09_140000) do
     t.boolean "is_locked", default: false, null: false
     t.string "name", null: false
     t.integer "post_count", default: 0, null: false
+    t.boolean "prevent_group_tagging", default: false, null: false
     t.text "related_tags"
     t.datetime "related_tags_updated_at", precision: nil
     t.datetime "updated_at", precision: nil, null: false

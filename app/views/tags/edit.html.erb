@@ -13,6 +13,8 @@
 
     <%= f.input(:is_deprecated, collection: [%w[No false], %w[Yes true]], include_blank: false, hint: safe_join(["The tag must have a ", link_to_wiki_or_new("wiki page", @tag.name), " before it can be deprecated."])) %>
 
+  <%= f.input(:prevent_group_tagging, collection: [%w[No false], %w[Yes true]], include_blank: false) %>
+
   <% if !@tag.is_locked? || f.policy.can_use_attribute?(:is_locked) %>
     <%= f.input(:reason, as: :string) %>
   <% end %>

@@ -18,6 +18,7 @@ class Tag < ApplicationRecord
   validate(:validate_deprecation_requires_wiki_page, if: -> { is_deprecated? && is_deprecated_changed? })
 
   before_save(:update_category, if: :category_id_changed?)
+  before_save(:update_prevent_group_tagging, if: :prevent_group_tagging_changed?)
   before_save(:lock_when_deprecated, if: :is_deprecated?)
   after_create(:create_version)
   after_update(:create_version, if: :saved_change_to_watched_attributes?)
@@ -45,6 +46,23 @@ class Tag < ApplicationRecord
 
   def saved_change_to_watched_attributes?
     saved_change_to_category_id? || saved_change_to_is_locked? || saved_change_to_is_deprecated?
+  end
+
+  def self.grouping(tag_names, disable_cache: false)
+    if disable_cache
+      found = Tag.where(name: Array(tag_names), prevent_group_tagging: true).pluck(:name)
+      tag_names.index_with { |tag| found.include?(tag) }
+    else
+      found = Cache.read_multi(Array(tag_names), "tpgt")
+      not_found = tag_names - found.keys
+      if not_found.any?
+        truthy = Tag.where(name: not_found, prevent_group_tagging: true).pluck(:name)
+        falsy = not_found - truthy
+        Cache.write_multi(**truthy.to_h { |name| ["tpgt:#{name}", true] }, **falsy.to_h { |name| ["tpgt:#{name}", false] })
+        found.merge!({ **truthy.index_with { true }, **falsy.index_with { false } })
+      end
+      found
+    end
   end
 
   module CountMethods
@@ -102,7 +120,7 @@ class Tag < ApplicationRecord
           found = Cache.read_multi(Array(tag_names), "tc")
           not_found = tag_names - found.keys
           if not_found.any?
-            # Is multi_write worth it here? Normal usage of this will be short put lists and then never touched.
+            # XXX: Is multi_write worth it here? Normal usage of this will be short put lists and then never touched.
             Tag.where(name: not_found).select(%i[id name category_id]).find_each do |tag|
               Cache.write("tc:#{tag.name}", tag.category_id)
               found[tag.name] = tag.category_id
@@ -141,7 +159,7 @@ class Tag < ApplicationRecord
     end
 
     def update_category_cache
-      Cache.write("tc:#{name}", category_id, expires_in: 3.hours)
+      Cache.write("tc:#{name}", category_id)
     end
 
     def user_can_change_category?
@@ -162,14 +180,19 @@ class Tag < ApplicationRecord
       update_category_post_counts unless new_record?
     end
 
+    def update_prevent_group_tagging
+      Cache.write("tpgt:#{name}", prevent_group_tagging)
+    end
+
     def create_version
-      TagVersion.create(tag_id:          id,
-                        updater:         updater,
-                        updater_ip_addr: updater_ip_addr,
-                        category_id:     category_id.to_i,
-                        is_locked:       is_locked?,
-                        is_deprecated:   is_deprecated?,
-                        reason:          reason || "")
+      TagVersion.create(tag_id:                id,
+                        updater:               updater,
+                        updater_ip_addr:       updater_ip_addr,
+                        category_id:           category_id.to_i,
+                        is_locked:             is_locked?,
+                        is_deprecated:         is_deprecated?,
+                        prevent_group_tagging: prevent_group_tagging?,
+                        reason:                reason || "")
     end
 
     # tag.artist? etc, true if the tag is in the category with that name or alias. Methods that
@@ -321,6 +344,7 @@ class Tag < ApplicationRecord
       super
         .field(:is_locked)
         .field(:is_deprecated)
+        .field(:prevent_group_tagging)
         .field(:category_id, multi: true)
         .field(:ip_addr, :creator_ip_addr)
         .field(:name, normalize: Tag.method(:normalize_name))

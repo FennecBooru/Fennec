@@ -17,6 +17,8 @@
     <li>Category Editable: <%= @tag.category_editable_by?(CurrentUser.user) ? link_to("Yes", edit_tag_path(@tag)) : "No" %><%= " (implicit locked)" unless @tag.category_editable_by_implicit?(CurrentUser.user) %></li>
   <% end %>
   <li>Locked: <%= @tag.is_locked? ? "Yes" : "No" %></li>
+  <li>Deprecated: <%= @tag.is_deprecated? ? "Yes" : "No" %></li>
+  <li>Prevent Group Tagging: <%= @tag.prevent_group_tagging? ? "Yes" : "No" %></li>
 </ul>
 
 <%= render("secondary_links") %>
